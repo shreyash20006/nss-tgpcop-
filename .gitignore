@@ -1,0 +1,8 @@
+# Environment Variables (Keep secret!)
+.env
+.env.local
+.env.*.local
+
+# Node modules & build outputs
+node_modules/
+dist/

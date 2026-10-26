@@ -1,0 +1,18 @@
+{
+  "name": "nss-tgpcop",
+  "version": "1.0.0",
+  "description": "National Service Scheme (NSS) Portal - Tulsiramji Gaikwad-Patil College of Pharmacy (TGPCOP)",
+  "main": "nss.html",
+  "scripts": {
+    "build": "node build.js",
+    "start": "node build.js"
+  },
+  "keywords": [
+    "nss",
+    "tgpcop",
+    "volunteer",
+    "national-service-scheme"
+  ],
+  "author": "NSS TGPCOP",
+  "license": "ISC"
+}

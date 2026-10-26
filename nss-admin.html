@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Coordinator Dashboard | NSS TGPCOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="echo.css">
+  <link rel="stylesheet" href="nss.css">
+</head>
+<body class="nss-page">
+
+  <!-- Admin Portal Top Bar -->
+  <header class="nss-admin-header">
+    <div class="nss-admin-header-wrap">
+      <div class="nss-admin-title">
+        <img src="assets/nss-logo.png" alt="NSS Logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div>
+          <h1>NSS Coordinator Desk</h1>
+          <div style="font-size:12px; color:var(--nss-gold); font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">
+            TGPCOP Administration Portal
+          </div>
+        </div>
+      </div>
+
+      <div class="nss-admin-user">
+        <img id="adminAvatar" class="nss-admin-user-avatar" src="" alt="Avatar" style="display:none;">
+        <div style="text-align:right;">
+          <div id="adminName" style="font-size:14px; font-weight:600; color:var(--nss-white);">Coordinator</div>
+          <div id="adminRole" style="font-size:11px; color:#CBD5E1; text-transform:uppercase;">Role: Loading...</div>
+        </div>
+        <button class="nss-btn nss-btn-sm nss-btn-danger" onclick="logoutAdmin()" style="margin-left:8px;">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="nss-section" style="padding: 36px 0 60px;">
+    <div class="nss-container">
+
+      <!-- Navigation breadcrumbs & shortcuts -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
+        <div style="font-size:14px; font-weight:500; color:var(--nss-text-muted);">
+          <a href="nss.html" style="color:var(--nss-accent);">← NSS Public Home</a> &nbsp;|&nbsp; Coordinator Management Console
+        </div>
+        <div style="display:flex; gap:10px;">
+          <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="exportCSV()">
+            📊 Export Approved CSV
+          </button>
+          <a href="nss-verify.html" target="_blank" class="nss-btn nss-btn-sm nss-btn-navy">
+            🔍 Open QR Scanner
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="nss-stats-grid">
+        <div class="nss-stat-card">
+          <div class="val" id="statTotal">0</div>
+          <div class="lbl">Total Applications</div>
+        </div>
+        <div class="nss-stat-card" style="border-left: 4px solid var(--nss-warning);">
+          <div class="val" id="statPending" style="color:var(--nss-warning);">0</div>
+          <div class="lbl">Pending Review</div>
+        </div>
+        <div class="nss-stat-card" style="border-left: 4px solid var(--nss-success);">
+          <div class="val" id="statApproved" style="color:var(--nss-success);">0</div>
+          <div class="lbl">Active Volunteers</div>
+        </div>
+        <div class="nss-stat-card" style="border-left: 4px solid var(--nss-danger);">
+          <div class="val" id="statRejected" style="color:var(--nss-danger);">0</div>
+          <div class="lbl">Rejected</div>
+        </div>
+        <div class="nss-stat-card">
+          <div class="val" id="statRevoked">0</div>
+          <div class="lbl">Revoked</div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="nss-tabs">
+        <button class="nss-tab-btn active" onclick="switchTab('pendingTab')">
+          Pending Review <span id="pendingBadge" style="background:var(--nss-warning); color:#fff; border-radius:99px; padding:2px 8px; font-size:11px; margin-left:4px;">0</span>
+        </button>
+        <button class="nss-tab-btn" onclick="switchTab('allTab')">
+          All Applications
+        </button>
+        <button class="nss-tab-btn" onclick="switchTab('leadershipTab')">
+          Leadership Profiles
+        </button>
+      </div>
+
+      <!-- TAB 1: PENDING REVIEW -->
+      <div id="pendingTab" class="tab-content">
+        <div class="nss-table-container">
+          <div class="nss-table-toolbar">
+            <h3 style="margin:0; font-size:16px;">Applications Awaiting Coordinator Action</h3>
+            <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="loadDashboard()">🔄 Refresh</button>
+          </div>
+          <div class="nss-table-wrapper">
+            <table class="nss-table">
+              <thead>
+                <tr>
+                  <th>Applicant</th>
+                  <th>Roll No</th>
+                  <th>Course & Year</th>
+                  <th>Submitted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="pendingTableBody">
+                <tr><td colspan="5" style="text-align:center; padding:24px; color:var(--nss-text-muted);">Loading pending applications...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: ALL APPLICATIONS -->
+      <div id="allTab" class="tab-content" style="display:none;">
+        <div class="nss-table-container">
+          <div class="nss-table-toolbar">
+            <input type="text" id="allSearchInput" class="nss-search-input" placeholder="Search by name, roll no, ref code..." oninput="handleSearch()">
+            <div style="display:flex; gap:8px; align-items:center;">
+              <select id="allStatusFilter" class="nss-form-select" style="padding:6px 12px; font-size:13px; width:auto;" onchange="handleFilter()">
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+                <option value="revoked">Revoked</option>
+              </select>
+            </div>
+          </div>
+          <div class="nss-table-wrapper">
+            <table class="nss-table">
+              <thead>
+                <tr>
+                  <th>Ref Code</th>
+                  <th>Volunteer ID</th>
+                  <th>Applicant Name</th>
+                  <th>Roll Number</th>
+                  <th>Course</th>
+                  <th>Status</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="allTableBody">
+                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--nss-text-muted);">Loading applications...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: LEADERSHIP PROFILES -->
+      <div id="leadershipTab" class="tab-content" style="display:none;">
+        <div class="nss-table-container">
+          <div class="nss-table-toolbar">
+            <h3 style="margin:0; font-size:16px;">NSS Leadership & Advisory Directory</h3>
+            <button class="nss-btn nss-btn-sm nss-btn-primary" onclick="openLeaderModal()">+ Add New Leader</button>
+          </div>
+          <div class="nss-table-wrapper">
+            <table class="nss-table">
+              <thead>
+                <tr>
+                  <th>Order</th>
+                  <th>Photo</th>
+                  <th>Name</th>
+                  <th>Designation</th>
+                  <th>Department</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leadershipTableBody">
+                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--nss-text-muted);">Loading leadership members...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODAL: APPLICATION DETAIL & ACTION -->
+  <div id="appModal" class="nss-modal-backdrop">
+    <div class="nss-modal">
+      <div class="nss-modal-header">
+        <h3 id="modalAppTitle">Application Details</h3>
+        <button class="nss-modal-close" onclick="closeAppModal()">&times;</button>
+      </div>
+      <div class="nss-modal-body">
+        <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
+          <img id="modalAppPhoto" src="" alt="Student Photo" style="width:90px; height:90px; border-radius:12px; object-fit:cover; border:2px solid var(--nss-navy); background:#F1F5F9;">
+          <div>
+            <h2 id="modalAppName" style="font-size:22px; margin:0 0 4px; color:var(--nss-navy);">Name</h2>
+            <div id="modalAppStatus"></div>
+          </div>
+        </div>
+
+        <div class="nss-detail-row"><span class="nss-detail-label">Reference Code</span><span class="nss-detail-val" id="mRefCode">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Volunteer ID</span><span class="nss-detail-val" id="mVolId" style="color:var(--nss-accent);">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Roll Number</span><span class="nss-detail-val" id="mRoll">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">PRN Number</span><span class="nss-detail-val" id="mPrn">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Course & Year</span><span class="nss-detail-val" id="mCourseYear">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Division</span><span class="nss-detail-val" id="mDivision">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">College Email</span><span class="nss-detail-val" id="mCollegeEmail">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Personal Email</span><span class="nss-detail-val" id="mPersonalEmail">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Mobile Number</span><span class="nss-detail-val" id="mMobile">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Emergency Contact</span><span class="nss-detail-val" id="mEmergency">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Submitted At</span><span class="nss-detail-val" id="mSubmitted">—</span></div>
+
+        <!-- Approval Result Box (if recently approved) -->
+        <div id="approvalResultBox" style="display:none; background:var(--nss-success-bg); border:1px solid #86EFAC; border-radius:var(--nss-radius-md); padding:16px; margin-top:18px;">
+          <div style="font-weight:700; color:var(--nss-success); margin-bottom:6px;">Volunteer Approved Successfully!</div>
+          <div style="font-size:13px; color:var(--nss-text);">
+            <div><strong>Assigned Volunteer ID:</strong> <span id="resVolIdText"></span></div>
+            <div style="margin-top:4px;"><strong>Generated QR Token:</strong> <code id="resTokenText" style="word-break:break-all; font-size:11px; background:#fff; padding:2px 6px; border-radius:4px;"></code></div>
+          </div>
+        </div>
+
+        <!-- Rejection Reason Input -->
+        <div id="rejectReasonBox" style="display:none; margin-top:18px;">
+          <label class="nss-form-label">Reason for Rejection <span class="req">*</span></label>
+          <textarea id="rejectReasonInput" class="nss-form-textarea" placeholder="Explain why this enrollment application is rejected..."></textarea>
+        </div>
+
+        <!-- Revocation Reason Input -->
+        <div id="revokeReasonBox" style="display:none; margin-top:18px;">
+          <label class="nss-form-label">Reason for Revoking Card <span class="req">*</span></label>
+          <textarea id="revokeReasonInput" class="nss-form-textarea" placeholder="Explain why this credential is being revoked..."></textarea>
+        </div>
+      </div>
+      <div class="nss-modal-footer" id="modalActions">
+        <!-- Injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT LEADERSHIP -->
+  <div id="leaderModal" class="nss-modal-backdrop">
+    <div class="nss-modal">
+      <div class="nss-modal-header">
+        <h3 id="leaderModalTitle">Add Leadership Member</h3>
+        <button class="nss-modal-close" onclick="closeLeaderModal()">&times;</button>
+      </div>
+      <form id="leaderForm" onsubmit="handleSaveLeader(event)">
+        <input type="hidden" id="leaderId">
+        <div class="nss-modal-body">
+          <div class="nss-form-group">
+            <label class="nss-form-label">Full Name <span class="req">*</span></label>
+            <input type="text" id="leaderName" class="nss-form-input" required placeholder="e.g. Dr. Rajesh Verma">
+          </div>
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label">Designation <span class="req">*</span></label>
+              <input type="text" id="leaderDesignation" class="nss-form-input" required placeholder="e.g. NSS Program Officer">
+            </div>
+            <div class="nss-form-group">
+              <label class="nss-form-label">Department</label>
+              <input type="text" id="leaderDept" class="nss-form-input" placeholder="e.g. Pharmaceutics">
+            </div>
+          </div>
+          <div class="nss-form-group">
+            <label class="nss-form-label">Bio / Message</label>
+            <textarea id="leaderBio" class="nss-form-textarea" placeholder="Short description of role or message to students..."></textarea>
+          </div>
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label">Display Order</label>
+              <input type="number" id="leaderOrder" class="nss-form-input" value="0">
+            </div>
+            <div class="nss-form-group" style="display:flex; align-items:center; padding-top:28px;">
+              <label class="nss-checkbox-label">
+                <input type="checkbox" id="leaderPublished" checked>
+                <span>Publish on NSS Homepage</span>
+              </label>
+            </div>
+          </div>
+          <div class="nss-form-group">
+            <label class="nss-form-label">Photo Upload (Optional)</label>
+            <input type="file" id="leaderPhotoFile" accept="image/*" class="nss-form-input">
+          </div>
+        </div>
+        <div class="nss-modal-footer">
+          <button type="button" class="nss-btn nss-btn-outline" onclick="closeLeaderModal()">Cancel</button>
+          <button type="submit" id="saveLeaderBtn" class="nss-btn nss-btn-primary">Save Profile</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Shared Echo Footer -->
+  <div id="foot"></div>
+
+  <!-- Scripts -->
+  <script src="env.js"></script>
+  <script src="echo.js"></script>
+  <script src="nss.js"></script>
+  <script>
+    let activeApp = null;
+    let cachedPending = [];
+    let cachedAll = [];
+
+    // Auth Guard
+    async function initAdminAuth() {
+      await window.ready;
+      const res = await NSS.Auth.requireCoordinator('nss-login.html');
+      if (!res) return;
+
+      const { user, role } = res;
+      document.getElementById('adminName').textContent = user.user_metadata?.full_name || user.email;
+      document.getElementById('adminRole').textContent = `Role: ${role.replace('_', ' ')}`;
+      if (user.user_metadata?.avatar_url) {
+        const av = document.getElementById('adminAvatar');
+        av.src = user.user_metadata.avatar_url;
+        av.style.display = 'block';
+      }
+
+      loadDashboard();
+    }
+
+    function logoutAdmin() {
+      const sb = window.getSB();
+      if (sb) {
+        sb.auth.signOut().then(() => {
+          location.href = 'nss-login.html';
+        });
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.nss-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const activeEl = document.getElementById(tabId);
+      if (activeEl) activeEl.style.display = 'block';
+
+      if (event && event.currentTarget) {
+        event.currentTarget.classList.add('active');
+      }
+
+      if (tabId === 'allTab') loadAllTab();
+      if (tabId === 'leadershipTab') loadLeadershipTab();
+    }
+
+    // Load Stats & Pending
+    async function loadDashboard() {
+      const stats = await NSS.Admin.loadStats();
+      document.getElementById('statTotal').textContent = stats.total;
+      document.getElementById('statPending').textContent = stats.pending;
+      document.getElementById('statApproved').textContent = stats.approved;
+      document.getElementById('statRejected').textContent = stats.rejected;
+      document.getElementById('statRevoked').textContent = stats.revoked;
+      document.getElementById('pendingBadge').textContent = stats.pending;
+
+      const pending = await NSS.Admin.loadPending();
+      cachedPending = pending;
+      renderPendingTable(pending);
+    }
+
+    function renderPendingTable(list) {
+      const tb = document.getElementById('pendingTableBody');
+      if (!list || !list.length) {
+        tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:32px; color:var(--nss-text-muted);">🎉 No pending applications to review. All caught up!</td></tr>`;
+        return;
+      }
+
+      tb.innerHTML = list.map(item => `
+        <tr>
+          <td>
+            <div style="font-weight:600; color:var(--nss-navy);">${item.full_name}</div>
+            <small style="color:var(--nss-text-muted);">${item.college_email}</small>
+          </td>
+          <td><strong>${item.roll_number}</strong></td>
+          <td>${item.course} (${item.academic_year})</td>
+          <td>${NSS.formatDate(item.submitted_at)}</td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="openAppModal('${item.id}')">View</button>
+              <button class="nss-btn nss-btn-sm nss-btn-primary" onclick="quickApprove('${item.id}')">Approve</button>
+              <button class="nss-btn nss-btn-sm nss-btn-danger" onclick="quickReject('${item.id}')">Reject</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // All Tab
+    async function loadAllTab() {
+      const status = document.getElementById('allStatusFilter').value;
+      const query = document.getElementById('allSearchInput').value;
+      const list = await NSS.Admin.loadAll(status, query);
+      cachedAll = list;
+      renderAllTable(list);
+    }
+
+    function handleSearch() {
+      loadAllTab();
+    }
+
+    function handleFilter() {
+      loadAllTab();
+    }
+
+    function renderAllTable(list) {
+      const tb = document.getElementById('allTableBody');
+      if (!list || !list.length) {
+        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--nss-text-muted);">No records matching current filters.</td></tr>`;
+        return;
+      }
+
+      tb.innerHTML = list.map(item => `
+        <tr>
+          <td><code>${item.ref_code || '—'}</code></td>
+          <td><strong style="color:var(--nss-accent);">${item.volunteer_id || '—'}</strong></td>
+          <td style="font-weight:600;">${item.full_name}</td>
+          <td>${item.roll_number}</td>
+          <td>${item.course} (${item.academic_year})</td>
+          <td>${NSS.renderStatusBadge(item.status)}</td>
+          <td>
+            <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="openAppModal('${item.id}')">View</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Modal Operations
+    function openAppModal(appId) {
+      const item = cachedPending.find(x => x.id === appId) || cachedAll.find(x => x.id === appId);
+      if (!item) return;
+
+      activeApp = item;
+      document.getElementById('modalAppName').textContent = item.full_name;
+      document.getElementById('modalAppStatus').innerHTML = NSS.renderStatusBadge(item.status);
+      document.getElementById('modalAppPhoto').src = item.photo_url || 'assets/nss-logo.png';
+      document.getElementById('mRefCode').textContent = item.ref_code || '—';
+      document.getElementById('mVolId').textContent = item.volunteer_id || '—';
+      document.getElementById('mRoll').textContent = item.roll_number;
+      document.getElementById('mPrn').textContent = item.prn || '—';
+      document.getElementById('mCourseYear').textContent = `${item.course} (${item.academic_year})`;
+      document.getElementById('mDivision').textContent = item.division || '—';
+      document.getElementById('mCollegeEmail').textContent = item.college_email;
+      document.getElementById('mPersonalEmail').textContent = item.personal_email || '—';
+      document.getElementById('mMobile').textContent = item.mobile;
+      document.getElementById('mEmergency').textContent = item.emergency_contact || '—';
+      document.getElementById('mSubmitted').textContent = NSS.formatDate(item.submitted_at, true);
+
+      document.getElementById('approvalResultBox').style.display = 'none';
+      document.getElementById('rejectReasonBox').style.display = 'none';
+      document.getElementById('revokeReasonBox').style.display = 'none';
+
+      renderModalActions(item);
+      document.getElementById('appModal').classList.add('on');
+    }
+
+    function closeAppModal() {
+      document.getElementById('appModal').classList.remove('on');
+      activeApp = null;
+    }
+
+    function renderModalActions(item) {
+      const act = document.getElementById('modalActions');
+      if (item.status === 'pending') {
+        act.innerHTML = `
+          <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Close</button>
+          <button class="nss-btn nss-btn-danger" id="mRejectBtn" onclick="showRejectInput()">Reject</button>
+          <button class="nss-btn nss-btn-primary" id="mApproveBtn" onclick="executeApprove()">Approve Volunteer</button>
+        `;
+      } else if (item.status === 'approved') {
+        act.innerHTML = `
+          <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Close</button>
+          <button class="nss-btn nss-btn-danger" onclick="showRevokeInput()">Revoke Volunteer Card</button>
+        `;
+      } else {
+        act.innerHTML = `
+          <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Close</button>
+        `;
+      }
+    }
+
+    function showRejectInput() {
+      const box = document.getElementById('rejectReasonBox');
+      box.style.display = 'block';
+      const btn = document.getElementById('mRejectBtn');
+      btn.textContent = 'Confirm Rejection';
+      btn.onclick = executeReject;
+    }
+
+    function showRevokeInput() {
+      const box = document.getElementById('revokeReasonBox');
+      box.style.display = 'block';
+      const act = document.getElementById('modalActions');
+      act.innerHTML = `
+        <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Cancel</button>
+        <button class="nss-btn nss-btn-danger" onclick="executeRevoke()">Confirm Revocation</button>
+      `;
+    }
+
+    async function executeApprove() {
+      if (!activeApp) return;
+      const btn = document.getElementById('mApproveBtn');
+      btn.disabled = true;
+      btn.textContent = 'Approving...';
+
+      try {
+        const res = await NSS.Admin.approveApp(activeApp.id);
+        document.getElementById('resVolIdText').textContent = res.volunteer_id;
+        document.getElementById('resTokenText').textContent = res.qr_token;
+        document.getElementById('approvalResultBox').style.display = 'block';
+        btn.style.display = 'none';
+        document.getElementById('modalAppStatus').innerHTML = NSS.renderStatusBadge('approved');
+        loadDashboard();
+      } catch (err) {
+        alert('Approval failed: ' + err.message);
+        btn.disabled = false;
+        btn.textContent = 'Approve Volunteer';
+      }
+    }
+
+    async function executeReject() {
+      if (!activeApp) return;
+      const reason = document.getElementById('rejectReasonInput').value.trim();
+      if (!reason) {
+        alert('Please specify a reason for rejection.');
+        return;
+      }
+
+      try {
+        await NSS.Admin.rejectApp(activeApp.id, reason);
+        alert('Application rejected.');
+        closeAppModal();
+        loadDashboard();
+      } catch (err) {
+        alert('Rejection failed: ' + err.message);
+      }
+    }
+
+    async function executeRevoke() {
+      if (!activeApp) return;
+      const reason = document.getElementById('revokeReasonInput').value.trim();
+      if (!reason) {
+        alert('Please specify a reason for card revocation.');
+        return;
+      }
+
+      try {
+        await NSS.Admin.revokeCard(activeApp.id, reason);
+        alert('Volunteer card revoked.');
+        closeAppModal();
+        loadDashboard();
+      } catch (err) {
+        alert('Revocation failed: ' + err.message);
+      }
+    }
+
+    async function quickApprove(id) {
+      if (!confirm('Approve this volunteer application?')) return;
+      try {
+        const res = await NSS.Admin.approveApp(id);
+        alert(`Volunteer approved!\nAssigned ID: ${res.volunteer_id}\nQR Token: ${res.qr_token}`);
+        loadDashboard();
+      } catch (e) {
+        alert('Approval error: ' + e.message);
+      }
+    }
+
+    async function quickReject(id) {
+      const reason = prompt('Enter reason for rejection:', 'Does not meet eligibility criteria');
+      if (reason === null) return;
+      try {
+        await NSS.Admin.rejectApp(id, reason);
+        alert('Application rejected.');
+        loadDashboard();
+      } catch (e) {
+        alert('Rejection error: ' + e.message);
+      }
+    }
+
+    // Leadership Tab
+    async function loadLeadershipTab() {
+      const list = await NSS.Admin.loadLeadership();
+      const tb = document.getElementById('leadershipTableBody');
+      if (!list || !list.length) {
+        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--nss-text-muted);">No leadership profiles configured yet. Click "+ Add New Leader" to create one.</td></tr>`;
+        return;
+      }
+
+      tb.innerHTML = list.map(item => `
+        <tr>
+          <td><strong>${item.display_order}</strong></td>
+          <td>
+            ${item.photo_url 
+              ? `<img src="${item.photo_url}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">`
+              : `<span style="font-size:24px;">🎖️</span>`
+            }
+          </td>
+          <td style="font-weight:600;">${item.name}</td>
+          <td>${item.designation}</td>
+          <td>${item.department || '—'}</td>
+          <td>${item.published ? '<span class="nss-badge approved">Published</span>' : '<span class="nss-badge pending">Draft</span>'}</td>
+          <td>
+            <button class="nss-btn nss-btn-sm nss-btn-danger" onclick="handleDeleteLeader('${item.id}')">Delete</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openLeaderModal() {
+      document.getElementById('leaderForm').reset();
+      document.getElementById('leaderId').value = '';
+      document.getElementById('leaderModalTitle').textContent = 'Add Leadership Member';
+      document.getElementById('leaderModal').classList.add('on');
+    }
+
+    function closeLeaderModal() {
+      document.getElementById('leaderModal').classList.remove('on');
+    }
+
+    async function handleSaveLeader(e) {
+      e.preventDefault();
+      const btn = document.getElementById('saveLeaderBtn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      const fileInput = document.getElementById('leaderPhotoFile');
+      const photoFile = fileInput.files.length ? fileInput.files[0] : null;
+
+      try {
+        await NSS.Admin.saveLeadership({
+          id: document.getElementById('leaderId').value || null,
+          name: document.getElementById('leaderName').value,
+          designation: document.getElementById('leaderDesignation').value,
+          department: document.getElementById('leaderDept').value,
+          bio: document.getElementById('leaderBio').value,
+          display_order: document.getElementById('leaderOrder').value,
+          published: document.getElementById('leaderPublished').checked
+        }, photoFile);
+
+        closeLeaderModal();
+        loadLeadershipTab();
+      } catch (err) {
+        alert('Save failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Profile';
+      }
+    }
+
+    async function handleDeleteLeader(id) {
+      if (!confirm('Are you sure you want to delete this leadership profile?')) return;
+      try {
+        await NSS.Admin.deleteLeadership(id);
+        loadLeadershipTab();
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+      }
+    }
+
+    function exportCSV() {
+      NSS.Admin.exportApprovedCSV();
+    }
+
+    document.addEventListener('DOMContentLoaded', initAdminAuth);
+    document.addEventListener('echo-auth', initAdminAuth);
+  </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Verify NSS Credential | TGPCOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="echo.css">
+  <link rel="stylesheet" href="nss.css">
+</head>
+<body class="nss-page">
+  <!-- Shared Echo Navbar -->
+  <div id="nav"></div>
+
+  <!-- NSS Portal Secondary Nav -->
+  <div class="nss-subnav">
+    <div class="nss-subnav-wrap">
+      <div class="nss-subnav-brand">
+        <img src="assets/nss-logo.png" alt="NSS Logo" class="nss-subnav-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-subnav-title">
+          <strong>NSS • TGPCOP</strong>
+          <span>National Service Scheme</span>
+        </div>
+      </div>
+      <div class="nss-subnav-links">
+        <a href="nss.html" class="nss-subnav-link">Home</a>
+        <a href="nss-register.html" class="nss-subnav-link">Register</a>
+        <a href="nss-status.html" class="nss-subnav-link">Check Status</a>
+        <a href="nss-my-id.html" class="nss-subnav-link">Digital ID</a>
+        <a href="nss-verify.html" class="nss-subnav-link active">Verify QR</a>
+        <a href="nss-login.html" class="nss-subnav-btn">Coordinator Login</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="nss-section">
+    <div class="nss-container">
+      <div class="nss-section-header">
+        <div class="nss-motto-tag" style="background:#EFF6FF;border-color:#BFDBFE;color:var(--nss-accent);">
+          PUBLIC VERIFICATION
+        </div>
+        <h2>NSS Credential Verification</h2>
+        <p>Instantly authenticate digital volunteer cards issued by Tulsiramji Gaikwad-Patil College of Pharmacy.</p>
+      </div>
+
+      <div class="nss-scanner-wrapper">
+        <!-- Live Scanner Viewport -->
+        <div id="scannerSection">
+          <div class="nss-camera-container">
+            <video id="scannerVideo" class="nss-camera-video"></video>
+            <div class="nss-scanner-target">
+              <div class="nss-scanner-laser"></div>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; justify-content:center; margin-bottom:24px;">
+            <button id="btnStartScan" class="nss-btn nss-btn-primary" onclick="startScanner()">
+              📹 Open Camera Scanner
+            </button>
+            <button id="btnStopScan" class="nss-btn nss-btn-outline" style="display:none;" onclick="stopScanner()">
+              ⏹ Stop Camera
+            </button>
+          </div>
+        </div>
+
+        <!-- Manual Input Fallback -->
+        <div class="nss-card" style="margin-bottom:28px; padding:20px;">
+          <label class="nss-form-label" style="text-align:left;">Manual Verification Lookup</label>
+          <div style="display:flex; gap:10px;">
+            <input type="text" id="manualInput" class="nss-form-input" placeholder="Enter Token or Volunteer ID (e.g. NSS-TGP-...)">
+            <button class="nss-btn nss-btn-navy" onclick="handleManualVerify()">Verify</button>
+          </div>
+        </div>
+
+        <!-- Verification Result Presentation Card -->
+        <div id="resultCard" class="nss-card" style="display:none; text-align:center; padding:32px 24px; animation:fadeIn 0.3s ease;">
+          <div id="resIcon" style="font-size:56px; margin-bottom:12px;"></div>
+          <h3 id="resHeading" style="font-size:24px; margin-bottom:6px;">Result</h3>
+          <div id="resBadge" style="margin-bottom:18px;"></div>
+          <p id="resDesc" style="color:var(--nss-text-muted); font-size:14px; margin-bottom:20px;"></p>
+
+          <!-- Details Table for Valid Records -->
+          <div id="resDetailsTable" style="display:none; text-align:left; margin-bottom:24px; background:#F8FAFC; border-radius:var(--nss-radius-md); padding:16px;">
+            <div id="resPhotoWrap" style="text-align:center; margin-bottom:14px;">
+              <img id="resPhoto" src="" alt="Volunteer Photo" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid var(--nss-navy); margin:0 auto;">
+            </div>
+            <div class="nss-detail-row">
+              <span class="nss-detail-label">Volunteer Name</span>
+              <span class="nss-detail-val" id="resName">—</span>
+            </div>
+            <div class="nss-detail-row">
+              <span class="nss-detail-label">Volunteer ID</span>
+              <span class="nss-detail-val" id="resVolId" style="color:var(--nss-accent);">—</span>
+            </div>
+            <div class="nss-detail-row">
+              <span class="nss-detail-label">Course & Year</span>
+              <span class="nss-detail-val" id="resCourseYear">—</span>
+            </div>
+            <div class="nss-detail-row">
+              <span class="nss-detail-label">Issued / Approved On</span>
+              <span class="nss-detail-val" id="resIssued">—</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:12px; justify-content:center;">
+            <button class="nss-btn nss-btn-primary" onclick="resetVerification()">
+              🔄 Scan Another Code
+            </button>
+            <a href="nss.html" class="nss-btn nss-btn-outline">
+              Back to NSS Home
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Echo Footer -->
+  <div id="foot"></div>
+
+  <!-- Scripts -->
+  <script src="env.js"></script>
+  <script src="echo.js"></script>
+  <script src="nss.js"></script>
+  <script>
+    const video = document.getElementById('scannerVideo');
+    const btnStart = document.getElementById('btnStartScan');
+    const btnStop = document.getElementById('btnStopScan');
+    const resultCard = document.getElementById('resultCard');
+    const scannerSection = document.getElementById('scannerSection');
+
+    async function startScanner() {
+      btnStart.style.display = 'none';
+      btnStop.style.display = 'inline-flex';
+      resultCard.style.display = 'none';
+
+      await NSS.QRScanner.start(video, data => {
+        handleScannedData(data);
+      }, err => {
+        alert('Camera access failed or was denied. You may enter the token manually.');
+        stopScanner();
+      });
+    }
+
+    function stopScanner() {
+      NSS.QRScanner.stop();
+      btnStart.style.display = 'inline-flex';
+      btnStop.style.display = 'none';
+    }
+
+    function handleScannedData(data) {
+      stopScanner();
+      // Scanned data may be full URL like https://echotgpcopmedia.vercel.app/nss-verify.html?t=xyz or ?v=NSS-...
+      let token = null;
+      let volId = null;
+
+      try {
+        const url = new URL(data);
+        token = url.searchParams.get('t');
+        volId = url.searchParams.get('v');
+      } catch (e) {
+        // Not a URL, treat as raw token or volunteer id
+        if (data.startsWith('NSS-TGP-')) {
+          volId = data;
+        } else {
+          token = data;
+        }
+      }
+
+      if (token) {
+        verifyToken(token);
+      } else if (volId) {
+        verifyVolunteerId(volId);
+      } else {
+        verifyToken(data);
+      }
+    }
+
+    async function handleManualVerify() {
+      const val = document.getElementById('manualInput').value.trim();
+      if (!val) {
+        alert('Please enter a verification token or Volunteer ID.');
+        return;
+      }
+      stopScanner();
+      if (val.toUpperCase().startsWith('NSS-TGP-')) {
+        verifyVolunteerId(val);
+      } else {
+        verifyToken(val);
+      }
+    }
+
+    // Verify via Supabase RPC nss_verify_token
+    async function verifyToken(token) {
+      displayLoading();
+      try {
+        const res = await NSS.QRVerify(token);
+        renderVerificationResult(res);
+      } catch (err) {
+        renderVerificationResult({ result: 'invalid', message: 'Verification query failed' });
+      }
+    }
+
+    // Verify via Volunteer ID lookup
+    async function verifyVolunteerId(volId) {
+      displayLoading();
+      try {
+        const res = await NSS.verifyByVolunteerId(volId);
+        if (res) {
+          renderVerificationResult(res);
+        } else {
+          renderVerificationResult({ result: 'invalid', message: 'Volunteer record not found or not approved' });
+        }
+      } catch (err) {
+        renderVerificationResult({ result: 'invalid', message: 'Lookup error' });
+      }
+    }
+
+    function displayLoading() {
+      scannerSection.style.display = 'none';
+      resultCard.style.display = 'block';
+      document.getElementById('resIcon').textContent = '⏳';
+      document.getElementById('resHeading').textContent = 'Authenticating Credential...';
+      document.getElementById('resBadge').innerHTML = '';
+      document.getElementById('resDesc').textContent = 'Contacting institutional verification registry...';
+      document.getElementById('resDetailsTable').style.display = 'none';
+    }
+
+    function renderVerificationResult(res) {
+      scannerSection.style.display = 'none';
+      resultCard.style.display = 'block';
+
+      const icon = document.getElementById('resIcon');
+      const heading = document.getElementById('resHeading');
+      const badge = document.getElementById('resBadge');
+      const desc = document.getElementById('resDesc');
+      const table = document.getElementById('resDetailsTable');
+
+      const status = (res.result || 'invalid').toLowerCase();
+
+      if (status === 'approved' || status === 'valid') {
+        icon.textContent = '✅';
+        heading.textContent = 'Verified Active NSS Volunteer';
+        badge.innerHTML = '<span class="nss-badge approved">OFFICIALLY VERIFIED</span>';
+        desc.textContent = 'This credential is authentic and belongs to an active NSS volunteer at TGPCOP.';
+
+        table.style.display = 'block';
+        document.getElementById('resName').textContent = res.name || '—';
+        document.getElementById('resVolId').textContent = res.volunteer_id || '—';
+        document.getElementById('resCourseYear').textContent = `${res.course || ''} (${res.academic_year || ''})`;
+        document.getElementById('resIssued').textContent = NSS.formatDate(res.issued_at);
+
+        const photoWrap = document.getElementById('resPhotoWrap');
+        const photoEl = document.getElementById('resPhoto');
+        if (res.photo_url) {
+          photoEl.src = res.photo_url;
+          photoWrap.style.display = 'block';
+        } else {
+          photoWrap.style.display = 'none';
+        }
+
+      } else if (status === 'pending') {
+        icon.textContent = '⏳';
+        heading.textContent = 'Application Under Review';
+        badge.innerHTML = '<span class="nss-badge pending">PENDING VERIFICATION</span>';
+        desc.textContent = 'This application has been submitted to the NSS unit and is awaiting coordinator approval.';
+        table.style.display = 'none';
+
+      } else if (status === 'rejected') {
+        icon.textContent = '❌';
+        heading.textContent = 'Application Not Approved';
+        badge.innerHTML = '<span class="nss-badge rejected">APPLICATION REJECTED</span>';
+        desc.textContent = 'This application was not approved by the NSS Program Officer.';
+        table.style.display = 'none';
+
+      } else if (status === 'revoked') {
+        icon.textContent = '🚫';
+        heading.textContent = 'Volunteer Card Revoked';
+        badge.innerHTML = '<span class="nss-badge revoked">CARD REVOKED</span>';
+        desc.textContent = 'This volunteer card has been officially revoked by institutional authorities and is no longer valid.';
+        table.style.display = 'none';
+
+      } else {
+        icon.textContent = '❓';
+        heading.textContent = 'Unknown or Invalid Code';
+        badge.innerHTML = '<span class="nss-badge revoked">INVALID CREDENTIAL</span>';
+        desc.textContent = res.message || 'No corresponding record was found in the NSS verification registry.';
+        table.style.display = 'none';
+      }
+    }
+
+    function resetVerification() {
+      resultCard.style.display = 'none';
+      scannerSection.style.display = 'block';
+      document.getElementById('manualInput').value = '';
+      startScanner();
+    }
+
+    // Auto-verify on page load if query parameters exist
+    document.addEventListener('DOMContentLoaded', async () => {
+      await window.ready;
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('t');
+      const volId = params.get('v');
+
+      if (token) {
+        verifyToken(token);
+      } else if (volId) {
+        verifyVolunteerId(volId);
+      } else {
+        // Automatically start camera scanner if on mobile or supported
+        startScanner();
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Digital NSS Volunteer ID | TGPCOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="echo.css">
+  <link rel="stylesheet" href="nss.css">
+  <!-- QR Code and html2canvas CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body class="nss-page">
+  <!-- Shared Echo Navbar -->
+  <div id="nav"></div>
+
+  <!-- NSS Portal Secondary Nav -->
+  <div class="nss-subnav">
+    <div class="nss-subnav-wrap">
+      <div class="nss-subnav-brand">
+        <img src="assets/nss-logo.png" alt="NSS Logo" class="nss-subnav-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-subnav-title">
+          <strong>NSS • TGPCOP</strong>
+          <span>National Service Scheme</span>
+        </div>
+      </div>
+      <div class="nss-subnav-links">
+        <a href="nss.html" class="nss-subnav-link">Home</a>
+        <a href="nss-register.html" class="nss-subnav-link">Register</a>
+        <a href="nss-status.html" class="nss-subnav-link">Check Status</a>
+        <a href="nss-my-id.html" class="nss-subnav-link active">Digital ID</a>
+        <a href="nss-verify.html" class="nss-subnav-link">Verify QR</a>
+        <a href="nss-login.html" class="nss-subnav-btn">Coordinator Login</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="nss-section">
+    <div class="nss-container">
+      <div class="nss-section-header">
+        <h2>Digital NSS Volunteer ID</h2>
+        <p>Your official verifiable credential as an active National Service Scheme volunteer at TGPCOP.</p>
+      </div>
+
+      <!-- Auth Prompt -->
+      <div id="authPrompt" class="nss-card" style="display:none; max-width:520px; margin:0 auto; text-align:center; padding:48px 24px;">
+        <div style="font-size:48px; margin-bottom:14px;">🔒</div>
+        <h3 style="font-size:24px; margin-bottom:10px;">Login Required</h3>
+        <p style="color:var(--nss-text-muted); margin-bottom:24px;">
+          Please sign in to access your digital volunteer card.
+        </p>
+        <button class="nss-btn nss-btn-primary nss-btn-lg" onclick="signIn()">
+          Sign in with Google
+        </button>
+      </div>
+
+      <!-- Not Approved Prompt -->
+      <div id="notApprovedPrompt" class="nss-card" style="display:none; max-width:520px; margin:0 auto; text-align:center; padding:48px 24px;">
+        <div style="font-size:48px; margin-bottom:14px;">⏳</div>
+        <h3 style="font-size:24px; margin-bottom:10px;">Card Not Yet Available</h3>
+        <p id="notApprovedReason" style="color:var(--nss-text-muted); margin-bottom:24px;">
+          Your digital ID card is generated automatically once your volunteer application is reviewed and approved by the NSS Program Officer.
+        </p>
+        <a href="nss-status.html" class="nss-btn nss-btn-primary">View Application Status</a>
+      </div>
+
+      <!-- Card Display Container -->
+      <div id="idCardWrapper" class="nss-id-card-wrapper" style="display:none;">
+        
+        <!-- The ID Card DOM Element -->
+        <div id="captureCard" class="nss-id-card">
+          <!-- Card Header -->
+          <div class="nss-id-card-header">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" class="nss-id-card-emblem" onerror="this.src='echo_logo_white_transparent.png'">
+            <div class="nss-id-card-org">National Service Scheme</div>
+            <div class="nss-id-card-college">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="nss-id-card-body">
+            <div class="nss-id-photo-frame">
+              <img id="cardPhoto" src="" alt="Student Photo" class="nss-id-photo" onerror="this.src='echo_logo_white_transparent.png'">
+            </div>
+
+            <div class="nss-id-name" id="cardName">VOLUNTEER NAME</div>
+            <div class="nss-id-vol-num" id="cardVolId">NSS-TGP-26-000000</div>
+
+            <table class="nss-id-table">
+              <tr>
+                <td>Course:</td>
+                <td id="cardCourse">—</td>
+              </tr>
+              <tr>
+                <td>Academic Year:</td>
+                <td id="cardYear">—</td>
+              </tr>
+              <tr>
+                <td>Roll Number:</td>
+                <td id="cardRoll">—</td>
+              </tr>
+              <tr>
+                <td>Issue Date:</td>
+                <td id="cardDate">—</td>
+              </tr>
+              <tr>
+                <td>Membership:</td>
+                <td><span class="nss-badge approved" style="padding:2px 8px; font-size:10px;">ACTIVE VOLUNTEER</span></td>
+              </tr>
+            </table>
+
+            <!-- QR Code Box -->
+            <div class="nss-id-qr-box">
+              <div id="cardQrCode"></div>
+            </div>
+            <div class="nss-id-verify-hint">Scan to Verify Institutional Credential</div>
+          </div>
+
+          <!-- Card Footer -->
+          <div class="nss-id-card-footer">
+            ★ NOT ME BUT YOU ★
+          </div>
+        </div>
+
+        <!-- Download & Print Actions -->
+        <div class="nss-id-card-actions" style="display:flex; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:12px;">
+          <button id="downloadBtn" class="nss-btn nss-btn-primary" onclick="downloadIdCard()">
+            📥 Download as Image (PNG)
+          </button>
+          <button class="nss-btn nss-btn-outline" onclick="window.print()">
+            🖨️ Print Card
+          </button>
+          <a href="nss-status.html" class="nss-btn nss-btn-navy">
+            ← Back to Status
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Echo Footer -->
+  <div id="foot"></div>
+
+  <!-- Scripts -->
+  <script src="env.js"></script>
+  <script src="echo.js"></script>
+  <script src="nss.js"></script>
+  <script>
+    let currentApp = null;
+
+    async function loadVolunteerId() {
+      await window.ready;
+      const user = await NSS.Auth.getCurrentUser();
+
+      const authPrompt = document.getElementById('authPrompt');
+      const notApprovedPrompt = document.getElementById('notApprovedPrompt');
+      const idWrapper = document.getElementById('idCardWrapper');
+
+      if (!user) {
+        authPrompt.style.display = 'block';
+        return;
+      }
+
+      try {
+        const app = await NSS.App.getUserApplication(user.id);
+        if (!app) {
+          notApprovedPrompt.style.display = 'block';
+          return;
+        }
+
+        currentApp = app;
+
+        if (app.status !== 'approved' && app.status !== 'revoked') {
+          notApprovedPrompt.style.display = 'block';
+          document.getElementById('notApprovedReason').textContent =
+            `Your application status is currently "${app.status.toUpperCase()}". Digital ID card is only available for approved volunteers.`;
+          return;
+        }
+
+        // Render approved/revoked card
+        idWrapper.style.display = 'flex';
+        document.getElementById('cardName').textContent = app.full_name;
+        document.getElementById('cardVolId').textContent = app.volunteer_id || 'NSS-VOLUNTEER';
+        document.getElementById('cardCourse').textContent = app.course;
+        document.getElementById('cardYear').textContent = app.academic_year;
+        document.getElementById('cardRoll').textContent = app.roll_number;
+        document.getElementById('cardDate').textContent = NSS.formatDate(app.reviewed_at || app.submitted_at);
+
+        if (app.photo_url) {
+          document.getElementById('cardPhoto').src = app.photo_url;
+        }
+
+        // Revocation state
+        if (app.status === 'revoked') {
+          const cardEl = document.getElementById('captureCard');
+          cardEl.classList.add('is-revoked');
+          const dlBtn = document.getElementById('downloadBtn');
+          if (dlBtn) dlBtn.disabled = true;
+        }
+
+        // Generate QR code pointing to verify URL
+        // We link directly to nss-verify.html with volunteer_id query
+        const verifyUrl = `${window.location.origin}/nss-verify.html?v=${encodeURIComponent(app.volunteer_id || '')}`;
+        const qrContainer = document.getElementById('cardQrCode');
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+          text: verifyUrl,
+          width: 96,
+          height: 96,
+          colorDark: '#0C2340',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+
+      } catch (err) {
+        console.error('Error loading ID:', err);
+        alert('Could not render ID card. Please refresh.');
+      }
+    }
+
+    // Download Card as PNG using html2canvas
+    async function downloadIdCard() {
+      const card = document.getElementById('captureCard');
+      const dlBtn = document.getElementById('downloadBtn');
+      if (!card || !currentApp) return;
+
+      dlBtn.disabled = true;
+      dlBtn.textContent = 'Generating PNG...';
+
+      try {
+        const canvas = await html2canvas(card, {
+          scale: 3, // High resolution
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        });
+
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.download = `NSS_ID_${(currentApp.volunteer_id || 'card').replace(/[^a-zA-Z0-9_-]/g, '_')}.png`;
+        link.href = image;
+        link.click();
+      } catch (e) {
+        console.error('Error rendering image:', e);
+        alert('Failed to generate image. You may use the Print Card button instead.');
+      } finally {
+        dlBtn.disabled = false;
+        dlBtn.textContent = '📥 Download as Image (PNG)';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadVolunteerId);
+    document.addEventListener('echo-auth', loadVolunteerId);
+  </script>
+</body>
+</html>
