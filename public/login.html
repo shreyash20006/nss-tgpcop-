@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>NSS Coordinator Login | TGPCOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="echo.css">
+  <link rel="stylesheet" href="nss.css">
+</head>
+<body class="nss-page">
+  <!-- Shared Echo Navbar -->
+  <div id="nav"></div>
+
+  <!-- NSS Portal Secondary Nav -->
+  <div class="nss-subnav">
+    <div class="nss-subnav-wrap">
+      <div class="nss-subnav-brand">
+        <img src="assets/nss-logo.png" alt="NSS Logo" class="nss-subnav-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-subnav-title">
+          <strong>NSS • TGPCOP</strong>
+          <span>National Service Scheme</span>
+        </div>
+      </div>
+      <div class="nss-subnav-links">
+        <a href="nss.html" class="nss-subnav-link">Home</a>
+        <a href="nss-register.html" class="nss-subnav-link">Register</a>
+        <a href="nss-status.html" class="nss-subnav-link">Check Status</a>
+        <a href="nss-my-id.html" class="nss-subnav-link">Digital ID</a>
+        <a href="nss-verify.html" class="nss-subnav-link">Verify QR</a>
+        <a href="nss-login.html" class="nss-subnav-btn active">Coordinator Login</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="nss-section" style="min-height: 70vh; display:flex; align-items:center;">
+    <div class="nss-container">
+      <div class="nss-card" style="max-width:440px; margin:0 auto; text-align:center; padding:44px 32px; border-top: 4px solid var(--nss-navy); box-shadow: var(--nss-shadow-lg);">
+        <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:90px; margin:0 auto 18px;" onerror="this.src='echo_logo_white_transparent.png'">
+        <h1 style="font-size:32px; margin-bottom:6px;">Coordinator Portal</h1>
+        <p style="font-size:14px; color:var(--nss-text-muted); margin-bottom:28px;">
+          National Service Scheme administration and volunteer review desk.
+        </p>
+
+        <!-- Checking state -->
+        <div id="checkingState" style="display:none; margin-bottom:20px;">
+          <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block;">⏳</div>
+          <p style="font-size:13px; color:var(--nss-text-muted); margin-top:8px;">Verifying coordinator authorization...</p>
+        </div>
+
+        <!-- Login Button Container -->
+        <div id="loginAction">
+          <button class="nss-btn nss-btn-primary nss-btn-lg" style="width:100%;" onclick="loginCoordinator()">
+            <span style="font-size:18px;">G</span> Sign in with Google
+          </button>
+          <p style="font-size:12px; color:var(--nss-text-muted); margin-top:16px;">
+            Authorized faculty coordinators and NSS program officers only.
+          </p>
+        </div>
+
+        <!-- Access Denied Alert -->
+        <div id="accessDeniedCard" style="display:none; margin-top:24px; background:var(--nss-danger-bg); border:1px solid #FCA5A5; border-radius:var(--nss-radius-md); padding:18px; text-align:left;">
+          <div style="font-weight:700; color:var(--nss-danger); font-size:15px; margin-bottom:6px;">Access Denied</div>
+          <p style="font-size:13px; color:var(--nss-text); margin:0 0 14px; line-height:1.5;">
+            Your account (<span id="deniedEmail" style="font-weight:600;"></span>) is not listed in the authorized NSS coordinator registry.
+          </p>
+          <div style="display:flex; gap:10px;">
+            <button class="nss-btn nss-btn-danger nss-btn-sm" onclick="signOutCoordinator()">Sign Out</button>
+            <a href="nss.html" class="nss-btn nss-btn-outline nss-btn-sm">Return Home</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Echo Footer -->
+  <div id="foot"></div>
+
+  <!-- Scripts -->
+  <script src="env.js"></script>
+  <script src="echo.js"></script>
+  <script src="nss.js"></script>
+  <script>
+    function loginCoordinator() {
+      const sb = window.getSB();
+      if (!sb) {
+        alert('Supabase client unavailable');
+        return;
+      }
+      sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: new URL('nss-login.html', location.href).href
+        }
+      });
+    }
+
+    function signOutCoordinator() {
+      const sb = window.getSB();
+      if (sb) {
+        sb.auth.signOut().then(() => {
+          location.href = 'nss-login.html';
+        });
+      }
+    }
+
+    async function evaluateAuth() {
+      await window.ready;
+      const user = await NSS.Auth.getCurrentUser();
+      const checking = document.getElementById('checkingState');
+      const loginAction = document.getElementById('loginAction');
+      const deniedCard = document.getElementById('accessDeniedCard');
+
+      if (!user) {
+        checking.style.display = 'none';
+        loginAction.style.display = 'block';
+        deniedCard.style.display = 'none';
+        return;
+      }
+
+      checking.style.display = 'block';
+      loginAction.style.display = 'none';
+
+      // Check role in nss_roles table
+      const role = await NSS.Auth.checkCoordinatorRole(user.id);
+      checking.style.display = 'none';
+
+      if (role === 'super_admin' || role === 'coordinator') {
+        window.location.href = 'nss-admin.html';
+      } else {
+        loginAction.style.display = 'none';
+        deniedCard.style.display = 'block';
+        document.getElementById('deniedEmail').textContent = user.email || 'Current Account';
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', evaluateAuth);
+    document.addEventListener('echo-auth', evaluateAuth);
+  </script>
+</body>
+</html>

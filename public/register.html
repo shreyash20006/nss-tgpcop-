@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Volunteer Registration | NSS TGPCOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="echo.css">
+  <link rel="stylesheet" href="nss.css">
+</head>
+<body class="nss-page">
+  <!-- Shared Echo Navbar -->
+  <div id="nav"></div>
+
+  <!-- NSS Portal Secondary Nav -->
+  <div class="nss-subnav">
+    <div class="nss-subnav-wrap">
+      <div class="nss-subnav-brand">
+        <img src="assets/nss-logo.png" alt="NSS Logo" class="nss-subnav-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-subnav-title">
+          <strong>NSS • TGPCOP</strong>
+          <span>National Service Scheme</span>
+        </div>
+      </div>
+      <div class="nss-subnav-links">
+        <a href="nss.html" class="nss-subnav-link">Home</a>
+        <a href="nss-register.html" class="nss-subnav-link active">Register</a>
+        <a href="nss-status.html" class="nss-subnav-link">Check Status</a>
+        <a href="nss-my-id.html" class="nss-subnav-link">Digital ID</a>
+        <a href="nss-verify.html" class="nss-subnav-link">Verify QR</a>
+        <a href="nss-login.html" class="nss-subnav-btn">Coordinator Login</a>
+      </div>
+    </div>
+  </div>
+
+  <main class="nss-section">
+    <div class="nss-container">
+      <div class="nss-section-header">
+        <div class="nss-motto-tag" style="background:#EFF6FF;border-color:#BFDBFE;color:var(--nss-accent);">
+          ENROLLMENT 2026-27
+        </div>
+        <h2>NSS Volunteer Registration</h2>
+        <p>Join the TGPCOP National Service Scheme chapter. Complete the form below to receive your official volunteer credential.</p>
+      </div>
+
+      <!-- Auth State Prompt (if not logged in) -->
+      <div id="authPromptCard" class="nss-form-card" style="display:none; text-align:center; padding: 48px 24px;">
+        <div style="font-size: 48px; margin-bottom: 14px;">🔒</div>
+        <h3 style="font-size: 24px; margin-bottom: 10px;">Google Authentication Required</h3>
+        <p style="color: var(--nss-text-muted); max-width: 460px; margin: 0 auto 24px;">
+          To prevent duplicate registrations and protect your student profile, please sign in with Google before submitting your NSS application.
+        </p>
+        <button class="nss-btn nss-btn-primary nss-btn-lg" onclick="signIn()">
+          <span style="font-size:18px;">G</span> Sign in with Google
+        </button>
+      </div>
+
+      <!-- Already Registered Alert -->
+      <div id="alreadyRegisteredCard" class="nss-form-card" style="display:none; text-align:center; padding: 48px 24px;">
+        <div style="font-size: 48px; margin-bottom: 14px;">📋</div>
+        <h3 style="font-size: 24px; margin-bottom: 10px;">Application Already Submitted</h3>
+        <p style="color: var(--nss-text-muted); max-width: 480px; margin: 0 auto 16px;">
+          You have already submitted an NSS volunteer application under your account (<span id="userEmailSpan" style="font-weight:600;"></span>).
+        </p>
+        <div id="existingStatusBadge" style="margin-bottom: 24px;"></div>
+        <a href="nss-status.html" class="nss-btn nss-btn-navy nss-btn-lg">View Application Status</a>
+      </div>
+
+      <!-- Success Screen -->
+      <div id="successCard" class="nss-form-card" style="display:none; text-align:center; padding: 48px 24px;">
+        <div style="font-size: 54px; margin-bottom: 14px;">🎉</div>
+        <h2 style="font-size: 36px; margin-bottom: 8px;">Registration Submitted!</h2>
+        <p style="color: var(--nss-text-muted); margin-bottom: 24px;">
+          Your application has been received and is currently under coordinator review.
+        </p>
+        <div style="background: #F8FAFC; border: 2px dashed var(--nss-accent); border-radius: var(--nss-radius-md); padding: 20px; max-width: 400px; margin: 0 auto 28px;">
+          <div style="font-size: 12px; color: var(--nss-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Your Reference Code</div>
+          <div id="refCodeDisplay" style="font-size: 24px; font-weight: 700; color: var(--nss-navy); margin-top: 4px; letter-spacing: 0.05em;"></div>
+        </div>
+        <p style="font-size: 14px; color: var(--nss-text-muted); margin-bottom: 28px;">
+          Please save your Reference Code. Once approved by the NSS Program Officer, your official Volunteer ID and Digital QR Card will be issued.
+        </p>
+        <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
+          <a href="nss-status.html" class="nss-btn nss-btn-primary">Check Status</a>
+          <a href="nss.html" class="nss-btn nss-btn-outline">Back to NSS Home</a>
+        </div>
+      </div>
+
+      <!-- Registration Form -->
+      <div id="regFormContainer" class="nss-form-card">
+        <form id="nssRegForm" novalidate>
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="fullName">Full Name (as per College ID) <span class="req">*</span></label>
+              <input type="text" id="fullName" class="nss-form-input" placeholder="e.g. Rahul Ashok Sharma" required>
+              <div class="nss-form-error" id="errFullName">Please enter your full name.</div>
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="rollNumber">College Roll Number <span class="req">*</span></label>
+              <input type="text" id="rollNumber" class="nss-form-input" placeholder="e.g. 23BPH042" required style="text-transform: uppercase;">
+              <div class="nss-form-error" id="errRollNumber">Please enter your roll number.</div>
+            </div>
+          </div>
+
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="prnNumber">Permanent Registration No. (PRN)</label>
+              <input type="text" id="prnNumber" class="nss-form-input" placeholder="Optional (e.g. 2023016400...)">
+              <div class="nss-form-hint">University PRN if available.</div>
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="courseSelect">Course / Program <span class="req">*</span></label>
+              <select id="courseSelect" class="nss-form-select" required>
+                <option value="">— Select Course —</option>
+                <option value="B.Pharm">B.Pharm (Bachelor of Pharmacy)</option>
+                <option value="M.Pharm">M.Pharm (Master of Pharmacy)</option>
+                <option value="Pharm.D">Pharm.D (Doctor of Pharmacy)</option>
+                <option value="D.Pharm">D.Pharm (Diploma in Pharmacy)</option>
+                <option value="B.Tech">B.Tech / BE</option>
+                <option value="MBA">MBA</option>
+                <option value="MCA">MCA</option>
+              </select>
+              <div class="nss-form-error" id="errCourse">Please select your course.</div>
+            </div>
+          </div>
+
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="academicYear">Academic Year <span class="req">*</span></label>
+              <select id="academicYear" class="nss-form-select" required>
+                <option value="">— Select Year —</option>
+                <option value="FY">First Year (FY)</option>
+                <option value="SY">Second Year (SY)</option>
+                <option value="TY">Third Year (TY)</option>
+                <option value="Fourth Year">Final Year (Fourth Year)</option>
+              </select>
+              <div class="nss-form-error" id="errYear">Please select your academic year.</div>
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="division">Division / Section</label>
+              <input type="text" id="division" class="nss-form-input" placeholder="e.g. Div A / Batch 1">
+            </div>
+          </div>
+
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="collegeEmail">College / Institutional Email <span class="req">*</span></label>
+              <input type="email" id="collegeEmail" class="nss-form-input" placeholder="e.g. student@tgpcop.site" required>
+              <div class="nss-form-error" id="errCollegeEmail">Please enter a valid college or email address.</div>
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="personalEmail">Personal Email (Optional)</label>
+              <input type="email" id="personalEmail" class="nss-form-input" placeholder="e.g. rahul@gmail.com">
+              <div class="nss-form-error" id="errPersonalEmail">Please enter a valid personal email.</div>
+            </div>
+          </div>
+
+          <div class="nss-form-row">
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="mobileNumber">Mobile Number <span class="req">*</span></label>
+              <input type="tel" id="mobileNumber" class="nss-form-input" placeholder="10-digit mobile number" maxlength="10" required>
+              <div class="nss-form-error" id="errMobile">Please enter a valid 10-digit mobile number.</div>
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="emergencyContact">Emergency Contact Number</label>
+              <input type="tel" id="emergencyContact" class="nss-form-input" placeholder="Parent / Guardian 10-digit number" maxlength="10">
+              <div class="nss-form-error" id="errEmergency">Please enter a valid 10-digit number.</div>
+            </div>
+          </div>
+
+          <!-- Photo Upload -->
+          <div class="nss-form-group">
+            <label class="nss-form-label">Passport Size Photo <span class="req">*</span></label>
+            <div class="nss-upload-zone" id="dropZone" onclick="document.getElementById('photoInput').click()">
+              <img id="photoPreview" class="nss-upload-preview" alt="Preview">
+              <div id="uploadPrompt">
+                <div class="nss-upload-icon">📷</div>
+                <div style="font-size:14px; font-weight:600; color:var(--nss-navy);">Click or drag & drop student photo</div>
+                <div class="nss-form-hint">Accepted formats: JPG, PNG, WEBP (Max 2MB). Clear passport style required for digital ID.</div>
+              </div>
+              <input type="file" id="photoInput" accept="image/jpeg,image/png,image/webp" style="display:none">
+            </div>
+            <div class="nss-form-error" id="errPhoto">Please upload a valid photo (JPEG/PNG/WEBP, max 2MB).</div>
+          </div>
+
+          <!-- Consent -->
+          <div class="nss-form-group" style="margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--nss-border-light);">
+            <label class="nss-checkbox-label">
+              <input type="checkbox" id="consentCheck" required>
+              <span>
+                I hereby declare that the information provided is correct to the best of my knowledge. I promise to abide by the NSS motto <em>"NOT ME BUT YOU"</em>, follow institutional discipline, and actively participate in designated community service camps.
+              </span>
+            </label>
+            <div class="nss-form-error" id="errConsent">You must accept the declaration to register.</div>
+          </div>
+
+          <div id="submitAlert" style="display:none; padding:12px; border-radius:8px; margin-bottom:16px; font-size:14px;"></div>
+
+          <div style="margin-top: 28px;">
+            <button type="submit" id="submitBtn" class="nss-btn nss-btn-primary nss-btn-lg" style="width:100%;">
+              Submit NSS Registration
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- Shared Echo Footer -->
+  <div id="foot"></div>
+
+  <!-- Scripts -->
+  <script src="env.js"></script>
+  <script src="echo.js"></script>
+  <script src="nss.js"></script>
+  <script>
+    let selectedFile = null;
+
+    // Check user authentication and existing application
+    async function checkAuthAndApp() {
+      await window.ready;
+      const user = await NSS.Auth.getCurrentUser();
+      const authPrompt = document.getElementById('authPromptCard');
+      const alreadyCard = document.getElementById('alreadyRegisteredCard');
+      const formContainer = document.getElementById('regFormContainer');
+
+      if (!user) {
+        authPrompt.style.display = 'block';
+        formContainer.style.display = 'none';
+        return;
+      }
+
+      authPrompt.style.display = 'none';
+
+      // Check if user has an existing application
+      const existing = await NSS.App.getUserApplication(user.id);
+      if (existing) {
+        document.getElementById('userEmailSpan').textContent = user.email || '';
+        document.getElementById('existingStatusBadge').innerHTML = NSS.renderStatusBadge(existing.status);
+        alreadyCard.style.display = 'block';
+        formContainer.style.display = 'none';
+        return;
+      }
+
+      formContainer.style.display = 'block';
+
+      // Pre-fill email and name if available from Google login
+      if (user.user_metadata?.full_name && !document.getElementById('fullName').value) {
+        document.getElementById('fullName').value = user.user_metadata.full_name;
+      }
+      if (user.email && !document.getElementById('collegeEmail').value) {
+        document.getElementById('collegeEmail').value = user.email;
+      }
+    }
+
+    // Photo input handling & preview
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const dropZone = document.getElementById('dropZone');
+
+    function handleFile(file) {
+      if (!file) return;
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        alert('Invalid file format. Please upload JPEG, PNG, or WEBP image.');
+        return;
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        alert('File size exceeds 2MB limit. Please select a smaller photo.');
+        return;
+      }
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        photoPreview.src = e.target.result;
+        photoPreview.style.display = 'block';
+        uploadPrompt.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+      document.getElementById('errPhoto').classList.remove('visible');
+    }
+
+    photoInput.addEventListener('change', e => {
+      if (e.target.files.length) handleFile(e.target.files[0]);
+    });
+
+    ['dragenter', 'dragover'].forEach(name => {
+      dropZone.addEventListener(name, e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+    });
+    ['dragleave', 'drop'].forEach(name => {
+      dropZone.addEventListener(name, e => { e.preventDefault(); dropZone.classList.remove('dragover'); });
+    });
+    dropZone.addEventListener('drop', e => {
+      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    });
+
+    // Form submission validation & handling
+    const form = document.getElementById('nssRegForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitAlert = document.getElementById('submitAlert');
+
+    function showAlert(msg, isError = true) {
+      submitAlert.textContent = msg;
+      submitAlert.style.display = 'block';
+      submitAlert.style.background = isError ? 'var(--nss-danger-bg)' : 'var(--nss-success-bg)';
+      submitAlert.style.color = isError ? 'var(--nss-danger)' : 'var(--nss-success)';
+    }
+
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      let hasError = false;
+
+      const fullName = document.getElementById('fullName').value.trim();
+      const rollNumber = document.getElementById('rollNumber').value.trim();
+      const course = document.getElementById('courseSelect').value;
+      const year = document.getElementById('academicYear').value;
+      const collegeEmail = document.getElementById('collegeEmail').value.trim();
+      const personalEmail = document.getElementById('personalEmail').value.trim();
+      const mobile = document.getElementById('mobileNumber').value.trim();
+      const emergency = document.getElementById('emergencyContact').value.trim();
+      const consent = document.getElementById('consentCheck').checked;
+
+      // Validation
+      const setErr = (id, valid) => {
+        const el = document.getElementById(id);
+        if (el) el.classList.toggle('visible', !valid);
+        if (!valid) hasError = true;
+      };
+
+      setErr('errFullName', !!fullName);
+      setErr('errRollNumber', !!rollNumber);
+      setErr('errCourse', !!course);
+      setErr('errYear', !!year);
+      setErr('errCollegeEmail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(collegeEmail));
+      setErr('errPersonalEmail', !personalEmail || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(personalEmail));
+      setErr('errMobile', /^\d{10}$/.test(mobile));
+      setErr('errEmergency', !emergency || /^\d{10}$/.test(emergency));
+      setErr('errPhoto', !!selectedFile);
+      setErr('errConsent', consent);
+
+      if (hasError) {
+        showAlert('Please complete all required fields correctly before submitting.', true);
+        return;
+      }
+
+      // Check roll number uniqueness
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Verifying roll number...';
+
+      try {
+        const rollExists = await NSS.App.checkRollExists(rollNumber);
+        if (rollExists) {
+          showAlert(`Roll Number ${rollNumber.toUpperCase()} is already registered with NSS. Please check your status.`, true);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit NSS Registration';
+          return;
+        }
+
+        submitBtn.textContent = 'Uploading photo & submitting...';
+
+        const data = await NSS.App.submitApplication({
+          full_name: fullName,
+          roll_number: rollNumber,
+          prn: document.getElementById('prnNumber').value,
+          course: course,
+          academic_year: year,
+          division: document.getElementById('division').value,
+          college_email: collegeEmail,
+          personal_email: personalEmail,
+          mobile: mobile,
+          emergency_contact: emergency,
+          consent: consent
+        }, selectedFile);
+
+        // Success!
+        document.getElementById('regFormContainer').style.display = 'none';
+        document.getElementById('refCodeDisplay').textContent = data.ref_code || 'NSS-REF-SUCCESS';
+        document.getElementById('successCard').style.display = 'block';
+
+      } catch (err) {
+        console.error('Submission error:', err);
+        showAlert(err.message || 'An error occurred while submitting your registration. Please try again.', true);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit NSS Registration';
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', checkAuthAndApp);
+    document.addEventListener('echo-auth', checkAuthAndApp);
+  </script>
+</body>
+</html>

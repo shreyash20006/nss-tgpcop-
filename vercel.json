@@ -3,13 +3,7 @@
   "outputDirectory": "dist",
   "cleanUrls": true,
   "rewrites": [
-    { "source": "/", "destination": "/nss.html" },
-    { "source": "/register", "destination": "/nss-register.html" },
-    { "source": "/application-status", "destination": "/nss-status.html" },
-    { "source": "/my-id", "destination": "/nss-my-id.html" },
-    { "source": "/verify", "destination": "/nss-verify.html" },
-    { "source": "/verify/:token", "destination": "/nss-verify.html" },
-    { "source": "/login", "destination": "/nss-login.html" },
-    { "source": "/admin", "destination": "/nss-admin.html" }
+    { "source": "/verify/:token", "destination": "/verify.html" },
+    { "source": "/nss-verify/:token", "destination": "/nss-verify.html" }
   ]
 }
