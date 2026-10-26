@@ -83,4 +83,13 @@ if (fs.existsSync(assetsDir)) {
   });
 }
 
+const imagesDir = path.join(rootDir, 'images');
+if (fs.existsSync(imagesDir)) {
+  for (const out of [distDir, publicDir]) {
+    const dst = path.join(out, 'images');
+    if (!fs.existsSync(dst)) fs.mkdirSync(dst, { recursive: true });
+    fs.readdirSync(imagesDir).forEach(f => fs.copyFileSync(path.join(imagesDir, f), path.join(dst, f)));
+  }
+}
+
 console.log('NSS Portal build completed successfully for Vercel deployment.');
