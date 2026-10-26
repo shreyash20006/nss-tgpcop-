@@ -622,6 +622,49 @@
     NSS.initScrollScene();
   }
 
+  
+  // NSS Cloudinary Asset Integrator
+  NSS.applyCloudinaryAssets = function () {
+    const cfg = window.NSS_CLOUDINARY_CONFIG;
+    if (!cfg) return;
+
+    // 1. President / Leadership Portrait
+    const presContainer = document.getElementById('presidentPortraitContainer');
+    if (presContainer) {
+      if (cfg.presidentPortrait && typeof cfg.presidentPortrait === 'string' && cfg.presidentPortrait.trim() !== '') {
+        presContainer.innerHTML = '<img src="' + cfg.presidentPortrait.trim() + '" alt="Executive Desk Portrait" class="nss-president-img" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'grid\';"><div class="nss-president-monogram" style="display:none;" title="TGPCOP NSS Unit">NSS</div>';
+      } else {
+        presContainer.innerHTML = '<div class="nss-president-monogram" title="TGPCOP NSS Unit">NSS</div>';
+      }
+    }
+
+    // 2. Media Gallery Section
+    const galleryGrid = document.getElementById('nssGalleryGrid');
+    const galleryNotice = document.getElementById('nssGalleryNotice');
+    if (galleryGrid) {
+      const photos = Array.isArray(cfg.galleryPhotos) ? cfg.galleryPhotos.filter(u => typeof u === 'string' && u.trim() !== '') : [];
+      if (photos.length > 0) {
+        if (galleryNotice) galleryNotice.style.display = 'none';
+        galleryGrid.style.display = 'grid';
+        galleryGrid.innerHTML = photos.map((url, i) =>
+          '<div class="nss-gallery-item rv" onclick="viewPhoto(\'' + url + '\')">' +
+          '<img src="' + url + '" alt="NSS Activity Photo ' + (i + 1) + '" loading="lazy">' +
+          '<div class="nss-gallery-overlay"><span>View Full Image ➔</span></div>' +
+          '</div>'
+        ).join('');
+      } else {
+        galleryGrid.style.display = 'none';
+        if (galleryNotice) galleryNotice.style.display = 'block';
+      }
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', NSS.applyCloudinaryAssets);
+  } else {
+    NSS.applyCloudinaryAssets();
+  }
+
   window.NSS = NSS;
 
 })(window);
