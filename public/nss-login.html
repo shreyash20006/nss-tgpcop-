@@ -3,21 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>NSS Coordinator Login | TGPCOP</title>
+  <title>Portal Sign In | NSS TGPCOP — National Service Scheme</title>
+  <meta name="description" content="Secure Google sign in for NSS TGPCOP student volunteers and authorized faculty coordinators.">
+  <meta name="theme-color" content="#071B49">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
   <link rel="stylesheet" href="nss.css">
 </head>
 <body class="nss-page">
-    <!-- ======================================================================
-       UNIFIED INSTITUTIONAL HEADER & NAVIGATION
+
+  <!-- ======================================================================
+       1. UNIFIED INSTITUTIONAL HEADER & NAVIGATION
        ====================================================================== -->
   <header class="nss-header" id="top">
     <div class="nss-header-wrap">
       <a href="index.html" class="nss-header-brand" aria-label="NSS TGPCOP Home">
-        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-header-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-header-logo">
         <div class="nss-header-identity">
           <span class="nss-brand-name">NSS <b>TGPCOP</b></span>
           <span class="nss-brand-sub">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</span>
@@ -39,7 +42,7 @@
       <!-- Action Buttons -->
       <div class="nss-header-actions">
         <a href="register.html" class="nss-btn-join">Volunteer</a>
-        <a href="login.html" class="nss-btn-login">Login</a>
+        <a href="login.html" class="nss-btn-login active">Login</a>
         <button class="nss-menu-toggle" id="nssMenuToggle" aria-label="Toggle Navigation Menu">
           <span></span><span></span><span></span>
         </button>
@@ -47,7 +50,7 @@
     </div>
   </header>
 
-  <!-- Mobile Drawer -->
+  <!-- Mobile Navigation Drawer -->
   <div class="nss-drawer" id="nssDrawer">
     <div class="nss-drawer-header">
       <div class="nss-header-identity">
@@ -67,89 +70,251 @@
       <a href="status.html" class="nss-drawer-link">Check Application Status</a>
       <a href="my-id.html" class="nss-drawer-link">Digital ID Card</a>
       <a href="verify.html" class="nss-drawer-link">Scan / Verify Certificate</a>
-      <a href="login.html" class="nss-drawer-link">Coordinator Login</a>
+      <a href="login.html" class="nss-drawer-link active">Portal Login</a>
       <a href="index.html#contact" class="nss-drawer-link">Contact Information</a>
     </nav>
   </div>
 
-  <main class="nss-section" style="min-height: 70vh; display:flex; align-items:center;">
-    <div class="nss-container">
-      <div class="nss-card" style="max-width:440px; margin:0 auto; text-align:center; padding:44px 32px; border-top: 4px solid var(--nss-navy); box-shadow: var(--nss-shadow-lg);">
-        <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:90px; margin:0 auto 18px;" onerror="this.src='echo_logo_white_transparent.png'">
-        <h1 style="font-size:32px; margin-bottom:6px;">Coordinator Portal</h1>
-        <p style="font-size:14px; color:var(--nss-text-muted); margin-bottom:28px;">
-          National Service Scheme administration and volunteer review desk.
+  <!-- ======================================================================
+       2. LOGIN SCREEN
+       ====================================================================== -->
+  <main class="nss-section" style="min-height: 75vh; display: flex; align-items: center; padding: 48px 20px;">
+    <div class="nss-container" style="max-width: 520px; margin: 0 auto; width: 100%;">
+      
+      <div class="nss-card" style="padding: 44px 34px; text-align: center; border-top: 4px solid var(--nss-navy); box-shadow: var(--nss-shadow-card); background: #FFFFFF; border-radius: var(--nss-radius-card);">
+        
+        <!-- Official NSS Emblem -->
+        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" style="height: 84px; width: 84px; object-fit: contain; margin: 0 auto 18px;" onerror="this.src='echo_logo_white_transparent.png'">
+        
+        <div style="display:inline-block; font-size: 11px; font-weight: 700; color: var(--nss-royal-blue); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 999px; padding: 4px 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;">
+          ★ NSS TGPCOP GATEWAY ★
+        </div>
+
+        <h1 style="font-size: 26px; font-weight: 800; color: var(--nss-navy); margin: 0 0 8px; letter-spacing: -0.01em;">
+          Welcome to NSS TGPCOP
+        </h1>
+        <p style="font-size: 14px; color: var(--nss-text-muted); margin: 0 auto 28px; line-height: 1.5; max-width: 420px;">
+          Sign in securely to continue to your volunteer application, digital credentials, or coordinator administration desk.
         </p>
 
-        <!-- Checking state -->
-        <div id="checkingState" style="display:none; margin-bottom:20px;">
-          <div style="font-size:24px; animation:spin 1s linear infinite; display:inline-block;">⏳</div>
-          <p style="font-size:13px; color:var(--nss-text-muted); margin-top:8px;">Verifying coordinator authorization...</p>
+        <!-- Checking Authorization State -->
+        <div id="checkingState" style="display:none; padding: 20px; background: #F8FAFC; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--nss-border);">
+          <div style="font-size: 28px; animation: spin 1s linear infinite; display: inline-block;">⏳</div>
+          <p style="font-size: 13.5px; font-weight: 600; color: var(--nss-navy); margin: 10px 0 0;">
+            Verifying account authorization...
+          </p>
         </div>
 
-        <!-- Login Button Container -->
+        <!-- Login Action Button Box -->
         <div id="loginAction">
-          <button class="nss-btn nss-btn-primary nss-btn-lg" style="width:100%;" onclick="loginCoordinator()">
-            <span style="font-size:18px;">G</span> Sign in with Google
+          <button type="button" class="nss-btn-google" id="googleBtn" onclick="handleGoogleSignIn()">
+            <!-- Official Multicolor Google "G" SVG -->
+            <svg class="nss-google-icon" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            <span id="googleBtnText">Continue with Google</span>
           </button>
-          <p style="font-size:12px; color:var(--nss-text-muted); margin-top:16px;">
-            Authorized faculty coordinators and NSS program officers only.
+
+          <p style="font-size: 12px; color: var(--nss-text-muted); margin-top: 14px; line-height: 1.5;">
+            Use your college or personal Google account. Faculty coordinators will be directed to the Admin Console upon verification.
           </p>
         </div>
 
-        <!-- Access Denied Alert -->
-        <div id="accessDeniedCard" style="display:none; margin-top:24px; background:var(--nss-danger-bg); border:1px solid #FCA5A5; border-radius:var(--nss-radius-md); padding:18px; text-align:left;">
-          <div style="font-weight:700; color:var(--nss-danger); font-size:15px; margin-bottom:6px;">Access Denied</div>
-          <p style="font-size:13px; color:var(--nss-text); margin:0 0 14px; line-height:1.5;">
-            Your account (<span id="deniedEmail" style="font-weight:600;"></span>) is not listed in the authorized NSS coordinator registry.
+        <!-- Access Denied Card (If non-coordinator clicks coordinator desk) -->
+        <div id="accessDeniedCard" style="display:none; margin-top: 24px; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: var(--nss-radius-md); padding: 20px; text-align: left;">
+          <div style="font-weight: 700; color: #DC2626; font-size: 15px; margin-bottom: 6px; display:flex; align-items:center; gap:8px;">
+            <span>⚠️</span> Access Restricted to Coordinators
+          </div>
+          <p style="font-size: 13px; color: var(--nss-text-primary); margin: 0 0 14px; line-height: 1.5;">
+            Your account (<strong id="deniedEmail"></strong>) is authenticated with Google, but is not listed in the authorized NSS coordinator registry.
           </p>
-          <div style="display:flex; gap:10px;">
-            <button class="nss-btn nss-btn-danger nss-btn-sm" onclick="signOutCoordinator()">Sign Out</button>
-            <a href="nss.html" class="nss-btn nss-btn-outline nss-btn-sm">Return Home</a>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff;" onclick="signOut()">
+              Sign Out
+            </button>
+            <a href="status.html" class="nss-btn nss-btn-sm nss-btn-outline">
+              Check Volunteer Status
+            </a>
           </div>
         </div>
 
+        <!-- Divider -->
+        <div style="margin: 32px 0 24px; border-top: 1px solid var(--nss-border); position: relative;">
+          <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 0 12px; font-size: 11px; font-weight: 700; color: var(--nss-text-muted); text-transform: uppercase; letter-spacing: 0.08em;">
+            Quick Services
+          </span>
+        </div>
+
+        <!-- Quick Links Grid -->
+        <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; font-size: 13px;">
+          <a href="register.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+            <span>📝 New Volunteer Registration</span>
+            <span style="color: var(--nss-royal-blue);">Apply Now ➔</span>
+          </a>
+          <a href="status.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+            <span>📋 Application Status Tracker</span>
+            <span style="color: var(--nss-royal-blue);">Check ➔</span>
+          </a>
+          <a href="my-id.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+            <span>🪪 Official Digital Volunteer ID</span>
+            <span style="color: var(--nss-royal-blue);">Download ➔</span>
+          </a>
+          <a href="verify.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+            <span>🔍 Scan & Verify NSS QR Token</span>
+            <span style="color: var(--nss-royal-blue);">Verify ➔</span>
+          </a>
+        </div>
+
       </div>
+
     </div>
   </main>
 
-  <!-- Shared Echo Footer -->
-  <div id="foot"></div>
+  <!-- ======================================================================
+       3. INSTITUTIONAL FOOTER
+       ====================================================================== -->
+  <footer class="nss-footer" id="contact">
+    <div class="nss-container">
+      <div class="nss-footer-grid">
+        <!-- Col 1: Identity & Scheme -->
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:48px;" onerror="this.src='echo_logo_white_transparent.png'">
+            <div class="nss-footer-brand-title">NSS TGPCOP</div>
+          </div>
+          <p class="nss-footer-brand-desc">
+            National Service Scheme (NSS) Unit 1 • Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
+          </p>
+          <div class="nss-footer-motto-pill">★ NOT ME, BUT YOU ★</div>
+          <p style="font-size:12px;margin-top:14px;color:#64748B;">
+            Sponsored by Ministry of Youth Affairs & Sports, Government of India. Affiliated with RTMNU Nagpur.
+          </p>
+        </div>
+
+        <!-- Col 2: Navigation -->
+        <div>
+          <div class="nss-footer-col-title">Navigation</div>
+          <ul class="nss-footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About NSS</a></li>
+            <li><a href="index.html#activities">Key Activities</a></li>
+            <li><a href="index.html#events">Recent Events</a></li>
+            <li><a href="index.html#leadership">Leadership Desk</a></li>
+            <li><a href="index.html#gallery">Photo Gallery</a></li>
+            <li><a href="index.html#impact">NSS Impact</a></li>
+            <li><a href="register.html">Join as Volunteer</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Portal Services -->
+        <div>
+          <div class="nss-footer-col-title">Volunteer Portal</div>
+          <ul class="nss-footer-links">
+            <li><a href="register.html">Volunteer Registration</a></li>
+            <li><a href="status.html">Application Status</a></li>
+            <li><a href="my-id.html">Digital ID Card</a></li>
+            <li><a href="verify.html">Scan & Verify QR</a></li>
+            <li><a href="login.html">Coordinator Login</a></li>
+            <li><a href="admin.html">Admin Dashboard</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Contact & Social -->
+        <div>
+          <div class="nss-footer-col-title">Connect With Us</div>
+          <div class="nss-footer-contact-item">
+            <b>Official Contact Desk:</b><br>
+            Email: <a href="mailto:Media@tgpcop.site" style="color:var(--nss-yellow);">Media@tgpcop.site</a><br>
+            Campus: TGPCOP, Wardha Road, Nagpur
+          </div>
+          <div class="nss-social-pills">
+            <a href="https://www.instagram.com/nss_tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill">
+              @nss_tgpcop
+            </a>
+            <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill">
+              @echo.tgpcop
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar -->
+      <div class="nss-footer-bottom">
+        <div>
+          © 2026 National Service Scheme — TGPCOP Unit. All rights reserved.
+        </div>
+        <div>
+          Media & Creative Support by <a href="https://www.echotgpcopmedia.site" target="_blank" rel="noopener noreferrer">ECHO.TGPCOP</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- Scripts -->
+  <script src="cloudinary-config.js"></script>
   <script src="env.js"></script>
   <script src="echo.js"></script>
   <script src="nss.js"></script>
   <script>
-    function loginCoordinator() {
-      const sb = window.getSB();
-      if (!sb) {
-        alert('Supabase client unavailable');
-        return;
-      }
-      sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: new URL('nss-login.html', location.href).href
-        }
+    // Mobile navigation drawer toggle
+    const toggleBtn = document.getElementById('nssMenuToggle');
+    const closeBtn = document.getElementById('nssDrawerClose');
+    const drawer = document.getElementById('nssDrawer');
+
+    if (toggleBtn && drawer) {
+      toggleBtn.addEventListener('click', () => drawer.classList.add('open'));
+    }
+    if (closeBtn && drawer) {
+      closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
+    }
+    if (drawer) {
+      drawer.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => drawer.classList.remove('open'));
       });
     }
 
-    function signOutCoordinator() {
+    // Google Sign-in Initiation
+    async function handleGoogleSignIn() {
+      const btn = document.getElementById('googleBtn');
+      const btnText = document.getElementById('googleBtnText');
       const sb = window.getSB();
-      if (sb) {
-        sb.auth.signOut().then(() => {
-          location.href = 'nss-login.html';
+      if (!sb) {
+        alert('Supabase client is initializing. Please wait a moment and try again.');
+        return;
+      }
+
+      btn.disabled = true;
+      btnText.textContent = 'Connecting to Google...';
+
+      try {
+        const redirectUrl = new URL(location.pathname, location.href).href;
+        const { error } = await sb.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: redirectUrl
+          }
         });
+        if (error) throw error;
+      } catch (err) {
+        console.error('Google OAuth error:', err);
+        alert('Could not start Google sign in: ' + (err.message || 'Unknown error'));
+        btn.disabled = false;
+        btnText.textContent = 'Continue with Google';
       }
     }
 
+    // Evaluate Auth State
     async function evaluateAuth() {
       await window.ready;
       const user = await NSS.Auth.getCurrentUser();
       const checking = document.getElementById('checkingState');
       const loginAction = document.getElementById('loginAction');
       const deniedCard = document.getElementById('accessDeniedCard');
+      const isCoordReq = new URLSearchParams(window.location.search).get('coordinator') === 'true' || window.location.pathname.includes('nss-login');
 
       if (!user) {
         checking.style.display = 'none';
@@ -166,11 +331,22 @@
       checking.style.display = 'none';
 
       if (role === 'super_admin' || role === 'coordinator') {
-        window.location.href = 'nss-admin.html';
-      } else {
+        window.location.href = 'admin.html';
+      } else if (isCoordReq) {
         loginAction.style.display = 'none';
         deniedCard.style.display = 'block';
         document.getElementById('deniedEmail').textContent = user.email || 'Current Account';
+      } else {
+        window.location.href = 'status.html';
+      }
+    }
+
+    function signOut() {
+      const sb = window.getSB();
+      if (sb) {
+        sb.auth.signOut().then(() => {
+          window.location.href = 'login.html';
+        });
       }
     }
 

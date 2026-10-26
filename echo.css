@@ -1,14 +1,14 @@
 :root{--blue:#004BFE;--yellow:#FFD60A;--navy:#002DAA;--dot:#1e69ff;box-sizing:border-box}
 *,*::before,*::after{box-sizing:inherit}html{scroll-behavior:smooth;scroll-padding-top:90px}
-body{margin:0;background:var(--blue) radial-gradient(circle,var(--dot) 2px,transparent 2.5px) 0 0/54px 54px;color:#fff;font:400 16px/1.6 Poppins,system-ui,sans-serif;overflow-x:hidden}
-h1,h2,h3{margin:0;font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.92}
-h1{font-size:clamp(56px,9vw,110px)}h2{font-size:clamp(46px,7vw,86px);margin-bottom:26px}
+body:not(.nss-page){margin:0;background:var(--blue) radial-gradient(circle,var(--dot) 2px,transparent 2.5px) 0 0/54px 54px;color:#fff;font:400 16px/1.6 Poppins,system-ui,sans-serif;overflow-x:hidden}
+body:not(.nss-page) h1,body:not(.nss-page) h2,body:not(.nss-page) h3{margin:0;font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.92}
+body:not(.nss-page) h1{font-size:clamp(56px,9vw,110px)}body:not(.nss-page) h2{font-size:clamp(46px,7vw,86px);margin-bottom:26px}
 .y{color:var(--yellow)}a{color:inherit;text-decoration:none}img{max-width:100%;display:block}
 .wrap{width:min(1120px,92%);margin:auto}section{padding:80px 0;position:relative}
 .marq{background:#fff;color:var(--blue);overflow:hidden;white-space:nowrap;font-weight:700;padding:10px 0}
 .marq div{display:inline-block;animation:mq 28s linear infinite}.marq span{margin:0 14px}@keyframes mq{to{transform:translateX(-50%)}}
-nav{position:sticky;top:0;z-index:50;background:rgba(0,75,254,.92);backdrop-filter:blur(8px)}
-nav .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}nav img{height:46px;width:auto}
+nav:not(.nss-header-nav):not(.nss-drawer-nav){position:sticky;top:0;z-index:50;background:rgba(0,75,254,.92);backdrop-filter:blur(8px)}
+nav:not(.nss-header-nav):not(.nss-drawer-nav) .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}nav:not(.nss-header-nav):not(.nss-drawer-nav) img{height:46px;width:auto}
 .links{display:flex;gap:22px;align-items:center;font-weight:500;font-size:15px}.links a:not(.btn):hover{color:var(--yellow)}
 .btn{display:inline-block;border-radius:99px;padding:13px 28px;font-weight:700;border:2px solid var(--yellow);background:var(--yellow);color:var(--blue);transition:.2s;cursor:pointer;font:700 15px Poppins}
 .btn:hover{transform:scale(1.06)}.btn.o{background:transparent;color:#fff;border-color:#fff}.btn.sm{padding:8px 18px;font-size:14px}
@@ -39,7 +39,7 @@ nav .wrap{display:flex;align-items:center;justify-content:space-between;height:7
 .gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;background:var(--yellow);color:var(--blue);border:0;border-radius:99px;padding:12px 22px;font:700 17px Poppins;cursor:pointer;position:relative;overflow:hidden;transition:.2s}
 .gbtn:hover{transform:scale(1.05) rotate(-1deg)}.gbtn::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:rgba(255,255,255,.55);transform:skewX(-20deg);animation:sh 3s infinite}@keyframes sh{60%,100%{left:130%}}
 .gi{width:36px;height:36px;border-radius:50%;background:#fff;border:3px solid var(--blue);display:grid;place-items:center}.gi svg{width:22px;height:22px}
-footer{background:var(--navy);padding:50px 0 90px;text-align:center}footer img{height:90px;margin:0 auto 14px}footer p{margin:6px 0}.soc a{color:var(--yellow);font-weight:600}
+footer:not(.nss-footer){background:var(--navy);padding:50px 0 90px;text-align:center}footer:not(.nss-footer) img{height:90px;margin:0 auto 14px}footer:not(.nss-footer) p{margin:6px 0}.soc a{color:var(--yellow);font-weight:600}
 .rv{opacity:0;transform:translateY(34px);transition:.8s}.rv.in{opacity:1;transform:rotate(var(--r,0deg))}
 #fl{position:fixed;inset:0;background:#fff;z-index:99;pointer-events:none;animation:fx .5s ease-out forwards}@keyframes fx{to{opacity:0;visibility:hidden}}
 #lb{position:fixed;inset:0;background:rgba(0,10,60,.92);display:none;z-index:90;padding:24px;overflow:auto;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));align-content:start}#lb.on{display:grid}#lb img,#lb video{width:100%;border:8px solid #fff;border-radius:20px}

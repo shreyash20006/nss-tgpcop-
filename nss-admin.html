@@ -3,102 +3,116 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Coordinator Dashboard | NSS TGPCOP</title>
+  <title>Coordinator Dashboard | NSS TGPCOP — Administration Console</title>
+  <meta name="description" content="Official administrative console for NSS TGPCOP coordinators. Review volunteer applications, verify member credentials, and manage campus drives.">
+  <meta name="theme-color" content="#071B49">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
   <link rel="stylesheet" href="nss.css">
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body class="nss-page">
 
-  <!-- Admin Portal Top Bar -->
+  <!-- ======================================================================
+       1. COMPACT COORDINATOR DESK TOP BAR
+       ====================================================================== -->
   <header class="nss-admin-header">
     <div class="nss-admin-header-wrap">
       <div class="nss-admin-title">
-        <img src="assets/nss-logo.png" alt="NSS Logo" onerror="this.src='echo_logo_white_transparent.png'">
-        <div>
-          <h1>NSS Coordinator Desk</h1>
-          <div style="font-size:12px; color:var(--nss-gold); font-weight:600; text-transform:uppercase; letter-spacing:0.06em;">
-            TGPCOP Administration Portal
+        <a href="index.html" style="display:flex; align-items:center; gap:12px;">
+          <img src="assets/nss-logo.png" alt="NSS Logo" onerror="this.src='echo_logo_white_transparent.png'">
+          <div>
+            <h1>NSS Coordinator Desk</h1>
+            <div class="nss-admin-title-sub">TGPCOP Administration Portal</div>
           </div>
-        </div>
+        </a>
       </div>
 
       <div class="nss-admin-user">
         <img id="adminAvatar" class="nss-admin-user-avatar" src="" alt="Avatar" style="display:none;">
         <div style="text-align:right;">
-          <div id="adminName" style="font-size:14px; font-weight:600; color:var(--nss-white);">Coordinator</div>
-          <div id="adminRole" style="font-size:11px; color:#CBD5E1; text-transform:uppercase;">Role: Loading...</div>
+          <div id="adminName" class="nss-admin-user-name">Coordinator</div>
+          <div id="adminRole" class="nss-admin-user-role">Role: Loading...</div>
         </div>
-        <button class="nss-btn nss-btn-sm nss-btn-danger" onclick="logoutAdmin()" style="margin-left:8px;">
+        <button class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff; border:none; margin-left:8px;" onclick="logoutAdmin()">
           Logout
         </button>
       </div>
     </div>
   </header>
 
-  <main class="nss-section" style="padding: 36px 0 60px;">
+  <!-- ======================================================================
+       2. DASHBOARD BODY & TABS
+       ====================================================================== -->
+  <main class="nss-section" style="padding: 32px 0 60px;">
     <div class="nss-container">
 
       <!-- Navigation breadcrumbs & shortcuts -->
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
         <div style="font-size:14px; font-weight:500; color:var(--nss-text-muted);">
-          <a href="nss.html" style="color:var(--nss-accent);">← NSS Public Home</a> &nbsp;|&nbsp; Coordinator Management Console
+          <a href="index.html" style="color:var(--nss-royal-blue); font-weight:600;">← NSS Public Home</a> &nbsp;|&nbsp; Coordinator Management Console
         </div>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
           <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="exportCSV()">
             📊 Export Approved CSV
           </button>
-          <a href="nss-verify.html" target="_blank" class="nss-btn nss-btn-sm nss-btn-navy">
-            🔍 Open QR Scanner
-          </a>
+          <button class="nss-btn nss-btn-sm nss-btn-primary" onclick="loadDashboard()">
+            🔄 Refresh Data
+          </button>
         </div>
       </div>
 
-      <!-- Stats Cards -->
+      <!-- Live Stats Cards -->
       <div class="nss-stats-grid">
         <div class="nss-stat-card">
           <div class="val" id="statTotal">0</div>
           <div class="lbl">Total Applications</div>
         </div>
-        <div class="nss-stat-card" style="border-left: 4px solid var(--nss-warning);">
-          <div class="val" id="statPending" style="color:var(--nss-warning);">0</div>
+        <div class="nss-stat-card" style="border-left-color: #D97706;">
+          <div class="val" id="statPending" style="color: #D97706;">0</div>
           <div class="lbl">Pending Review</div>
         </div>
-        <div class="nss-stat-card" style="border-left: 4px solid var(--nss-success);">
-          <div class="val" id="statApproved" style="color:var(--nss-success);">0</div>
+        <div class="nss-stat-card" style="border-left-color: #16A34A;">
+          <div class="val" id="statApproved" style="color: #16A34A;">0</div>
           <div class="lbl">Active Volunteers</div>
         </div>
-        <div class="nss-stat-card" style="border-left: 4px solid var(--nss-danger);">
-          <div class="val" id="statRejected" style="color:var(--nss-danger);">0</div>
+        <div class="nss-stat-card" style="border-left-color: #DC2626;">
+          <div class="val" id="statRejected" style="color: #DC2626;">0</div>
           <div class="lbl">Rejected</div>
         </div>
-        <div class="nss-stat-card">
-          <div class="val" id="statRevoked">0</div>
+        <div class="nss-stat-card" style="border-left-color: #64748B;">
+          <div class="val" id="statRevoked" style="color: #64748B;">0</div>
           <div class="lbl">Revoked</div>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="nss-tabs">
-        <button class="nss-tab-btn active" onclick="switchTab('pendingTab')">
-          Pending Review <span id="pendingBadge" style="background:var(--nss-warning); color:#fff; border-radius:99px; padding:2px 8px; font-size:11px; margin-left:4px;">0</span>
+        <button class="nss-tab-btn active" id="btnTabPending" onclick="switchTab('pendingTab')">
+          <span>📋 Applications Pending Review</span>
+          <span id="pendingBadge" style="background:#D97706; color:#fff; border-radius:99px; padding:2px 8px; font-size:11px; margin-left:4px;">0</span>
         </button>
-        <button class="nss-tab-btn" onclick="switchTab('allTab')">
-          All Applications
+        <button class="nss-tab-btn" id="btnTabAll" onclick="switchTab('allTab')">
+          <span>👥 All Enrolled Applicants</span>
         </button>
-        <button class="nss-tab-btn" onclick="switchTab('leadershipTab')">
-          Leadership Profiles
+        <button class="nss-tab-btn" id="btnTabScanner" onclick="switchTab('scannerTab')">
+          <span>📹 QR Scanner & Member Verification</span>
+        </button>
+        <button class="nss-tab-btn" id="btnTabLeaders" onclick="switchTab('leadershipTab')">
+          <span>🎖️ Leadership Directory</span>
         </button>
       </div>
 
-      <!-- TAB 1: PENDING REVIEW -->
+      <!-- ==================================================================
+           TAB 1: PENDING REVIEW
+           ================================================================== -->
       <div id="pendingTab" class="tab-content">
         <div class="nss-table-container">
           <div class="nss-table-toolbar">
-            <h3 style="margin:0; font-size:16px;">Applications Awaiting Coordinator Action</h3>
-            <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="loadDashboard()">🔄 Refresh</button>
+            <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--nss-navy);">Applications Awaiting Coordinator Review</h3>
+            <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="loadDashboard()">🔄 Reload</button>
           </div>
           <div class="nss-table-wrapper">
             <table class="nss-table">
@@ -108,24 +122,26 @@
                   <th>Roll No</th>
                   <th>Course & Year</th>
                   <th>Submitted</th>
-                  <th>Actions</th>
+                  <th>Review Actions</th>
                 </tr>
               </thead>
               <tbody id="pendingTableBody">
-                <tr><td colspan="5" style="text-align:center; padding:24px; color:var(--nss-text-muted);">Loading pending applications...</td></tr>
+                <tr><td colspan="5" style="text-align:center; padding:28px; color:var(--nss-text-muted);">Loading pending applications...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- TAB 2: ALL APPLICATIONS -->
+      <!-- ==================================================================
+           TAB 2: ALL APPLICATIONS
+           ================================================================== -->
       <div id="allTab" class="tab-content" style="display:none;">
         <div class="nss-table-container">
           <div class="nss-table-toolbar">
-            <input type="text" id="allSearchInput" class="nss-search-input" placeholder="Search by name, roll no, ref code..." oninput="handleSearch()">
+            <input type="text" id="allSearchInput" class="nss-search-input" placeholder="Search by name, roll no, ref code, volunteer ID..." oninput="handleSearch()">
             <div style="display:flex; gap:8px; align-items:center;">
-              <select id="allStatusFilter" class="nss-form-select" style="padding:6px 12px; font-size:13px; width:auto;" onchange="handleFilter()">
+              <select id="allStatusFilter" class="nss-form-select" style="padding:8px 14px; font-size:13px; width:auto; border-radius:var(--nss-radius-full);" onchange="handleFilter()">
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
@@ -148,18 +164,110 @@
                 </tr>
               </thead>
               <tbody id="allTableBody">
-                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--nss-text-muted);">Loading applications...</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:28px; color:var(--nss-text-muted);">Loading applications...</td></tr>
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- TAB 3: LEADERSHIP PROFILES -->
+      <!-- ==================================================================
+           TAB 3: BUILT-IN QR SCANNER & MEMBER VERIFICATION
+           ================================================================== -->
+      <div id="scannerTab" class="tab-content" style="display:none;">
+        <div class="nss-card" style="padding: 32px 24px; max-width: 680px; margin: 0 auto; background: #FFFFFF; border-radius: var(--nss-radius-card); box-shadow: var(--nss-shadow-card);">
+          
+          <div style="text-align:center; margin-bottom: 24px;">
+            <div style="display:inline-block; font-size: 11px; font-weight: 700; color: var(--nss-royal-blue); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 999px; padding: 3px 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+              INSTITUTIONAL CREDENTIAL DESK
+            </div>
+            <h2 style="font-size: 24px; font-weight: 800; color: var(--nss-navy); margin: 0 0 6px;">
+              Live Volunteer ID & QR Verification
+            </h2>
+            <p style="font-size: 13.5px; color: var(--nss-text-muted); margin: 0 auto; max-width: 480px;">
+              Scan the physical or digital QR code on any volunteer's ID card to verify their active membership in real time.
+            </p>
+          </div>
+
+          <!-- Camera Scanner Viewport -->
+          <div class="nss-scanner-wrapper">
+            <div id="scannerSection">
+              <div class="nss-camera-container">
+                <video id="scannerVideo" class="nss-camera-video"></video>
+                <div class="nss-scanner-target">
+                  <div class="nss-scanner-laser"></div>
+                </div>
+              </div>
+
+              <div style="display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap;">
+                <button id="btnStartScan" class="nss-btn nss-btn-primary" onclick="startScanner()">
+                  📹 Start Camera Scanner
+                </button>
+                <button id="btnStopScan" class="nss-btn nss-btn-outline" style="display:none;" onclick="stopScanner()">
+                  ⏹ Stop Camera
+                </button>
+              </div>
+            </div>
+
+            <!-- Manual Input Fallback -->
+            <div style="background:#F8FAFC; border:1px solid var(--nss-border); border-radius:12px; padding:18px; margin-bottom:24px; text-align:left;">
+              <label class="nss-form-label" style="font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:6px; display:block;">
+                Or Enter Volunteer ID / QR Token Manually:
+              </label>
+              <div style="display:flex; gap:10px;">
+                <input type="text" id="manualInput" class="nss-form-input" placeholder="e.g. NSS-TGP-2026-0001 or token..." style="padding:10px 14px; font-size:13px;">
+                <button class="nss-btn nss-btn-navy" onclick="handleManualVerify()" style="white-space:nowrap;">
+                  Verify Now
+                </button>
+              </div>
+            </div>
+
+            <!-- Verification Result Presentation Card -->
+            <div id="resultCard" style="display:none; text-align:center; padding:24px; background:#FFFFFF; border:2px solid #E2E8F0; border-radius:14px; animation:fadeIn 0.25s ease;">
+              <div id="resIcon" style="font-size:52px; margin-bottom:8px;"></div>
+              <h3 id="resHeading" style="font-size:20px; font-weight:700; color:var(--nss-navy); margin:0 0 6px;">Result</h3>
+              <div id="resBadge" style="margin-bottom:14px;"></div>
+              <p id="resDesc" style="color:var(--nss-text-muted); font-size:13px; margin:0 0 18px;"></p>
+
+              <!-- Details Table for Valid Records -->
+              <div id="resDetailsTable" style="display:none; text-align:left; background:#F8FAFC; border-radius:12px; padding:16px; border:1px solid var(--nss-border); margin-bottom:18px;">
+                <div id="resPhotoWrap" style="text-align:center; margin-bottom:14px;">
+                  <img id="resPhoto" src="" alt="Volunteer Photo" style="width:90px; height:90px; border-radius:50%; object-fit:cover; border:3px solid var(--nss-navy); margin:0 auto; background:#E2E8F0;">
+                </div>
+                <div class="nss-detail-row">
+                  <span class="nss-detail-label">Volunteer Name</span>
+                  <span class="nss-detail-val" id="resName">—</span>
+                </div>
+                <div class="nss-detail-row">
+                  <span class="nss-detail-label">Volunteer ID</span>
+                  <span class="nss-detail-val" id="resVolId" style="color:var(--nss-royal-blue); font-family:monospace;">—</span>
+                </div>
+                <div class="nss-detail-row">
+                  <span class="nss-detail-label">Course & Year</span>
+                  <span class="nss-detail-val" id="resCourseYear">—</span>
+                </div>
+                <div class="nss-detail-row">
+                  <span class="nss-detail-label">Approval Date</span>
+                  <span class="nss-detail-val" id="resIssued">—</span>
+                </div>
+              </div>
+
+              <button class="nss-btn nss-btn-primary nss-btn-sm" onclick="resetVerification()">
+                🔄 Scan Another ID
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================================
+           TAB 4: LEADERSHIP DIRECTORY
+           ================================================================== -->
       <div id="leadershipTab" class="tab-content" style="display:none;">
         <div class="nss-table-container">
           <div class="nss-table-toolbar">
-            <h3 style="margin:0; font-size:16px;">NSS Leadership & Advisory Directory</h3>
+            <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--nss-navy);">NSS Leadership & Advisory Directory</h3>
             <button class="nss-btn nss-btn-sm nss-btn-primary" onclick="openLeaderModal()">+ Add New Leader</button>
           </div>
           <div class="nss-table-wrapper">
@@ -176,7 +284,7 @@
                 </tr>
               </thead>
               <tbody id="leadershipTableBody">
-                <tr><td colspan="7" style="text-align:center; padding:24px; color:var(--nss-text-muted);">Loading leadership members...</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:28px; color:var(--nss-text-muted);">Loading leadership members...</td></tr>
               </tbody>
             </table>
           </div>
@@ -186,7 +294,9 @@
     </div>
   </main>
 
-  <!-- MODAL: APPLICATION DETAIL & ACTION -->
+  <!-- ======================================================================
+       3. MODAL: APPLICATION DETAIL & APPROVAL
+       ====================================================================== -->
   <div id="appModal" class="nss-modal-backdrop">
     <div class="nss-modal">
       <div class="nss-modal-header">
@@ -195,15 +305,15 @@
       </div>
       <div class="nss-modal-body">
         <div style="display:flex; gap:20px; align-items:center; margin-bottom:20px; flex-wrap:wrap;">
-          <img id="modalAppPhoto" src="" alt="Student Photo" style="width:90px; height:90px; border-radius:12px; object-fit:cover; border:2px solid var(--nss-navy); background:#F1F5F9;">
+          <img id="modalAppPhoto" src="" alt="Student Photo" style="width:90px; height:90px; border-radius:12px; object-fit:cover; border:2px solid var(--nss-navy); background:#F1F5F9;" onerror="this.src='assets/nss-logo.png'">
           <div>
-            <h2 id="modalAppName" style="font-size:22px; margin:0 0 4px; color:var(--nss-navy);">Name</h2>
+            <h2 id="modalAppName" style="font-size:22px; font-weight:800; margin:0 0 4px; color:var(--nss-navy);">Name</h2>
             <div id="modalAppStatus"></div>
           </div>
         </div>
 
         <div class="nss-detail-row"><span class="nss-detail-label">Reference Code</span><span class="nss-detail-val" id="mRefCode">—</span></div>
-        <div class="nss-detail-row"><span class="nss-detail-label">Volunteer ID</span><span class="nss-detail-val" id="mVolId" style="color:var(--nss-accent);">—</span></div>
+        <div class="nss-detail-row"><span class="nss-detail-label">Volunteer ID</span><span class="nss-detail-val" id="mVolId" style="color:var(--nss-royal-blue); font-family:monospace;">—</span></div>
         <div class="nss-detail-row"><span class="nss-detail-label">Roll Number</span><span class="nss-detail-val" id="mRoll">—</span></div>
         <div class="nss-detail-row"><span class="nss-detail-label">PRN Number</span><span class="nss-detail-val" id="mPrn">—</span></div>
         <div class="nss-detail-row"><span class="nss-detail-label">Course & Year</span><span class="nss-detail-val" id="mCourseYear">—</span></div>
@@ -215,11 +325,11 @@
         <div class="nss-detail-row"><span class="nss-detail-label">Submitted At</span><span class="nss-detail-val" id="mSubmitted">—</span></div>
 
         <!-- Approval Result Box (if recently approved) -->
-        <div id="approvalResultBox" style="display:none; background:var(--nss-success-bg); border:1px solid #86EFAC; border-radius:var(--nss-radius-md); padding:16px; margin-top:18px;">
-          <div style="font-weight:700; color:var(--nss-success); margin-bottom:6px;">Volunteer Approved Successfully!</div>
-          <div style="font-size:13px; color:var(--nss-text);">
-            <div><strong>Assigned Volunteer ID:</strong> <span id="resVolIdText"></span></div>
-            <div style="margin-top:4px;"><strong>Generated QR Token:</strong> <code id="resTokenText" style="word-break:break-all; font-size:11px; background:#fff; padding:2px 6px; border-radius:4px;"></code></div>
+        <div id="approvalResultBox" style="display:none; background:#F0FDF4; border:1px solid #86EFAC; border-radius:var(--nss-radius-md); padding:16px; margin-top:18px;">
+          <div style="font-weight:700; color:#16A34A; margin-bottom:6px;">Volunteer Approved Successfully!</div>
+          <div style="font-size:13px; color:var(--nss-text-primary);">
+            <div><strong>Assigned Volunteer ID:</strong> <span id="resVolIdText" style="font-family:monospace; color:var(--nss-royal-blue);"></span></div>
+            <div style="margin-top:4px;"><strong>Generated QR Token:</strong> <code id="resTokenText" style="word-break:break-all; font-size:11px; background:#fff; padding:2px 6px; border-radius:4px; border:1px solid #CBD5E1;"></code></div>
           </div>
         </div>
 
@@ -241,7 +351,9 @@
     </div>
   </div>
 
-  <!-- MODAL: ADD / EDIT LEADERSHIP -->
+  <!-- ======================================================================
+       4. MODAL: ADD / EDIT LEADERSHIP
+       ====================================================================== -->
   <div id="leaderModal" class="nss-modal-backdrop">
     <div class="nss-modal">
       <div class="nss-modal-header">
@@ -294,10 +406,64 @@
     </div>
   </div>
 
-  <!-- Shared Echo Footer -->
-  <div id="foot"></div>
+  <!-- ======================================================================
+       5. INSTITUTIONAL FOOTER
+       ====================================================================== -->
+  <footer class="nss-footer" id="contact">
+    <div class="nss-container">
+      <div class="nss-footer-grid">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:48px;" onerror="this.src='echo_logo_white_transparent.png'">
+            <div class="nss-footer-brand-title">NSS TGPCOP</div>
+          </div>
+          <p class="nss-footer-brand-desc">
+            National Service Scheme (NSS) Unit 1 • Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
+          </p>
+          <div class="nss-footer-motto-pill">★ NOT ME, BUT YOU ★</div>
+        </div>
+
+        <div>
+          <div class="nss-footer-col-title">Coordinator Links</div>
+          <ul class="nss-footer-links">
+            <li><a href="index.html">NSS Public Homepage</a></li>
+            <li><a href="register.html">Volunteer Registration</a></li>
+            <li><a href="status.html">Application Status</a></li>
+            <li><a href="my-id.html">Volunteer ID Cards</a></li>
+            <li><a href="verify.html">Public Verification</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="nss-footer-col-title">Authorized Admin Desk</div>
+          <p style="font-size:13px; color:#94A3B8; line-height:1.6;">
+            Strictly for authorized NSS Program Officers and faculty coordinators of TGPCOP Nagpur.
+          </p>
+        </div>
+
+        <div>
+          <div class="nss-footer-col-title">Connect With Us</div>
+          <div class="nss-footer-contact-item">
+            <b>Official Contact Desk:</b><br>
+            Email: <a href="mailto:Media@tgpcop.site" style="color:var(--nss-yellow);">Media@tgpcop.site</a><br>
+            Campus: TGPCOP, Wardha Road, Nagpur
+          </div>
+        </div>
+      </div>
+
+      <div class="nss-footer-bottom">
+        <div>
+          © 2026 National Service Scheme — TGPCOP Unit. All rights reserved.
+        </div>
+        <div>
+          Administration Console — Confidential Institutional Record
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- Scripts -->
+  <script src="cloudinary-config.js"></script>
   <script src="env.js"></script>
   <script src="echo.js"></script>
   <script src="nss.js"></script>
@@ -309,7 +475,7 @@
     // Auth Guard
     async function initAdminAuth() {
       await window.ready;
-      const res = await NSS.Auth.requireCoordinator('nss-login.html');
+      const res = await NSS.Auth.requireCoordinator('login.html?coordinator=true');
       if (!res) return;
 
       const { user, role } = res;
@@ -328,7 +494,7 @@
       const sb = window.getSB();
       if (sb) {
         sb.auth.signOut().then(() => {
-          location.href = 'nss-login.html';
+          location.href = 'login.html';
         });
       }
     }
@@ -339,27 +505,38 @@
       const activeEl = document.getElementById(tabId);
       if (activeEl) activeEl.style.display = 'block';
 
-      if (event && event.currentTarget) {
-        event.currentTarget.classList.add('active');
-      }
+      // Highlight corresponding tab button
+      const btnMap = {
+        'pendingTab': 'btnTabPending',
+        'allTab': 'btnTabAll',
+        'scannerTab': 'btnTabScanner',
+        'leadershipTab': 'btnTabLeaders'
+      };
+      const activeBtn = document.getElementById(btnMap[tabId]);
+      if (activeBtn) activeBtn.classList.add('active');
 
       if (tabId === 'allTab') loadAllTab();
       if (tabId === 'leadershipTab') loadLeadershipTab();
+      if (tabId !== 'scannerTab') stopScanner();
     }
 
     // Load Stats & Pending
     async function loadDashboard() {
-      const stats = await NSS.Admin.loadStats();
-      document.getElementById('statTotal').textContent = stats.total;
-      document.getElementById('statPending').textContent = stats.pending;
-      document.getElementById('statApproved').textContent = stats.approved;
-      document.getElementById('statRejected').textContent = stats.rejected;
-      document.getElementById('statRevoked').textContent = stats.revoked;
-      document.getElementById('pendingBadge').textContent = stats.pending;
+      try {
+        const stats = await NSS.Admin.loadStats();
+        document.getElementById('statTotal').textContent = stats.total;
+        document.getElementById('statPending').textContent = stats.pending;
+        document.getElementById('statApproved').textContent = stats.approved;
+        document.getElementById('statRejected').textContent = stats.rejected;
+        document.getElementById('statRevoked').textContent = stats.revoked;
+        document.getElementById('pendingBadge').textContent = stats.pending;
 
-      const pending = await NSS.Admin.loadPending();
-      cachedPending = pending;
-      renderPendingTable(pending);
+        const pending = await NSS.Admin.loadPending();
+        cachedPending = pending;
+        renderPendingTable(pending);
+      } catch (e) {
+        console.error('Error loading dashboard:', e);
+      }
     }
 
     function renderPendingTable(list) {
@@ -372,17 +549,17 @@
       tb.innerHTML = list.map(item => `
         <tr>
           <td>
-            <div style="font-weight:600; color:var(--nss-navy);">${item.full_name}</div>
+            <div style="font-weight:700; color:var(--nss-navy);">${item.full_name}</div>
             <small style="color:var(--nss-text-muted);">${item.college_email}</small>
           </td>
           <td><strong>${item.roll_number}</strong></td>
           <td>${item.course} (${item.academic_year})</td>
           <td>${NSS.formatDate(item.submitted_at)}</td>
           <td>
-            <div style="display:flex; gap:6px;">
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
               <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="openAppModal('${item.id}')">View</button>
               <button class="nss-btn nss-btn-sm nss-btn-primary" onclick="quickApprove('${item.id}')">Approve</button>
-              <button class="nss-btn nss-btn-sm nss-btn-danger" onclick="quickReject('${item.id}')">Reject</button>
+              <button class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff; border:none;" onclick="quickReject('${item.id}')">Reject</button>
             </div>
           </td>
         </tr>
@@ -415,9 +592,9 @@
 
       tb.innerHTML = list.map(item => `
         <tr>
-          <td><code>${item.ref_code || '—'}</code></td>
-          <td><strong style="color:var(--nss-accent);">${item.volunteer_id || '—'}</strong></td>
-          <td style="font-weight:600;">${item.full_name}</td>
+          <td><code style="font-size:12px; font-weight:600;">${item.ref_code || '—'}</code></td>
+          <td><strong style="color:var(--nss-royal-blue); font-family:monospace;">${item.volunteer_id || '—'}</strong></td>
+          <td style="font-weight:600; color:var(--nss-navy);">${item.full_name}</td>
           <td>${item.roll_number}</td>
           <td>${item.course} (${item.academic_year})</td>
           <td>${NSS.renderStatusBadge(item.status)}</td>
@@ -467,13 +644,13 @@
       if (item.status === 'pending') {
         act.innerHTML = `
           <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Close</button>
-          <button class="nss-btn nss-btn-danger" id="mRejectBtn" onclick="showRejectInput()">Reject</button>
+          <button class="nss-btn" style="background:#DC2626; color:#fff;" id="mRejectBtn" onclick="showRejectInput()">Reject</button>
           <button class="nss-btn nss-btn-primary" id="mApproveBtn" onclick="executeApprove()">Approve Volunteer</button>
         `;
       } else if (item.status === 'approved') {
         act.innerHTML = `
           <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Close</button>
-          <button class="nss-btn nss-btn-danger" onclick="showRevokeInput()">Revoke Volunteer Card</button>
+          <button class="nss-btn" style="background:#DC2626; color:#fff;" onclick="showRevokeInput()">Revoke Volunteer Card</button>
         `;
       } else {
         act.innerHTML = `
@@ -496,7 +673,7 @@
       const act = document.getElementById('modalActions');
       act.innerHTML = `
         <button class="nss-btn nss-btn-outline" onclick="closeAppModal()">Cancel</button>
-        <button class="nss-btn nss-btn-danger" onclick="executeRevoke()">Confirm Revocation</button>
+        <button class="nss-btn" style="background:#DC2626; color:#fff;" onclick="executeRevoke()">Confirm Revocation</button>
       `;
     }
 
@@ -580,6 +757,159 @@
       }
     }
 
+    // In-Portal QR Scanner Engine
+    const video = document.getElementById('scannerVideo');
+    const btnStart = document.getElementById('btnStartScan');
+    const btnStop = document.getElementById('btnStopScan');
+    const resultCard = document.getElementById('resultCard');
+    const scannerSection = document.getElementById('scannerSection');
+
+    async function startScanner() {
+      btnStart.style.display = 'none';
+      btnStop.style.display = 'inline-flex';
+      resultCard.style.display = 'none';
+
+      await NSS.QRScanner.start(video, data => {
+        handleScannedData(data);
+      }, err => {
+        alert('Camera access failed or was denied. You may enter the token manually.');
+        stopScanner();
+      });
+    }
+
+    function stopScanner() {
+      NSS.QRScanner.stop();
+      if (btnStart) btnStart.style.display = 'inline-flex';
+      if (btnStop) btnStop.style.display = 'none';
+    }
+
+    function handleScannedData(data) {
+      stopScanner();
+      let token = null;
+      let volId = null;
+
+      try {
+        const url = new URL(data);
+        token = url.searchParams.get('t');
+        volId = url.searchParams.get('v');
+      } catch (e) {
+        if (data.startsWith('NSS-TGP-')) {
+          volId = data;
+        } else {
+          token = data;
+        }
+      }
+
+      if (token) {
+        verifyToken(token);
+      } else if (volId) {
+        verifyVolunteerId(volId);
+      } else {
+        verifyToken(data);
+      }
+    }
+
+    async function handleManualVerify() {
+      const val = document.getElementById('manualInput').value.trim();
+      if (!val) {
+        alert('Please enter a verification token or Volunteer ID.');
+        return;
+      }
+      stopScanner();
+      if (val.toUpperCase().startsWith('NSS-TGP-')) {
+        verifyVolunteerId(val);
+      } else {
+        verifyToken(val);
+      }
+    }
+
+    async function verifyToken(token) {
+      displayLoading();
+      try {
+        const res = await NSS.QRVerify(token);
+        renderVerificationResult(res);
+      } catch (err) {
+        renderVerificationResult({ result: 'invalid', message: 'Verification query failed' });
+      }
+    }
+
+    async function verifyVolunteerId(volId) {
+      displayLoading();
+      try {
+        const res = await NSS.verifyByVolunteerId(volId);
+        if (res) {
+          renderVerificationResult(res);
+        } else {
+          renderVerificationResult({ result: 'invalid', message: 'Volunteer record not found or not approved' });
+        }
+      } catch (err) {
+        renderVerificationResult({ result: 'invalid', message: 'Lookup error' });
+      }
+    }
+
+    function displayLoading() {
+      scannerSection.style.display = 'none';
+      resultCard.style.display = 'block';
+      document.getElementById('resIcon').textContent = '⏳';
+      document.getElementById('resHeading').textContent = 'Authenticating Credential...';
+      document.getElementById('resBadge').innerHTML = '';
+      document.getElementById('resDesc').textContent = 'Querying institutional registry...';
+      document.getElementById('resDetailsTable').style.display = 'none';
+    }
+
+    function renderVerificationResult(res) {
+      scannerSection.style.display = 'none';
+      resultCard.style.display = 'block';
+
+      const icon = document.getElementById('resIcon');
+      const heading = document.getElementById('resHeading');
+      const badge = document.getElementById('resBadge');
+      const desc = document.getElementById('resDesc');
+      const table = document.getElementById('resDetailsTable');
+
+      const status = (res.result || 'invalid').toLowerCase();
+
+      if (status === 'approved' || status === 'valid') {
+        icon.textContent = '✅';
+        heading.textContent = 'Verified Active NSS Volunteer';
+        badge.innerHTML = '<span class="nss-badge approved">OFFICIALLY VERIFIED</span>';
+        desc.textContent = 'This credential is authentic and belongs to an active NSS volunteer at TGPCOP.';
+
+        table.style.display = 'block';
+        document.getElementById('resName').textContent = res.name || '—';
+        document.getElementById('resVolId').textContent = res.volunteer_id || '—';
+        document.getElementById('resCourseYear').textContent = `${res.course || ''} (${res.academic_year || ''})`;
+        document.getElementById('resIssued').textContent = NSS.formatDate(res.issued_at);
+
+        const photoWrap = document.getElementById('resPhotoWrap');
+        const photoEl = document.getElementById('resPhoto');
+        if (res.photo_url) {
+          photoEl.src = res.photo_url;
+          photoWrap.style.display = 'block';
+        } else {
+          photoWrap.style.display = 'none';
+        }
+      } else if (status === 'revoked') {
+        icon.textContent = '⚠️';
+        heading.textContent = 'Volunteer Card Revoked';
+        badge.innerHTML = '<span class="nss-badge revoked">CARD REVOKED</span>';
+        desc.textContent = 'This volunteer card has been revoked by administration and is no longer valid.';
+        table.style.display = 'none';
+      } else {
+        icon.textContent = '❌';
+        heading.textContent = 'Invalid / Unrecognized Credential';
+        badge.innerHTML = '<span class="nss-badge rejected">NOT VERIFIED</span>';
+        desc.textContent = res.message || 'No matching active NSS enrollment record was found in the database.';
+        table.style.display = 'none';
+      }
+    }
+
+    function resetVerification() {
+      document.getElementById('resultCard').style.display = 'none';
+      document.getElementById('scannerSection').style.display = 'block';
+      document.getElementById('manualInput').value = '';
+    }
+
     // Leadership Tab
     async function loadLeadershipTab() {
       const list = await NSS.Admin.loadLeadership();
@@ -598,12 +928,12 @@
               : `<span style="font-size:24px;">🎖️</span>`
             }
           </td>
-          <td style="font-weight:600;">${item.name}</td>
+          <td style="font-weight:600; color:var(--nss-navy);">${item.name}</td>
           <td>${item.designation}</td>
           <td>${item.department || '—'}</td>
           <td>${item.published ? '<span class="nss-badge approved">Published</span>' : '<span class="nss-badge pending">Draft</span>'}</td>
           <td>
-            <button class="nss-btn nss-btn-sm nss-btn-danger" onclick="handleDeleteLeader('${item.id}')">Delete</button>
+            <button class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff;" onclick="handleDeleteLeader('${item.id}')">Delete</button>
           </td>
         </tr>
       `).join('');
@@ -667,15 +997,5 @@
     document.addEventListener('DOMContentLoaded', initAdminAuth);
     document.addEventListener('echo-auth', initAdminAuth);
   </script>
-
-  <script>
-    const toggleBtn = document.getElementById('nssMenuToggle');
-    const closeBtn = document.getElementById('nssDrawerClose');
-    const drawer = document.getElementById('nssDrawer');
-    if (toggleBtn && drawer) toggleBtn.addEventListener('click', () => drawer.classList.add('open'));
-    if (closeBtn && drawer) closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
-    if (drawer) drawer.querySelectorAll('a').forEach(l => l.addEventListener('click', () => drawer.classList.remove('open')));
-  </script>
-
 </body>
 </html>

@@ -89,9 +89,18 @@
         <p style="color:var(--nss-text-muted); margin-bottom:24px;">
           Please sign in to access your digital volunteer card.
         </p>
-        <button class="nss-btn nss-btn-primary nss-btn-lg" onclick="signIn()">
-          Sign in with Google
-        </button>
+        <div style="max-width:320px; margin:0 auto;">
+          <button type="button" class="nss-btn-google" onclick="signIn()">
+            <svg class="nss-google-icon" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+              <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+        </div>
       </div>
 
       <!-- Not Approved Prompt -->
@@ -111,7 +120,7 @@
         <div id="captureCard" class="nss-id-card">
           <!-- Card Header -->
           <div class="nss-id-card-header">
-            <img src="assets/nss-logo.png" alt="NSS Emblem" class="nss-id-card-emblem" onerror="this.src='echo_logo_white_transparent.png'">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" class="nss-id-card-emblem">
             <div class="nss-id-card-org">National Service Scheme</div>
             <div class="nss-id-card-college">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</div>
           </div>
@@ -119,7 +128,7 @@
           <!-- Card Body -->
           <div class="nss-id-card-body">
             <div class="nss-id-photo-frame">
-              <img id="cardPhoto" src="" alt="Student Photo" class="nss-id-photo" onerror="this.src='echo_logo_white_transparent.png'">
+              <img id="cardPhoto" src="" alt="Student Photo" class="nss-id-photo" onerror="this.src='assets/nss-logo.png'">
             </div>
 
             <div class="nss-id-name" id="cardName">VOLUNTEER NAME</div>
@@ -178,8 +187,65 @@
     </div>
   </main>
 
-  <!-- Shared Echo Footer -->
-  <div id="foot"></div>
+  <!-- ======================================================================
+       INSTITUTIONAL FOOTER
+       ====================================================================== -->
+  <footer class="nss-footer" id="contact">
+    <div class="nss-container">
+      <div class="nss-footer-grid">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:48px;" onerror="this.src='echo_logo_white_transparent.png'">
+            <div class="nss-footer-brand-title">NSS TGPCOP</div>
+          </div>
+          <p class="nss-footer-brand-desc">
+            National Service Scheme (NSS) Unit 1 • Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
+          </p>
+          <div class="nss-footer-motto-pill">★ NOT ME, BUT YOU ★</div>
+        </div>
+
+        <div>
+          <div class="nss-footer-col-title">Navigation</div>
+          <ul class="nss-footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About NSS</a></li>
+            <li><a href="index.html#activities">Key Activities</a></li>
+            <li><a href="index.html#events">Recent Events</a></li>
+            <li><a href="register.html">Join as Volunteer</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="nss-footer-col-title">Volunteer Portal</div>
+          <ul class="nss-footer-links">
+            <li><a href="register.html">Volunteer Registration</a></li>
+            <li><a href="status.html">Application Status</a></li>
+            <li><a href="my-id.html">Digital ID Card</a></li>
+            <li><a href="verify.html">Scan & Verify QR</a></li>
+            <li><a href="login.html">Coordinator Login</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="nss-footer-col-title">Connect With Us</div>
+          <div class="nss-footer-contact-item">
+            <b>Official Contact Desk:</b><br>
+            Email: <a href="mailto:Media@tgpcop.site" style="color:var(--nss-yellow);">Media@tgpcop.site</a><br>
+            Campus: TGPCOP, Wardha Road, Nagpur
+          </div>
+        </div>
+      </div>
+
+      <div class="nss-footer-bottom">
+        <div>
+          © 2026 National Service Scheme — TGPCOP Unit. All rights reserved.
+        </div>
+        <div>
+          Media & Creative Support by <a href="https://www.echotgpcopmedia.site" target="_blank" rel="noopener noreferrer">ECHO.TGPCOP</a>
+        </div>
+      </div>
+    </div>
+  </footer>
 
   <!-- Scripts -->
   <script src="env.js"></script>

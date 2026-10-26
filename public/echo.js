@@ -12,6 +12,7 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 var sb=null, _echoIo;
 function shell(){
+ if(document.body && document.body.classList.contains('nss-page')) return;
  if(!$('#fl')) document.body.insertAdjacentHTML('afterbegin','<div id="fl"></div>');
  if(!$('#lb')) document.body.insertAdjacentHTML('beforeend','<div id="lb"></div>');
  const n=$('#nav');
