@@ -40,6 +40,7 @@ fs.writeFileSync(path.join(distDir, 'env.js'), envScript, 'utf8');
 fs.writeFileSync(path.join(publicDir, 'env.js'), envScript, 'utf8');
 
 const staticFiles = [
+  'index.html',
   'nss.html',
   'nss-register.html',
   'nss-status.html',
