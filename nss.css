@@ -37,6 +37,18 @@
 }
 
 /* Base Page Overrides */
+#nav,
+body.nss-page #nav,
+.marq,
+body.nss-page .marq,
+#fl {
+  display: none !important;
+  height: 0 !important;
+  visibility: hidden !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
 body.nss-page {
   background: var(--nss-surface) !important;
   color: var(--nss-text) !important;
@@ -64,8 +76,10 @@ body.nss-page h4 {
   background: var(--nss-navy);
   color: var(--nss-white);
   border-bottom: 2px solid rgba(255, 214, 10, 0.25);
-  position: relative;
-  z-index: 40;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 18px rgba(7, 21, 38, 0.35);
 }
 
 .nss-subnav-wrap {
@@ -1316,4 +1330,43 @@ body.nss-page h4 {
 .nss-leader-dept {
   font-size: 12px;
   color: var(--nss-text-muted);
+}
+
+/* ==========================================================================
+   NSS Official Footer Overrides (replaces Echo blue footer)
+   ========================================================================== */
+body.nss-page #foot,
+body.nss-page #foot footer,
+body.nss-page footer {
+  background: var(--nss-navy) !important;
+  color: var(--nss-white) !important;
+  border-top: 2px solid rgba(255, 214, 10, 0.25) !important;
+  padding: 44px 0 60px !important;
+  margin-top: auto !important;
+}
+
+body.nss-page footer img {
+  display: none !important; /* Hide Echo Media logo */
+}
+
+body.nss-page footer p {
+  color: #E2E8F0 !important;
+  font-size: 14px !important;
+  margin: 6px 0 !important;
+}
+
+body.nss-page footer p b {
+  color: var(--nss-gold) !important;
+  font-size: 16px !important;
+  letter-spacing: 0.04em !important;
+}
+
+body.nss-page footer .soc a,
+body.nss-page footer a {
+  color: var(--nss-gold) !important;
+  transition: color 0.15s ease !important;
+}
+
+body.nss-page footer a:hover {
+  color: var(--nss-white) !important;
 }

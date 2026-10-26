@@ -518,6 +518,52 @@
     }
   };
 
+  // Initialize and enhance NSS Navbar with auth status
+  NSS.initNav = async function () {
+    try {
+      const user = await NSS.Auth.getCurrentUser();
+      const btn = document.querySelector('.nss-subnav-btn');
+      const links = document.querySelector('.nss-subnav-links');
+      if (user && links) {
+        const isCoord = await NSS.Auth.checkCoordinatorRole(user.id);
+        if (btn) {
+          if (isCoord) {
+            btn.textContent = 'Admin Panel';
+            btn.href = 'admin.html';
+            const outBtn = document.createElement('a');
+            outBtn.className = 'nss-subnav-link';
+            outBtn.textContent = 'Sign Out';
+            outBtn.href = '#';
+            outBtn.onclick = async (e) => {
+              e.preventDefault();
+              const sb = await NSS.getSupabase();
+              if (sb) await sb.auth.signOut();
+              window.location.reload();
+            };
+            links.appendChild(outBtn);
+          } else {
+            btn.textContent = 'Sign Out';
+            btn.href = '#';
+            btn.onclick = async (e) => {
+              e.preventDefault();
+              const sb = await NSS.getSupabase();
+              if (sb) await sb.auth.signOut();
+              window.location.reload();
+            };
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('NSS.initNav error:', e);
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => { setTimeout(NSS.initNav, 300); });
+  } else {
+    setTimeout(NSS.initNav, 300);
+  }
+
   // Expose NSS object globally
   window.NSS = NSS;
 
