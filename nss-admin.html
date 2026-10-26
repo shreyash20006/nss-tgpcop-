@@ -667,5 +667,15 @@
     document.addEventListener('DOMContentLoaded', initAdminAuth);
     document.addEventListener('echo-auth', initAdminAuth);
   </script>
+
+  <script>
+    const toggleBtn = document.getElementById('nssMenuToggle');
+    const closeBtn = document.getElementById('nssDrawerClose');
+    const drawer = document.getElementById('nssDrawer');
+    if (toggleBtn && drawer) toggleBtn.addEventListener('click', () => drawer.classList.add('open'));
+    if (closeBtn && drawer) closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
+    if (drawer) drawer.querySelectorAll('a').forEach(l => l.addEventListener('click', () => drawer.classList.remove('open')));
+  </script>
+
 </body>
 </html>

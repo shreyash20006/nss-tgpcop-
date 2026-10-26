@@ -4,151 +4,155 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>NSS TGPCOP | National Service Scheme — Tulsiramji Gaikwad-Patil College of Pharmacy</title>
-  <meta name="description" content="Official National Service Scheme (NSS) unit of Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur. Serving the community through healthcare outreach, cleanliness drives, and youth leadership.">
-  <meta name="theme-color" content="#061a52">
+  <meta name="description" content="Official National Service Scheme unit of Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur. Serving communities through health awareness, environmental protection, and student civic leadership.">
+  <meta name="theme-color" content="#071B49">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
   <link rel="stylesheet" href="nss.css">
 </head>
-<body class="nss-page nss-homepage">
+<body class="nss-page">
 
   <!-- ======================================================================
-       INTERACTIVE PARALLAX SCENE & MULTI-LAYERED ATMOSPHERE
+       1. COMPACT INSTITUTIONAL HEADER & NAVIGATION
        ====================================================================== -->
-  <div class="scene" aria-hidden="true">
-    <img class="scene-image" id="sceneImage" alt="" src="assets/nss-hero-scroll-bg.png">
-    <div class="scene-tint"></div>
-    <div class="particles" id="particles"></div>
-    <div class="orb one" data-speed=".16"></div>
-    <div class="orb two" data-speed="-.11"></div>
-    <div class="orb three" data-speed=".24"></div>
-  </div>
-
-  <!-- ======================================================================
-       1. INSTITUTIONAL HEADER & NAVIGATION
-       ====================================================================== -->
-  <header class="nss-header-sticky">
-    <div class="nss-nav-container">
-      <a href="index.html" class="nss-brand">
-        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-brand-logo" onerror="this.src='echo_logo_white_transparent.png'">
-        <div class="nss-brand-text">
-          <div class="nss-brand-title">NSS <span>TGPCOP</span></div>
-          <div class="nss-brand-sub">T.G.P.C.O.P. Nagpur • Unit 1</div>
+  <header class="nss-header" id="top">
+    <div class="nss-header-wrap">
+      <a href="index.html" class="nss-header-brand" aria-label="NSS TGPCOP Home">
+        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-header-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-header-identity">
+          <span class="nss-brand-name">NSS <b>TGPCOP</b></span>
+          <span class="nss-brand-sub">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</span>
         </div>
       </a>
 
       <!-- Desktop Nav -->
-      <nav class="nss-nav-menu" aria-label="Main Navigation">
-        <a href="#about" class="nss-nav-link">About</a>
-        <a href="#domains" class="nss-nav-link">Domains</a>
-        <a href="#desk" class="nss-nav-link">Leadership Desk</a>
-        <a href="#gallery" class="nss-nav-link">Gallery</a>
-        <a href="#volunteer" class="nss-nav-link">Volunteer</a>
-        <a href="#contact" class="nss-nav-link">Contact</a>
+      <nav class="nss-header-nav" aria-label="Main Navigation">
+        <a href="#top" class="nss-nav-item active">Home</a>
+        <a href="#about" class="nss-nav-item">About</a>
+        <a href="#activities" class="nss-nav-item">Activities</a>
+        <a href="#events" class="nss-nav-item">Events</a>
+        <a href="#leadership" class="nss-nav-item">Leadership</a>
+        <a href="#gallery" class="nss-nav-item">Gallery</a>
+        <a href="#impact" class="nss-nav-item">Impact</a>
+        <a href="#contact" class="nss-nav-item">Contact</a>
       </nav>
 
       <!-- Action Buttons -->
-      <div class="nss-nav-actions">
-        <a href="register.html" class="nss-btn-gold">Volunteer</a>
-        <a href="login.html" class="nss-btn-outline-gold nss-subnav-btn">Portal Login</a>
-        <button class="nss-mobile-btn" id="nssMobileBtn" aria-label="Toggle Navigation Menu">☰</button>
+      <div class="nss-header-actions">
+        <a href="register.html" class="nss-btn-join">Volunteer</a>
+        <a href="login.html" class="nss-btn-login">Login</a>
+        <button class="nss-menu-toggle" id="nssMenuToggle" aria-label="Toggle Navigation Menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </header>
 
   <!-- Mobile Drawer -->
-  <div class="nss-mobile-drawer" id="nssMobileDrawer">
-    <a href="#about" class="nss-nav-link">About NSS</a>
-    <a href="#domains" class="nss-nav-link">Domains & Initiatives</a>
-    <a href="#desk" class="nss-nav-link">Leadership Desk</a>
-    <a href="#gallery" class="nss-nav-link">Photo Gallery</a>
-    <a href="register.html" class="nss-nav-link" style="color:var(--nss-gold);font-weight:700;">Join as Volunteer ➔</a>
-    <a href="status.html" class="nss-nav-link">Check Application Status</a>
-    <a href="verify.html" class="nss-nav-link">Scan / Verify Digital Card</a>
-    <a href="login.html" class="nss-nav-link">Coordinator Login</a>
-    <a href="#contact" class="nss-nav-link">Contact Details</a>
+  <div class="nss-drawer" id="nssDrawer">
+    <div class="nss-drawer-header">
+      <div class="nss-header-identity">
+        <span class="nss-brand-name">NSS <b>TGPCOP</b></span>
+        <span class="nss-brand-sub">National Service Scheme • Unit 1</span>
+      </div>
+      <button class="nss-drawer-close" id="nssDrawerClose" aria-label="Close Navigation Menu">&times;</button>
+    </div>
+    <nav class="nss-drawer-nav">
+      <a href="#top" class="nss-drawer-link">Home</a>
+      <a href="#about" class="nss-drawer-link">About NSS</a>
+      <a href="#activities" class="nss-drawer-link">Key Activities</a>
+      <a href="#events" class="nss-drawer-link">Recent Events</a>
+      <a href="#leadership" class="nss-drawer-link">Leadership Desk</a>
+      <a href="#gallery" class="nss-drawer-link">Photo Gallery</a>
+      <a href="#impact" class="nss-drawer-link">Qualitative Impact</a>
+      <a href="register.html" class="nss-drawer-link highlight">Volunteer Registration ➔</a>
+      <a href="status.html" class="nss-drawer-link">Check Application Status</a>
+      <a href="my-id.html" class="nss-drawer-link">Digital ID Card</a>
+      <a href="verify.html" class="nss-drawer-link">Scan / Verify Certificate</a>
+      <a href="login.html" class="nss-drawer-link">Coordinator Login</a>
+      <a href="#contact" class="nss-drawer-link">Contact Information</a>
+    </nav>
   </div>
 
   <main>
     <!-- ======================================================================
-         2. HERO SECTION (SCROLL BACKGROUND + PARALLAX + ORBS)
+         2. HOMEPAGE HERO (CLEAR BACKGROUND ARTWORK & BALANCED CONTENT)
          ====================================================================== -->
-    <section class="nss-scroll-hero section" data-section="0">
-      <div class="nss-scroll-hero-inner">
-        <div>
-          <div class="eyebrow">NATIONAL SERVICE SCHEME • TGPCOP NAGPUR</div>
-          <h1 class="nss-display-title">NOT ME,<br><span class="accent-gold">BUT YOU.</span></h1>
-          <p class="nss-hero-lead">
-            Official National Service Scheme Unit 1 of Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur. Dedicated to community health empowerment, environmental sustainability, and student civic leadership under the Ministry of Youth Affairs & Sports, Government of India.
-          </p>
-          <div class="actions-hero">
-            <a class="btn-hero primary" href="#domains">Explore NSS Domains ↓</a>
-            <a class="btn-hero" href="register.html">Become a Volunteer</a>
-            <a class="btn-hero" href="verify.html" style="font-size:0.86rem;padding:12px 20px;">Verify Certificate ➔</a>
-          </div>
-          <div style="margin-top:20px;">
-            <a href="verify.html" style="color:rgba(255,255,255,0.78);font-size:13px;display:inline-flex;align-items:center;gap:8px;">
-              <span>📷</span> <u>Have a Volunteer ID? Scan or verify certificate authenticity here ➔</u>
-            </a>
-          </div>
+    <section class="nss-hero">
+      <div class="nss-hero-bg" aria-hidden="true">
+        <img src="assets/nss-hero-scroll-bg.png" alt="" class="nss-hero-bg-art" id="sceneImage">
+        <div class="nss-hero-overlay"></div>
+      </div>
+
+      <div class="nss-hero-content">
+        <div class="nss-badge-pill">
+          <span class="star">★</span> NATIONAL SERVICE SCHEME • TGPCOP NAGPUR <span class="star">★</span>
+        </div>
+        <h1 class="nss-hero-title">“NOT ME, BUT YOU.”</h1>
+        <h2 class="nss-hero-subtitle">Serving Communities. Inspiring Change.</h2>
+        <p class="nss-hero-description">
+          Discover how NSS volunteers at Tulsiramji Gaikwad-Patil College of Pharmacy contribute to community service, health awareness and environmental responsibility.
+        </p>
+
+        <div class="nss-hero-actions">
+          <a href="#activities" class="nss-btn-primary">Explore Our Activities ↓</a>
+          <a href="register.html" class="nss-btn-yellow">Become a Volunteer</a>
+          <a href="verify.html" class="nss-btn-ghost">Verify ID / Certificate ➔</a>
         </div>
 
-        <!-- Institutional Glass Emblem Card (Truthful & Verified) -->
-        <div class="glass-hero-badge-clean rv">
-          <img src="assets/nss-logo.png" alt="NSS Official Emblem" class="nss-badge-logo" onerror="this.src='echo_logo_white_transparent.png'">
-          <div class="nss-badge-unit">TGPCOP NSS CELL</div>
-          <div class="nss-badge-motto">MINISTRY OF YOUTH AFFAIRS & SPORTS • GOVT. OF INDIA</div>
-          
-          <div style="margin:18px 0 20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
-            <div class="nss-badge-info-pill">Affiliation: <span>RTMNU Nagpur</span></div>
-            <div class="nss-badge-info-pill">Unit Code: <span>01</span></div>
-          </div>
-
-          <a href="verify.html" class="nss-btn nss-btn-sm nss-btn-outline" style="border-color:var(--yellow);color:var(--yellow);width:100%;display:inline-block;text-align:center;">
-            Scan & Verify Volunteer Card ➔
-          </a>
+        <div class="nss-hero-accreditation">
+          <div class="nss-acc-item"><span>Affiliation:</span> RTMNU Nagpur</div>
+          <div class="nss-acc-dot">•</div>
+          <div class="nss-acc-item"><span>Unit:</span> Unit 1 (Pharmacy Cell)</div>
+          <div class="nss-acc-dot">•</div>
+          <div class="nss-acc-item"><span>Ministry:</span> Ministry of Youth Affairs & Sports, Govt. of India</div>
         </div>
       </div>
-      <div class="scroll-hint">Scroll to explore <span></span></div>
+
+      <!-- Mouse Scroll Indicator -->
+      <a href="#about" class="nss-scroll-indicator" aria-label="Scroll to explore">
+        <span class="mouse"></span>
+        <span class="text">Scroll to explore</span>
+      </a>
     </section>
 
     <!-- ======================================================================
-         3. INTRODUCTION / FOUNDATION & PURPOSE
+         3. ABOUT NSS AT TGPCOP
          ====================================================================== -->
-    <section class="nss-section" id="about" data-section="1" style="--wash-color:rgba(5,34,110,0.25);">
+    <section class="nss-section bg-offwhite" id="about">
       <div class="nss-container">
-        <div class="nss-section-header rv">
-          <div class="nss-motto-tag">FOUNDATION & PURPOSE</div>
-          <h2>About NSS at TGPCOP</h2>
-          <p>
-            The National Service Scheme was formally inaugurated in 1969 to mark the birth centenary of Mahatma Gandhi. At Tulsiramji Gaikwad-Patil College of Pharmacy, our unit integrates pharmaceutical knowledge with direct civic service — instilling social responsibility, empathy, and professional integrity in future healthcare professionals.
+        <div class="nss-section-header">
+          <div class="nss-eyebrow">Foundation & Purpose</div>
+          <h2 class="nss-section-title">About NSS at TGPCOP</h2>
+          <p class="nss-section-subtitle">
+            The National Service Scheme was established in 1969 to mark the birth centenary of Mahatma Gandhi. At Tulsiramji Gaikwad-Patil College of Pharmacy, our unit integrates pharmaceutical knowledge with direct community welfare — instilling social responsibility, empathy, and civic leadership in future healthcare professionals.
           </p>
         </div>
 
         <div class="nss-grid-3">
-          <div class="nss-card rv">
-            <div class="nss-mission-icon">🏥</div>
-            <h3>Public Health Literacy</h3>
-            <p>
-              Promoting rational drug use, preventive health awareness, patient medication compliance, and generic pharmaceutical counseling in local semi-urban and rural communities.
+          <div class="nss-feature-card">
+            <div class="nss-card-icon">🤝</div>
+            <h3 class="nss-card-title">Community Service</h3>
+            <p class="nss-card-desc">
+              Organizing grassroots community assistance, rural health awareness, and door-to-door welfare surveys in neighboring villages across Vidarbha.
             </p>
           </div>
 
-          <div class="nss-card rv">
-            <div class="nss-mission-icon">🌱</div>
-            <h3>Environmental Action</h3>
-            <p>
-              Tree plantation drives, campus energy audits, anti-plastic campaigns, and comprehensive village sanitation drives under the Swachh Bharat Abhiyan.
+          <div class="nss-feature-card">
+            <div class="nss-card-icon">🏥</div>
+            <h3 class="nss-card-title">Health Awareness</h3>
+            <p class="nss-card-desc">
+              Promoting rational medicine usage, patient counseling on generic pharmaceuticals, antibiotic resistance education, and preventive health screenings.
             </p>
           </div>
 
-          <div class="nss-card rv">
-            <div class="nss-mission-icon">🎓</div>
-            <h3>Civic Leadership & Teamwork</h3>
-            <p>
-              Instilling ethical teamwork, civic courage, disaster management readiness, and public speaking skills, equipping pharmacy students to become empathetic leaders in India's healthcare landscape.
+          <div class="nss-feature-card">
+            <div class="nss-card-icon">🌱</div>
+            <h3 class="nss-card-title">Environmental Responsibility</h3>
+            <p class="nss-card-desc">
+              Active participation in tree plantation campaigns, plastic-free campus drives, and village cleanliness under the nationwide Swachh Bharat Abhiyan.
             </p>
           </div>
         </div>
@@ -156,64 +160,166 @@
     </section>
 
     <!-- ======================================================================
-         4. KEY DOMAINS OF SERVICE (CLEAN & TRUTHFUL ARCHITECTURE)
+         4. KEY ACTIVITIES & INITIATIVES
          ====================================================================== -->
-    <section class="nss-section" id="domains" data-section="2" style="--wash-color:rgba(0,75,254,0.22);">
+    <section class="nss-section bg-navy" id="activities">
       <div class="nss-container">
-        <div class="nss-section-header rv">
-          <div class="nss-motto-tag">COMMUNITY INITIATIVES</div>
-          <h2>NSS Service Domains</h2>
-          <p>
-            Structured avenues of community engagement where pharmacy students step forward to make a direct positive difference in Vidarbha's rural and semi-urban localities.
+        <div class="nss-section-header">
+          <div class="nss-eyebrow">Core Initiatives</div>
+          <h2 class="nss-section-title">Key NSS Activities</h2>
+          <p class="nss-section-subtitle">
+            Structured avenues of community engagement led by student pharmacists of Tulsiramji Gaikwad-Patil College of Pharmacy.
           </p>
         </div>
 
-        <div class="nss-grid-2">
-          <div class="nss-card rv">
-            <div class="nss-mission-icon" style="background:#FEE2E2;color:#DC2626;">🩸</div>
-            <h3>Blood Donation & Diagnostic Outreach</h3>
-            <p>
-              Voluntary blood donation coordination, free blood pressure and glucose screenings, and public health awareness drives organized in collaboration with accredited medical centers and blood banks.
-            </p>
-            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span class="nss-badge approved">Health Initiative</span>
-              <span class="nss-badge" style="background:rgba(255,212,0,0.2);color:var(--yellow);border:1px solid rgba(255,212,0,0.4);">Community Care</span>
+        <div class="nss-activities-grid">
+          <div class="nss-activity-card">
+            <div class="nss-act-header">
+              <span class="nss-act-icon">🩺</span>
+              <span class="nss-act-tag">Health Initiative</span>
             </div>
+            <h3 class="nss-act-title">Health Awareness & Health Camps</h3>
+            <p class="nss-act-desc">
+              Blood pressure, blood glucose, and hemoglobin diagnostic screenings organized in collaboration with accredited medical officers and neighborhood health centers.
+            </p>
+            <span class="nss-act-action">Ongoing Programme ➔</span>
           </div>
 
-          <div class="nss-card rv">
-            <div class="nss-mission-icon" style="background:#DCFCE7;color:#16A34A;">🌳</div>
-            <h3>Van Mahotsav & Eco-Action</h3>
-            <p>
-              Plantation of native and medicinal saplings across campus grounds, neighboring rural schools, and adopted villages, promoting environmental stewardship and student tree adoption.
-            </p>
-            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span class="nss-badge approved">Green Campus</span>
-              <span class="nss-badge" style="background:rgba(255,212,0,0.2);color:var(--yellow);border:1px solid rgba(255,212,0,0.4);">Environmental Protection</span>
+          <div class="nss-activity-card">
+            <div class="nss-act-header">
+              <span class="nss-act-icon">🌳</span>
+              <span class="nss-act-tag">Van Mahotsav</span>
             </div>
+            <h3 class="nss-act-title">Environmental Awareness & Plantation</h3>
+            <p class="nss-act-desc">
+              Native and medicinal sapling plantation drives across campus grounds, adopted villages, and rural schools to foster biodiversity and student tree adoption.
+            </p>
+            <span class="nss-act-action">Eco Stewardship ➔</span>
           </div>
 
-          <div class="nss-card rv">
-            <div class="nss-mission-icon" style="background:#FEF3C7;color:#D97706;">🧹</div>
-            <h3>Swachh Bharat Cleanliness Drives</h3>
-            <p>
-              Community shramdaan sanitation drives, public park cleanliness, plastic abatement campaigns, and community demonstrations on the safe disposal of expired and unused pharmaceuticals.
-            </p>
-            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span class="nss-badge approved">Social Cleanliness</span>
-              <span class="nss-badge" style="background:rgba(255,212,0,0.2);color:var(--yellow);border:1px solid rgba(255,212,0,0.4);">Public Hygiene</span>
+          <div class="nss-activity-card">
+            <div class="nss-act-header">
+              <span class="nss-act-icon">🧹</span>
+              <span class="nss-act-tag">Swachhata</span>
             </div>
+            <h3 class="nss-act-title">Cleanliness Drives & Sanitation</h3>
+            <p class="nss-act-desc">
+              Shramdaan community sanitation, village drainage clearance, plastic abatement drives, and community demonstrations on safe pharmaceutical waste disposal.
+            </p>
+            <span class="nss-act-action">Community Cleanliness ➔</span>
           </div>
 
-          <div class="nss-card rv">
-            <div class="nss-mission-icon" style="background:#EDE9FE;color:#7C3AED;">⛺</div>
-            <h3>Rural Development & Special Camps</h3>
-            <p>
-              Flagship residential community service programs where student volunteers reside in adopted villages, conducting door-to-door wellness surveys, educational sessions, and community outreach.
+          <div class="nss-activity-card">
+            <div class="nss-act-header">
+              <span class="nss-act-icon">🩸</span>
+              <span class="nss-act-tag">Life Saving</span>
+            </div>
+            <h3 class="nss-act-title">Blood Donation Initiatives</h3>
+            <p class="nss-act-desc">
+              Coordinating voluntary campus blood donation drives in partnership with certified regional blood banks, ensuring vital supply for local trauma centers.
             </p>
-            <div style="margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;">
-              <span class="nss-badge approved">Flagship Program</span>
-              <span class="nss-badge" style="background:rgba(255,212,0,0.2);color:var(--yellow);border:1px solid rgba(255,212,0,0.4);">Rural Outreach</span>
+            <span class="nss-act-action">Voluntary Donation ➔</span>
+          </div>
+
+          <div class="nss-activity-card">
+            <div class="nss-act-header">
+              <span class="nss-act-icon">📢</span>
+              <span class="nss-act-tag">Public Literacy</span>
+            </div>
+            <h3 class="nss-act-title">Community Outreach & Awareness</h3>
+            <p class="nss-act-desc">
+              Educational rallies highlighting the risks of self-medication, antibiotic misuse, safe medication storage, and personal hygiene for rural school students.
+            </p>
+            <span class="nss-act-action">Social Awareness ➔</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         5. RECENT EVENTS & DRIVES
+         ====================================================================== -->
+    <section class="nss-section bg-white" id="events">
+      <div class="nss-container">
+        <div class="nss-section-header">
+          <div class="nss-eyebrow">Events & Drives</div>
+          <h2 class="nss-section-title">Recent Events</h2>
+          <p class="nss-section-subtitle">
+            Documenting our active campus drives, community outreach schedules, and student volunteer participation.
+          </p>
+        </div>
+
+        <div class="nss-events-grid">
+          <article class="nss-event-card">
+            <div class="nss-event-body">
+              <div class="nss-event-meta">
+                <span class="nss-event-badge">Healthcare</span>
+              </div>
+              <h3 class="nss-event-title">Voluntary Blood Donation & Health Literacy Drive</h3>
+              <p class="nss-event-desc">
+                Organized at campus premises with voluntary student participation, diagnostic vitals checks, and counseling on rational medication compliance.
+              </p>
+              <a href="register.html" class="nss-event-link">Volunteer in Next Drive ➔</a>
+            </div>
+          </article>
+
+          <article class="nss-event-card">
+            <div class="nss-event-body">
+              <div class="nss-event-meta">
+                <span class="nss-event-badge">Environment</span>
+              </div>
+              <h3 class="nss-event-title">Van Mahotsav Indigenous Flora Plantation</h3>
+              <p class="nss-event-desc">
+                Medicinal and shade saplings planted around campus boundaries with student volunteer adoption pledges for sustained nurture.
+              </p>
+              <a href="register.html" class="nss-event-link">Join Eco Wing ➔</a>
+            </div>
+          </article>
+
+          <article class="nss-event-card">
+            <div class="nss-event-body">
+              <div class="nss-event-meta">
+                <span class="nss-event-badge">Sanitation</span>
+              </div>
+              <h3 class="nss-event-title">Swachhata Pakhwada Village Sanitation Drive</h3>
+              <p class="nss-event-desc">
+                Community shramdaan focused on public cleanliness, mosquito breeding prevention, and educational sessions on safe drug disposal.
+              </p>
+              <a href="register.html" class="nss-event-link">View Activities ➔</a>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         6. NSS PRESIDENT / LEADERSHIP SPOTLIGHT
+         ====================================================================== -->
+    <section class="nss-section bg-offwhite" id="leadership">
+      <div class="nss-container">
+        <div class="nss-section-header">
+          <div class="nss-eyebrow">Leadership Desk</div>
+          <h2 class="nss-section-title">Message from the NSS President</h2>
+          <p class="nss-section-subtitle">
+            Guiding student civic participation, empathy, and professional integrity.
+          </p>
+        </div>
+
+        <div class="nss-leadership-wrap">
+          <div class="nss-president-card">
+            <div class="nss-president-portrait-frame">
+              <img src="assets/president.jpg" alt="NSS President Portrait" class="nss-president-portrait-img" id="presidentPortraitImg" onerror="this.src='assets/nss-logo.png'">
+            </div>
+            <div class="nss-president-details">
+              <div class="nss-desk-tag">★ Student Council & NSS Leadership ★</div>
+              <blockquote class="nss-president-quote">
+                “Pharmacy education fulfills its highest calling when student knowledge directly uplifts community well-being. Through the National Service Scheme, our student volunteers step beyond academic classrooms to understand real community healthcare needs, build empathy, and cultivate leadership through dedicated, selfless service.”
+              </blockquote>
+              <div class="nss-president-info">
+                <div class="nss-president-name">President</div>
+                <div class="nss-president-title">Student Council & National Service Scheme Unit</div>
+                <div class="nss-president-college">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</div>
+              </div>
             </div>
           </div>
         </div>
@@ -221,42 +327,23 @@
     </section>
 
     <!-- ======================================================================
-         5. EXECUTIVE DESK / LEADERSHIP MESSAGE
+         7. PHOTO GALLERY (CONNECTED TO CLOUDINARY CONFIG)
          ====================================================================== -->
-    <section class="nss-president-section" id="desk" data-section="3" style="--wash-color:rgba(3,18,60,0.42);">
+    <section class="nss-section bg-white" id="gallery">
       <div class="nss-container">
-        <div class="nss-president-card rv" style="text-align:center;display:block;">
-          <div id="presidentPortraitContainer" style="display:flex;justify-content:center;">
-            <div class="nss-president-monogram" title="TGPCOP NSS Unit">NSS</div>
-          </div>
-          <div>
-            <div class="nss-president-quote" style="max-width:820px;margin:0 auto 18px;font-size:1.15rem;line-height:1.75;">
-              "Pharmacy education fulfills its highest calling when student knowledge directly uplifts community well-being. Through the National Service Scheme, our student volunteers step beyond academic classrooms to understand real community healthcare needs, build empathy, and cultivate leadership through dedicated, selfless service."
-            </div>
-            <div class="nss-president-name">Executive Desk</div>
-            <div class="nss-president-role">Student Council & National Service Scheme Unit</div>
-            <div class="nss-president-dept">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ======================================================================
-         6. MEDIA & PHOTO GALLERY (POWERED BY CLOUDINARY CONFIG)
-         ====================================================================== -->
-    <section class="nss-section" id="gallery" data-section="4" style="--wash-color:rgba(0,40,120,0.25);">
-      <div class="nss-container">
-        <div class="nss-section-header rv">
-          <div class="nss-motto-tag">FIELD DOCUMENTATION</div>
-          <h2>NSS Photo Gallery</h2>
-          <p>Visual documentation of community drives, health camps, and campus initiatives.</p>
+        <div class="nss-section-header">
+          <div class="nss-eyebrow">Field Documentation</div>
+          <h2 class="nss-section-title">Photo Gallery</h2>
+          <p class="nss-section-subtitle">
+            Visual documentation of community drives, health camps, and campus initiatives.
+          </p>
         </div>
 
-        <!-- Dynamic Grid (Populated when Cloudinary URLs are supplied) -->
+        <!-- Dynamic Grid (Populated automatically when Cloudinary URLs are added) -->
         <div class="nss-gallery-grid" id="nssGalleryGrid" style="display:none;"></div>
 
-        <!-- Intentional Empty State (Displayed cleanly when gallery photos are pending) -->
-        <div class="nss-empty-notice rv" id="nssGalleryNotice">
+        <!-- Intentional Empty State (Displayed when real photos are pending) -->
+        <div class="nss-empty-notice" id="nssGalleryNotice">
           <div class="nss-empty-icon">📷</div>
           <h3>Official Event Photos Coming Soon</h3>
           <p>
@@ -267,23 +354,72 @@
     </section>
 
     <!-- ======================================================================
-         7. HIGH-IMPACT VOLUNTEER CTA
+         8. NSS IMPACT (QUALITATIVE PILLARS)
          ====================================================================== -->
-    <section class="nss-cta-section" id="volunteer" data-section="5" style="--wash-color:rgba(0,75,254,0.28);">
+    <section class="nss-section bg-navy" id="impact">
       <div class="nss-container">
-        <div class="nss-cta-banner rv">
-          <h2>READY TO LEAD AND SERVE?</h2>
-          <p>
-            Join the National Service Scheme at Tulsiramji Gaikwad-Patil College of Pharmacy. Earn recognized university volunteer recognition, develop practical leadership skills, and make a tangible positive difference.
+        <div class="nss-section-header">
+          <div class="nss-eyebrow">Qualitative Outcomes</div>
+          <h2 class="nss-section-title">Our Commitment to Impact</h2>
+          <p class="nss-section-subtitle">
+            Measuring progress through meaningful change, public health education, and sustainable community empowerment.
           </p>
-          <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
-            <a href="register.html" class="nss-btn nss-btn-primary nss-btn-lg">Register as Volunteer Now</a>
-            <a href="status.html" class="nss-btn nss-btn-outline-white nss-btn-lg">Check Application Status</a>
+        </div>
+
+        <div class="nss-impact-grid">
+          <div class="nss-impact-card">
+            <div class="nss-impact-icon">💊</div>
+            <h3 class="nss-impact-title">Healthcare Literacy</h3>
+            <p class="nss-impact-desc">
+              Equipping rural families with essential knowledge on rational drug use, generic medicine benefits, and preventive wellness.
+            </p>
           </div>
-          <div style="margin-top:22px;display:flex;gap:18px;justify-content:center;flex-wrap:wrap;font-size:13.5px;">
-            <a href="my-id.html" style="color:var(--nss-gold);text-decoration:underline;">Download Your Official Digital ID Card ➔</a>
-            <span style="opacity:0.4;">•</span>
-            <a href="verify.html" style="color:#ffffff;text-decoration:underline;">Scan / Verify QR Authenticity ➔</a>
+
+          <div class="nss-impact-card">
+            <div class="nss-impact-icon">🌿</div>
+            <h3 class="nss-impact-title">Environmental Action</h3>
+            <p class="nss-impact-desc">
+              Nurturing campus biodiversity and expanding green cover through native and medicinal tree plantation drives.
+            </p>
+          </div>
+
+          <div class="nss-impact-card">
+            <div class="nss-impact-icon">🚰</div>
+            <h3 class="nss-impact-title">Community Sanitation</h3>
+            <p class="nss-impact-desc">
+              Active village shramdaan, cleanliness drives, and public hygiene education under the Swachh Bharat Abhiyan.
+            </p>
+          </div>
+
+          <div class="nss-impact-card">
+            <div class="nss-impact-icon">🎓</div>
+            <h3 class="nss-impact-title">Youth Civic Leadership</h3>
+            <p class="nss-impact-desc">
+              Cultivating civic responsibility, teamwork, crisis readiness, and professional empathy in future healthcare leaders.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         9. VOLUNTEER CALL TO ACTION
+         ====================================================================== -->
+    <section class="nss-section bg-offwhite" id="volunteer">
+      <div class="nss-container">
+        <div class="nss-cta-wrap">
+          <h2 class="nss-cta-title">Ready to Make a Difference?</h2>
+          <p class="nss-cta-desc">
+            Join the National Service Scheme at Tulsiramji Gaikwad-Patil College of Pharmacy. Earn recognized university volunteer recognition, develop leadership and communication skills, and serve the community.
+          </p>
+          <div class="nss-cta-buttons">
+            <a href="register.html" class="nss-btn-yellow">Register as Volunteer Now</a>
+            <a href="status.html" class="nss-btn-ghost">Check Application Status</a>
+          </div>
+          <div class="nss-cta-links">
+            <a href="my-id.html">Download Your Official Digital ID Card ➔</a>
+            <span>•</span>
+            <a href="verify.html">Scan / Verify Certificate Authenticity ➔</a>
           </div>
         </div>
       </div>
@@ -291,43 +427,45 @@
   </main>
 
   <!-- ======================================================================
-       8. COMPREHENSIVE INSTITUTIONAL FOOTER
+       10. INSTITUTIONAL FOOTER
        ====================================================================== -->
-  <footer class="nss-footer-institutional" id="contact" data-section="6" style="--wash-color:rgba(0,12,48,0.65);">
+  <footer class="nss-footer" id="contact">
     <div class="nss-container">
       <div class="nss-footer-grid">
         <!-- Col 1: Identity & Scheme -->
         <div>
-          <div style="display:flex;align-items:center;gap:12px;">
-            <img src="assets/nss-logo.png" alt="NSS Logo" style="height:52px;" onerror="this.src='echo_logo_white_transparent.png'">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:48px;" onerror="this.src='echo_logo_white_transparent.png'">
             <div class="nss-footer-brand-title">NSS TGPCOP</div>
           </div>
           <p class="nss-footer-brand-desc">
-            National Service Scheme (NSS) Unit • Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
+            National Service Scheme (NSS) Unit 1 • Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
           </p>
           <div class="nss-footer-motto-pill">★ NOT ME, BUT YOU ★</div>
-          <p style="font-size:12px;margin-top:14px;color:#94A3B8;">
+          <p style="font-size:12px;margin-top:14px;color:#64748B;">
             Sponsored by Ministry of Youth Affairs & Sports, Government of India. Affiliated with RTMNU Nagpur.
           </p>
         </div>
 
         <!-- Col 2: Navigation -->
         <div>
-          <div class="nss-footer-heading">Navigation</div>
-          <ul class="nss-footer-links-list">
+          <div class="nss-footer-col-title">Navigation</div>
+          <ul class="nss-footer-links">
+            <li><a href="#top">Home</a></li>
             <li><a href="#about">About NSS</a></li>
-            <li><a href="#domains">Service Domains</a></li>
-            <li><a href="#desk">Leadership Desk</a></li>
+            <li><a href="#activities">Key Activities</a></li>
+            <li><a href="#events">Recent Events</a></li>
+            <li><a href="#leadership">Leadership Desk</a></li>
             <li><a href="#gallery">Photo Gallery</a></li>
-            <li><a href="#volunteer">Become a Volunteer</a></li>
-            <li><a href="#contact">Contact Details</a></li>
+            <li><a href="#impact">NSS Impact</a></li>
+            <li><a href="#volunteer">Join as Volunteer</a></li>
           </ul>
         </div>
 
         <!-- Col 3: Portal Services -->
         <div>
-          <div class="nss-footer-heading">Volunteer Portal</div>
-          <ul class="nss-footer-links-list">
+          <div class="nss-footer-col-title">Volunteer Portal</div>
+          <ul class="nss-footer-links">
             <li><a href="register.html">Volunteer Registration</a></li>
             <li><a href="status.html">Application Status</a></li>
             <li><a href="my-id.html">Digital ID Card</a></li>
@@ -339,17 +477,17 @@
 
         <!-- Col 4: Contact & Social -->
         <div>
-          <div class="nss-footer-heading">Connect With Us</div>
-          <p style="font-size:13px;line-height:1.6;color:#CBD5E1;margin-bottom:12px;">
-            <strong>Official Contact Desk:</strong><br>
-            Email: <a href="mailto:Media@tgpcop.site" style="color:var(--nss-gold);">Media@tgpcop.site</a><br>
+          <div class="nss-footer-col-title">Connect With Us</div>
+          <div class="nss-footer-contact-item">
+            <b>Official Contact Desk:</b><br>
+            Email: <a href="mailto:Media@tgpcop.site" style="color:var(--nss-yellow);">Media@tgpcop.site</a><br>
             Campus: TGPCOP, Wardha Road, Nagpur
-          </p>
-          <div style="display:flex;gap:12px;margin-top:16px;">
-            <a href="https://www.instagram.com/nss_tgpcop/" target="_blank" rel="noopener" class="nss-btn nss-btn-sm nss-btn-outline" style="border-color:var(--nss-gold);color:var(--nss-gold);">
+          </div>
+          <div class="nss-social-pills">
+            <a href="https://www.instagram.com/nss_tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill">
               @nss_tgpcop
             </a>
-            <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener" class="nss-btn nss-btn-sm nss-btn-outline" style="border-color:#64748B;color:#CBD5E1;">
+            <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill">
               @echo.tgpcop
             </a>
           </div>
@@ -361,8 +499,8 @@
         <div>
           © 2026 National Service Scheme — TGPCOP Unit. All rights reserved.
         </div>
-        <div class="nss-media-credit">
-          Media & Creative Support by <a href="https://www.echotgpcopmedia.site" target="_blank" rel="noopener">ECHO.TGPCOP</a>
+        <div>
+          Media & Creative Support by <a href="https://www.echotgpcopmedia.site" target="_blank" rel="noopener noreferrer">ECHO.TGPCOP</a>
         </div>
       </div>
     </div>
@@ -374,29 +512,29 @@
   <script src="echo.js"></script>
   <script src="nss.js"></script>
   <script>
-    // Mobile navigation toggle
-    const mobBtn = document.getElementById('nssMobileBtn');
-    const drawer = document.getElementById('nssMobileDrawer');
-    if (mobBtn && drawer) {
-      mobBtn.addEventListener('click', () => {
-        drawer.classList.toggle('open');
-      });
-      drawer.querySelectorAll('a').forEach(a => {
-        a.addEventListener('click', () => drawer.classList.remove('open'));
+    // Mobile navigation drawer toggle
+    const toggleBtn = document.getElementById('nssMenuToggle');
+    const closeBtn = document.getElementById('nssDrawerClose');
+    const drawer = document.getElementById('nssDrawer');
+
+    if (toggleBtn && drawer) {
+      toggleBtn.addEventListener('click', () => drawer.classList.add('open'));
+    }
+    if (closeBtn && drawer) {
+      closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
+    }
+    if (drawer) {
+      drawer.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', () => drawer.classList.remove('open'));
       });
     }
 
-    // Lightbox image viewer
+    // Lightbox viewer
     function viewPhoto(src) {
       if (window.LB) {
-        window.LB(`<div style="display:grid;place-items:center;height:100%;"><img src="${src}" alt="NSS Photo" style="max-height:85vh;max-width:92vw;border-radius:18px;border:4px solid #fff;box-shadow:0 20px 50px rgba(0,0,0,0.5);"></div>`);
+        window.LB(`<div style="display:grid;place-items:center;height:100%;"><img src="${src}" alt="NSS Photo" style="max-height:85vh;max-width:92vw;border-radius:14px;border:3px solid #fff;box-shadow:0 20px 50px rgba(0,0,0,0.5);"></div>`);
       }
     }
-
-    // Initialize IntersectionObserver animated reveals
-    document.addEventListener('DOMContentLoaded', () => {
-      if (typeof rv === 'function') rv();
-    });
   </script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 /**
  * NSS TGPCOP — Central Cloudinary Assets Configuration
+ * Location: /cloudinary-config.js
  * 
  * Instructions:
  * 1. Upload your real campus & NSS event photos to Cloudinary (or any secure CDN).
@@ -14,23 +15,23 @@ window.NSS_CLOUDINARY_CONFIG = {
   // Optional Cloudinary cloud name
   cloudName: "",
 
-  // Leadership & Desk Portraits
-  presidentPortrait: "",       // URL for President / Executive Desk photo
-  programOfficerPortrait: "",  // URL for NSS Program Officer / Faculty Incharge photo
+  // Leadership & Desk Portraits (Real president portrait configured)
+  presidentPortrait: "assets/president.jpg",
+  programOfficerPortrait: "",
 
-  // Core NSS Domain Feature Images (Optional - text layout used if empty)
-  activityHealthCamp: "",      // Public health outreach & diagnostic drives
-  activityEnvironment: "",     // Tree plantation & green campus drives
-  activitySwachhata: "",       // Swachh Bharat village sanitation drives
-  activityRuralCamp: "",       // Annual rural residential special camp
+  // Core NSS Domain Feature Images (Optional - clean domain cards used if empty)
+  activityHealthCamp: "",
+  activityEnvironment: "",
+  activitySwachhata: "",
+  activityRuralCamp: "",
 
-  // Recent Event Images (Optional - text cards used if empty)
+  // Recent Event Images (Optional - clean editorial cards used if empty)
   eventHealthCamp: "",
   eventSwachhata: "",
   eventPlantation: "",
   eventPharmacyRally: "",
 
-  // Media Gallery Photos (Add array of Cloudinary image URLs when ready)
+  // Media Gallery Photos (Paste array of Cloudinary image URLs when ready)
   // Example:
   // galleryPhotos: [
   //   "https://res.cloudinary.com/your-cloud/image/upload/v1/camp1.jpg",

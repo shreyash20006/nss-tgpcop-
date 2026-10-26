@@ -623,19 +623,15 @@
   }
 
   
-  // NSS Cloudinary Asset Integrator
+    // NSS Cloudinary Asset Integrator
   NSS.applyCloudinaryAssets = function () {
     const cfg = window.NSS_CLOUDINARY_CONFIG;
     if (!cfg) return;
 
-    // 1. President / Leadership Portrait
-    const presContainer = document.getElementById('presidentPortraitContainer');
-    if (presContainer) {
-      if (cfg.presidentPortrait && typeof cfg.presidentPortrait === 'string' && cfg.presidentPortrait.trim() !== '') {
-        presContainer.innerHTML = '<img src="' + cfg.presidentPortrait.trim() + '" alt="Executive Desk Portrait" class="nss-president-img" onerror="this.style.display=\'none\'; this.nextElementSibling.style.display=\'grid\';"><div class="nss-president-monogram" style="display:none;" title="TGPCOP NSS Unit">NSS</div>';
-      } else {
-        presContainer.innerHTML = '<div class="nss-president-monogram" title="TGPCOP NSS Unit">NSS</div>';
-      }
+    // 1. President Portrait
+    const presImg = document.getElementById('presidentPortraitImg');
+    if (presImg && cfg.presidentPortrait && typeof cfg.presidentPortrait === 'string' && cfg.presidentPortrait.trim() !== '') {
+      presImg.src = cfg.presidentPortrait.trim();
     }
 
     // 2. Media Gallery Section
@@ -647,7 +643,7 @@
         if (galleryNotice) galleryNotice.style.display = 'none';
         galleryGrid.style.display = 'grid';
         galleryGrid.innerHTML = photos.map((url, i) =>
-          '<div class="nss-gallery-item rv" onclick="viewPhoto(\'' + url + '\')">' +
+          '<div class="nss-gallery-item" onclick="viewPhoto(\'' + url + '\')">' +
           '<img src="' + url + '" alt="NSS Activity Photo ' + (i + 1) + '" loading="lazy">' +
           '<div class="nss-gallery-overlay"><span>View Full Image ➔</span></div>' +
           '</div>'

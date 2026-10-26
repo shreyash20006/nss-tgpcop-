@@ -11,26 +11,65 @@
   <link rel="stylesheet" href="nss.css">
 </head>
 <body class="nss-page">
-  <!-- Shared Echo Navbar -->
-  <!-- NSS Portal Secondary Nav -->
-  <div class="nss-subnav">
-    <div class="nss-subnav-wrap">
-      <div class="nss-subnav-brand">
-        <img src="assets/nss-logo.png" alt="NSS Logo" class="nss-subnav-logo" onerror="this.src='echo_logo_white_transparent.png'">
-        <div class="nss-subnav-title">
-          <strong>NSS • TGPCOP</strong>
-          <span>National Service Scheme</span>
+    <!-- ======================================================================
+       UNIFIED INSTITUTIONAL HEADER & NAVIGATION
+       ====================================================================== -->
+  <header class="nss-header" id="top">
+    <div class="nss-header-wrap">
+      <a href="index.html" class="nss-header-brand" aria-label="NSS TGPCOP Home">
+        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-header-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-header-identity">
+          <span class="nss-brand-name">NSS <b>TGPCOP</b></span>
+          <span class="nss-brand-sub">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</span>
         </div>
-      </div>
-      <div class="nss-subnav-links">
-        <a href="nss.html" class="nss-subnav-link">Home</a>
-        <a href="nss-register.html" class="nss-subnav-link">Register</a>
-        <a href="nss-status.html" class="nss-subnav-link">Check Status</a>
-        <a href="nss-my-id.html" class="nss-subnav-link">Digital ID</a>
-        <a href="nss-verify.html" class="nss-subnav-link">Verify QR</a>
-        <a href="nss-login.html" class="nss-subnav-btn active">Coordinator Login</a>
+      </a>
+
+      <!-- Desktop Nav -->
+      <nav class="nss-header-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nss-nav-item">Home</a>
+        <a href="index.html#about" class="nss-nav-item">About</a>
+        <a href="index.html#activities" class="nss-nav-item">Activities</a>
+        <a href="index.html#events" class="nss-nav-item">Events</a>
+        <a href="index.html#leadership" class="nss-nav-item">Leadership</a>
+        <a href="index.html#gallery" class="nss-nav-item">Gallery</a>
+        <a href="index.html#impact" class="nss-nav-item">Impact</a>
+        <a href="index.html#contact" class="nss-nav-item">Contact</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="nss-header-actions">
+        <a href="register.html" class="nss-btn-join">Volunteer</a>
+        <a href="login.html" class="nss-btn-login">Login</a>
+        <button class="nss-menu-toggle" id="nssMenuToggle" aria-label="Toggle Navigation Menu">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="nss-drawer" id="nssDrawer">
+    <div class="nss-drawer-header">
+      <div class="nss-header-identity">
+        <span class="nss-brand-name">NSS <b>TGPCOP</b></span>
+        <span class="nss-brand-sub">National Service Scheme • Unit 1</span>
+      </div>
+      <button class="nss-drawer-close" id="nssDrawerClose" aria-label="Close Navigation Menu">&times;</button>
+    </div>
+    <nav class="nss-drawer-nav">
+      <a href="index.html" class="nss-drawer-link">Home</a>
+      <a href="index.html#about" class="nss-drawer-link">About NSS</a>
+      <a href="index.html#activities" class="nss-drawer-link">Key Activities</a>
+      <a href="index.html#events" class="nss-drawer-link">Recent Events</a>
+      <a href="index.html#leadership" class="nss-drawer-link">Leadership Desk</a>
+      <a href="index.html#gallery" class="nss-drawer-link">Photo Gallery</a>
+      <a href="register.html" class="nss-drawer-link highlight">Volunteer Registration ➔</a>
+      <a href="status.html" class="nss-drawer-link">Check Application Status</a>
+      <a href="my-id.html" class="nss-drawer-link">Digital ID Card</a>
+      <a href="verify.html" class="nss-drawer-link">Scan / Verify Certificate</a>
+      <a href="login.html" class="nss-drawer-link">Coordinator Login</a>
+      <a href="index.html#contact" class="nss-drawer-link">Contact Information</a>
+    </nav>
   </div>
 
   <main class="nss-section" style="min-height: 70vh; display:flex; align-items:center;">

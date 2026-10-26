@@ -1,42 +1,50 @@
 /* ==========================================================================
-   NSS (National Service Scheme) Portal Stylesheet - TGPCOP
-   Scoped to body.nss-page and .nss-* classes.
-   Designed to coexist with echo.css without conflicts.
+   NSS TGPCOP — OFFICIAL DESIGN SYSTEM & INSTITUTIONAL STYLESHEET
+   Brand Identity:
+     Royal Blue: #0647C8
+     Deep Navy:  #071B49
+     Yellow:     #FFD400
+     White:      #FFFFFF
+     Off-White:  #F7F9FC
    ========================================================================== */
 
 :root {
-  --nss-navy: #0C2340;
-  --nss-navy-dark: #071526;
-  --nss-blue: #1a3a6b;
-  --nss-accent: #2563EB;
-  --nss-accent-hover: #1d4ed8;
-  --nss-gold: #FFD60A;
-  --nss-gold-dark: #D97706;
-  --nss-white: #ffffff;
-  --nss-surface: #F8FAFC;
-  --nss-surface-alt: #F1F5F9;
-  --nss-card-bg: #ffffff;
-  --nss-border: #CBD5E1;
-  --nss-border-light: #E2E8F0;
-  --nss-text: #0F172A;
+  /* Core Color Palette */
+  --nss-royal-blue: #0647C8;
+  --nss-royal-blue-hover: #0539A3;
+  --nss-navy: #071B49;
+  --nss-navy-dark: #04102E;
+  --nss-yellow: #FFD400;
+  --nss-yellow-hover: #E6BE00;
+  --nss-white: #FFFFFF;
+  --nss-off-white: #F7F9FC;
+  --nss-surface-muted: #F1F5F9;
+
+  /* Text Colors */
+  --nss-text-primary: #071B49;
+  --nss-text-secondary: #475569;
   --nss-text-muted: #64748B;
   --nss-text-light: #94A3B8;
-  --nss-success: #16A34A;
-  --nss-success-bg: #DCFCE7;
-  --nss-warning: #D97706;
-  --nss-warning-bg: #FEF3C7;
-  --nss-danger: #DC2626;
-  --nss-danger-bg: #FEE2E2;
-  --nss-shadow-sm: 0 1px 3px rgba(12, 35, 64, 0.06);
-  --nss-shadow-md: 0 4px 14px -2px rgba(12, 35, 64, 0.08);
-  --nss-shadow-lg: 0 12px 32px -4px rgba(12, 35, 64, 0.12);
+  --nss-text-white: #FFFFFF;
+
+  /* Borders & Shadows */
+  --nss-border: #E2E8F0;
+  --nss-border-dark: rgba(255, 255, 255, 0.12);
+  --nss-border-yellow: rgba(255, 212, 0, 0.4);
+  --nss-shadow-sm: 0 2px 8px rgba(7, 27, 73, 0.05);
+  --nss-shadow-card: 0 4px 20px -2px rgba(7, 27, 73, 0.08);
+  --nss-shadow-hover: 0 14px 34px -4px rgba(7, 27, 73, 0.16);
+  --nss-shadow-header: 0 4px 20px rgba(4, 16, 46, 0.2);
+
+  /* Layout & Sizing */
   --nss-radius-sm: 8px;
   --nss-radius-md: 14px;
   --nss-radius-lg: 20px;
   --nss-radius-full: 9999px;
+  --nss-container: 1220px;
 }
 
-/* Base Page Overrides */
+/* Reset conflicting Echo elements */
 #nav,
 body.nss-page #nav,
 .marq,
@@ -49,2455 +57,457 @@ body.nss-page .marq,
   pointer-events: none !important;
 }
 
-body.nss-page {
-  background: var(--nss-surface) !important;
-  color: var(--nss-text) !important;
-  min-height: 100vh;
-  font-family: 'Poppins', system-ui, -apple-system, sans-serif !important;
-  display: flex;
-  flex-direction: column;
+/* Base Body Setup */
+* {
+  box-sizing: border-box;
 }
 
-body.nss-page a {
+html {
+  scroll-behavior: smooth;
+}
+
+body.nss-page {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: var(--nss-text-primary);
+  background-color: var(--nss-off-white);
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
   color: inherit;
   text-decoration: none;
+  transition: color 0.18s ease, transform 0.18s ease;
 }
 
-body.nss-page h1,
-body.nss-page h2,
-body.nss-page h3,
-body.nss-page h4 {
-  color: var(--nss-navy);
-  margin-top: 0;
-}
-
-/* Secondary Portal Nav / Breadcrumbs */
-.nss-subnav {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-  border-bottom: 2px solid rgba(255, 214, 10, 0.25);
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 4px 18px rgba(7, 21, 38, 0.35);
-}
-
-.nss-subnav-wrap {
-  width: min(1200px, 94%);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 0;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.nss-subnav-brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nss-subnav-logo {
-  height: 42px;
-  width: auto;
-  object-fit: contain;
-}
-
-.nss-subnav-title {
-  display: flex;
-  flex-direction: column;
-}
-
-.nss-subnav-title strong {
-  font-size: 15px;
-  letter-spacing: 0.03em;
-  color: var(--nss-white);
-  line-height: 1.2;
-}
-
-.nss-subnav-title span {
-  font-size: 11px;
-  color: var(--nss-gold);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-weight: 600;
-}
-
-.nss-subnav-links {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.nss-subnav-link {
-  font-size: 13px;
-  font-weight: 500;
-  color: #E2E8F0;
-  padding: 6px 12px;
-  border-radius: var(--nss-radius-sm);
-  transition: all 0.2s ease;
-}
-
-.nss-subnav-link:hover,
-.nss-subnav-link.active {
-  background: rgba(255, 255, 255, 0.12);
-  color: var(--nss-gold);
-}
-
-.nss-subnav-btn {
-  font-size: 12px;
-  font-weight: 600;
-  padding: 6px 14px;
-  border-radius: var(--nss-radius-full);
-  background: var(--nss-gold);
-  color: var(--nss-navy);
-  transition: transform 0.15s ease, background 0.15s ease;
-}
-
-.nss-subnav-btn:hover {
-  transform: translateY(-1px);
-  background: #ffe033;
-}
-
-/* NSS Hero Section */
-.nss-hero {
-  background: linear-gradient(135deg, var(--nss-navy) 0%, #153965 100%);
-  color: var(--nss-white);
-  padding: 64px 0 72px;
-  position: relative;
-  overflow: hidden;
-}
-
-.nss-hero::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  right: -20%;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(255, 214, 10, 0.08) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.nss-hero-wrap {
-  width: min(1160px, 92%);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: center;
-  gap: 48px;
-  position: relative;
-  z-index: 2;
-}
-
-@media (max-width: 900px) {
-  .nss-hero-wrap {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-}
-
-.nss-motto-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: rgba(255, 214, 10, 0.15);
-  border: 1px solid rgba(255, 214, 10, 0.35);
-  color: var(--nss-gold);
-  padding: 6px 16px;
-  border-radius: var(--nss-radius-full);
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 20px;
-}
-
-.nss-hero h1 {
-  font-family: 'Bebas Neue', Impact, sans-serif !important;
-  font-size: clamp(44px, 6vw, 76px);
-  color: var(--nss-white);
-  line-height: 0.96;
-  margin-bottom: 16px;
-  letter-spacing: 0.02em;
-}
-
-.nss-hero h1 span.gold {
-  color: var(--nss-gold);
-}
-
-.nss-hero-desc {
-  font-size: 17px;
-  line-height: 1.6;
-  color: #E2E8F0;
-  max-width: 580px;
-  margin-bottom: 32px;
-}
-
-@media (max-width: 900px) {
-  .nss-hero-desc {
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-.nss-hero-cta {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 900px) {
-  .nss-hero-cta {
-    justify-content: center;
-  }
-}
-
-.nss-hero-badge-card {
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  border-radius: var(--nss-radius-lg);
-  padding: 32px 28px;
-  text-align: center;
-  box-shadow: 0 20px 40px rgba(7, 21, 38, 0.3);
-}
-
-.nss-hero-logo {
-  height: 120px;
-  width: auto;
-  margin: 0 auto 18px;
-  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.35));
-}
-
-.nss-hero-badge-title {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--nss-white);
-  margin-bottom: 4px;
-}
-
-.nss-hero-badge-subtitle {
-  font-size: 13px;
-  color: #CBD5E1;
-  margin-bottom: 20px;
-}
-
-.nss-hero-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 18px;
-}
-
-.nss-hero-stat-item b {
-  display: block;
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--nss-gold);
-}
-
-.nss-hero-stat-item span {
-  font-size: 11px;
-  color: #CBD5E1;
-}
-
-/* Sections & Containers */
-.nss-section {
-  padding: 64px 0;
-}
-
-.nss-section.alt-bg {
-  background: var(--nss-surface-alt);
-}
-
-.nss-container {
-  width: min(1160px, 92%);
-  margin: 0 auto;
-}
-
-.nss-section-header {
-  text-align: center;
-  max-width: 680px;
-  margin: 0 auto 48px;
-}
-
-.nss-section-header h2 {
-  font-family: 'Bebas Neue', Impact, sans-serif !important;
-  font-size: clamp(36px, 5vw, 54px);
-  margin-bottom: 12px;
-  letter-spacing: 0.02em;
-}
-
-.nss-section-header p {
-  font-size: 16px;
-  color: var(--nss-text-muted);
-  line-height: 1.6;
-}
-
-/* Cards */
-.nss-card {
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: var(--nss-radius-md);
-  padding: 28px;
-  box-shadow: var(--nss-shadow-sm);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.nss-card:hover {
-  box-shadow: var(--nss-shadow-md);
-}
-
-.nss-card.featured {
-  border-color: var(--nss-accent);
-  box-shadow: 0 10px 30px -4px rgba(37, 99, 235, 0.15);
-}
-
-.nss-grid-3 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.nss-grid-2 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-  gap: 24px;
-}
-
-.nss-grid-4 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-}
-
-/* Mission Cards */
-.nss-mission-icon {
-  width: 54px;
-  height: 54px;
-  border-radius: var(--nss-radius-md);
-  background: #EFF6FF;
-  color: var(--nss-accent);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  margin-bottom: 20px;
-}
-
-.nss-card h3 {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 10px;
-  color: var(--nss-navy);
-}
-
-.nss-card p {
-  color: var(--nss-text-muted);
-  font-size: 14px;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* Steps / Process */
-.nss-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 24px;
-  position: relative;
-}
-
-.nss-step-card {
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: var(--nss-radius-md);
-  padding: 30px 24px;
-  position: relative;
-}
-
-.nss-step-num {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: var(--nss-navy);
-  color: var(--nss-gold);
-  font-weight: 700;
-  font-size: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 18px;
-}
-
-/* Buttons */
-.nss-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--nss-accent);
-  color: var(--nss-white);
-  padding: 12px 24px;
-  border-radius: var(--nss-radius-full);
-  font-weight: 600;
-  font-size: 15px;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: center;
-}
-
-.nss-btn:hover {
-  background: var(--nss-accent-hover);
-  transform: translateY(-1px);
-  color: var(--nss-white);
-}
-
-.nss-btn:active {
-  transform: translateY(0);
-}
-
-.nss-btn-primary {
-  background: var(--nss-gold);
-  color: var(--nss-navy);
-  font-weight: 700;
-}
-
-.nss-btn-primary:hover {
-  background: #f5cc00;
-  color: var(--nss-navy);
-}
-
-.nss-btn-navy {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-}
-
-.nss-btn-navy:hover {
-  background: var(--nss-blue);
-  color: var(--nss-white);
-}
-
-.nss-btn-outline {
-  background: transparent;
-  color: var(--nss-navy);
-  border: 2px solid var(--nss-navy);
-}
-
-.nss-btn-outline:hover {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-}
-
-.nss-btn-outline-white {
-  background: transparent;
-  color: var(--nss-white);
-  border: 2px solid var(--nss-white);
-}
-
-.nss-btn-outline-white:hover {
-  background: var(--nss-white);
-  color: var(--nss-navy);
-}
-
-.nss-btn-danger {
-  background: var(--nss-danger);
-  color: var(--nss-white);
-}
-
-.nss-btn-danger:hover {
-  background: #b91c1c;
-}
-
-.nss-btn-sm {
-  padding: 6px 14px;
-  font-size: 13px;
-}
-
-.nss-btn-lg {
-  padding: 14px 32px;
-  font-size: 16px;
-}
-
-.nss-btn:disabled,
-.nss-btn[disabled] {
-  opacity: 0.6;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
-/* Status Badges */
-.nss-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: var(--nss-radius-full);
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  width: fit-content;
-}
-
-.nss-badge::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.nss-badge.pending {
-  background: var(--nss-warning-bg);
-  color: var(--nss-warning);
-}
-.nss-badge.pending::before {
-  background: var(--nss-warning);
-}
-
-.nss-badge.approved {
-  background: var(--nss-success-bg);
-  color: var(--nss-success);
-}
-.nss-badge.approved::before {
-  background: var(--nss-success);
-}
-
-.nss-badge.rejected {
-  background: var(--nss-danger-bg);
-  color: var(--nss-danger);
-}
-.nss-badge.rejected::before {
-  background: var(--nss-danger);
-}
-
-.nss-badge.revoked {
-  background: #F1F5F9;
-  color: #475569;
-  border: 1px solid #CBD5E1;
-}
-.nss-badge.revoked::before {
-  background: #64748B;
-}
-
-/* Forms */
-.nss-form-card {
-  max-width: 760px;
-  margin: 0 auto;
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: var(--nss-radius-lg);
-  padding: 40px;
-  box-shadow: var(--nss-shadow-md);
-}
-
-@media (max-width: 640px) {
-  .nss-form-card {
-    padding: 24px 18px;
-  }
-}
-
-.nss-form-group {
-  margin-bottom: 20px;
-}
-
-.nss-form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-@media (max-width: 640px) {
-  .nss-form-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.nss-form-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--nss-navy);
-  margin-bottom: 6px;
-}
-
-.nss-form-label span.req {
-  color: var(--nss-danger);
-}
-
-.nss-form-input,
-.nss-form-select,
-.nss-form-textarea {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1.5px solid var(--nss-border);
-  border-radius: var(--nss-radius-sm);
-  background: var(--nss-white);
-  color: var(--nss-text);
-  font-family: inherit;
-  font-size: 14px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  box-sizing: border-box;
-}
-
-.nss-form-input:focus,
-.nss-form-select:focus,
-.nss-form-textarea:focus {
-  outline: none;
-  border-color: var(--nss-accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.nss-form-input.is-invalid,
-.nss-form-select.is-invalid {
-  border-color: var(--nss-danger);
-  background-color: #FEF2F2;
-}
-
-.nss-form-error {
-  font-size: 12px;
-  color: var(--nss-danger);
-  margin-top: 4px;
-  display: none;
-}
-
-.nss-form-error.visible {
-  display: block;
-}
-
-.nss-form-hint {
-  font-size: 12px;
-  color: var(--nss-text-muted);
-  margin-top: 4px;
-}
-
-/* File Upload Zone */
-.nss-upload-zone {
-  border: 2px dashed var(--nss-border);
-  border-radius: var(--nss-radius-md);
-  padding: 24px;
-  text-align: center;
-  background: var(--nss-surface);
-  cursor: pointer;
-  transition: border-color 0.2s ease, background 0.2s ease;
-  position: relative;
-}
-
-.nss-upload-zone:hover,
-.nss-upload-zone.dragover {
-  border-color: var(--nss-accent);
-  background: #EFF6FF;
-}
-
-.nss-upload-preview {
-  display: none;
-  width: 110px;
-  height: 110px;
-  border-radius: var(--nss-radius-sm);
-  object-fit: cover;
-  margin: 0 auto 12px;
-  border: 2px solid var(--nss-navy);
-}
-
-.nss-upload-icon {
-  font-size: 32px;
-  color: var(--nss-text-muted);
-  margin-bottom: 8px;
-}
-
-/* Checkbox */
-.nss-checkbox-label {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 13px;
-  color: var(--nss-text);
-  line-height: 1.5;
-  cursor: pointer;
-}
-
-.nss-checkbox-label input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  cursor: pointer;
-  accent-color: var(--nss-navy);
-}
-
-/* Status Page Card */
-.nss-status-card {
-  max-width: 640px;
-  margin: 0 auto;
-  background: var(--nss-card-bg);
-  border-radius: var(--nss-radius-lg);
-  border: 1px solid var(--nss-border-light);
-  box-shadow: var(--nss-shadow-md);
-  overflow: hidden;
-}
-
-.nss-status-header {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-  padding: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nss-status-header h3 {
-  color: var(--nss-white);
-  margin: 0;
-  font-size: 20px;
-}
-
-.nss-status-body {
-  padding: 32px 24px;
-}
-
-.nss-detail-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid var(--nss-border-light);
-  font-size: 14px;
-}
-
-.nss-detail-row:last-child {
-  border-bottom: none;
-}
-
-.nss-detail-label {
-  color: var(--nss-text-muted);
-  font-weight: 500;
-}
-
-.nss-detail-val {
-  font-weight: 600;
-  color: var(--nss-navy);
-  text-align: right;
-}
-
-/* DIGITAL ID CARD (PRINTABLE & DOWNLOADABLE) */
-.nss-id-card-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 24px;
-  margin: 0 auto;
-}
-
-.nss-id-card {
-  width: 380px;
+img {
   max-width: 100%;
-  border-radius: 18px;
-  background: #ffffff;
-  border: 2px solid var(--nss-navy);
-  box-shadow: 0 16px 36px rgba(12, 35, 64, 0.16);
-  overflow: hidden;
-  position: relative;
-  font-family: 'Poppins', sans-serif;
-  color: var(--nss-text);
-  box-sizing: border-box;
-}
-
-.nss-id-card-header {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-  padding: 16px 14px 12px;
-  text-align: center;
-  position: relative;
-  border-bottom: 3px solid var(--nss-gold);
-}
-
-.nss-id-card-emblem {
-  height: 52px;
-  width: auto;
-  margin: 0 auto 6px;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
-}
-
-.nss-id-card-org {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--nss-gold);
-  line-height: 1.2;
-}
-
-.nss-id-card-college {
-  font-size: 11px;
-  color: #E2E8F0;
-  margin-top: 2px;
-  font-weight: 500;
-}
-
-.nss-id-card-body {
-  padding: 20px 20px 16px;
-  text-align: center;
-  background: radial-gradient(circle at center, #ffffff 60%, #F8FAFC 100%);
-  position: relative;
-}
-
-.nss-id-photo-frame {
-  width: 120px;
-  height: 120px;
-  border-radius: 14px;
-  border: 3px solid var(--nss-navy);
-  overflow: hidden;
-  margin: 0 auto 14px;
-  box-shadow: 0 4px 10px rgba(12, 35, 64, 0.12);
-  background: var(--nss-surface-alt);
-}
-
-.nss-id-photo {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.nss-id-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--nss-navy);
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.nss-id-vol-num {
-  display: inline-block;
-  background: var(--nss-navy);
-  color: var(--nss-gold);
-  padding: 4px 14px;
-  border-radius: var(--nss-radius-full);
-  font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.05em;
-  margin-bottom: 14px;
-}
-
-.nss-id-table {
-  width: 100%;
-  margin: 0 auto 16px;
-  font-size: 12px;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.nss-id-table td {
-  padding: 5px 8px;
-  border-bottom: 1px dashed var(--nss-border-light);
-}
-
-.nss-id-table td:first-child {
-  color: var(--nss-text-muted);
-  font-weight: 500;
-  width: 40%;
-}
-
-.nss-id-table td:last-child {
-  font-weight: 600;
-  color: var(--nss-navy);
-}
-
-.nss-id-qr-box {
-  background: #ffffff;
-  padding: 10px;
-  border: 1px solid var(--nss-border);
-  border-radius: 10px;
-  display: inline-block;
-  margin-bottom: 8px;
-}
-
-.nss-id-qr-box canvas,
-.nss-id-qr-box img {
+  height: auto;
   display: block;
-  margin: 0 auto;
 }
 
-.nss-id-verify-hint {
-  font-size: 10px;
-  color: var(--nss-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.nss-id-card-footer {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-  padding: 10px;
-  text-align: center;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  color: var(--nss-gold);
-  text-transform: uppercase;
-}
-
-/* Revoked Watermark Overlay */
-.nss-id-card.is-revoked::after {
-  content: "CARD REVOKED";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-35deg);
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 54px;
-  color: rgba(220, 38, 38, 0.85);
-  border: 4px solid rgba(220, 38, 38, 0.85);
-  padding: 8px 24px;
-  border-radius: 12px;
-  pointer-events: none;
-  z-index: 10;
-  letter-spacing: 0.05em;
-}
-
-/* Print Styles for ID Card */
-@media print {
-  body.nss-page * {
-    visibility: hidden;
-  }
-  .nss-id-card, .nss-id-card * {
-    visibility: visible;
-  }
-  .nss-id-card {
-    position: absolute;
-    left: 0;
-    top: 0;
-    margin: 20px auto;
-    box-shadow: none;
-    border: 1px solid #000;
-  }
-  .nss-id-card-actions {
-    display: none !important;
-  }
-}
-
-/* Admin Dashboard Styles */
-.nss-admin-header {
-  background: var(--nss-navy);
-  color: var(--nss-white);
-  padding: 24px 0;
-  border-bottom: 3px solid var(--nss-gold);
-}
-
-.nss-admin-header-wrap {
-  width: min(1200px, 94%);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.nss-admin-title {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.nss-admin-title img {
-  height: 48px;
-  width: auto;
-}
-
-.nss-admin-title h1 {
-  font-size: 24px;
-  color: var(--nss-white);
-  margin: 0;
-}
-
-.nss-admin-user {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nss-admin-user-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 2px solid var(--nss-gold);
-  object-fit: cover;
-}
-
-.nss-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-.nss-stat-card {
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: var(--nss-radius-md);
-  padding: 20px;
-  box-shadow: var(--nss-shadow-sm);
-  display: flex;
-  flex-direction: column;
-}
-
-.nss-stat-card .val {
-  font-size: 32px;
-  font-weight: 700;
-  color: var(--nss-navy);
-  line-height: 1;
-  margin-bottom: 6px;
-}
-
-.nss-stat-card .lbl {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--nss-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Admin Tabs */
-.nss-tabs {
-  display: flex;
-  gap: 8px;
-  border-bottom: 2px solid var(--nss-border-light);
-  margin-bottom: 24px;
-  overflow-x: auto;
-}
-
-.nss-tab-btn {
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--nss-text-muted);
-  background: transparent;
-  border: none;
-  border-bottom: 3px solid transparent;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.nss-tab-btn:hover {
-  color: var(--nss-navy);
-}
-
-.nss-tab-btn.active {
-  color: var(--nss-accent);
-  border-bottom-color: var(--nss-accent);
-}
-
-/* Admin Table */
-.nss-table-container {
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: var(--nss-radius-md);
-  overflow: hidden;
-  box-shadow: var(--nss-shadow-sm);
-}
-
-.nss-table-toolbar {
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--nss-border-light);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.nss-search-input {
-  max-width: 320px;
-  padding: 8px 14px;
-  border: 1px solid var(--nss-border);
-  border-radius: var(--nss-radius-full);
-  font-size: 13px;
-  width: 100%;
-}
-
-.nss-table-wrapper {
-  overflow-x: auto;
-}
-
-.nss-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-  text-align: left;
-}
-
-.nss-table th {
-  background: #F8FAFC;
-  padding: 12px 16px;
-  font-weight: 600;
-  color: var(--nss-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-size: 11px;
-  border-bottom: 1px solid var(--nss-border-light);
-}
-
-.nss-table td {
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--nss-border-light);
-  color: var(--nss-text);
-  vertical-align: middle;
-}
-
-.nss-table tr:last-child td {
-  border-bottom: none;
-}
-
-.nss-table tr:hover td {
-  background: #F8FAFC;
-}
-
-/* QR Scanner Section */
-.nss-scanner-wrapper {
-  max-width: 520px;
-  margin: 0 auto;
-  text-align: center;
-}
-
-.nss-camera-container {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 1/1;
-  max-height: 400px;
-  background: #000;
-  border-radius: var(--nss-radius-lg);
-  overflow: hidden;
-  margin-bottom: 20px;
-  border: 3px solid var(--nss-navy);
-}
-
-.nss-camera-video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.nss-scanner-target {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 70%;
-  height: 70%;
-  border: 2px solid rgba(255, 214, 10, 0.7);
-  border-radius: 12px;
-  box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
-}
-
-.nss-scanner-laser {
-  position: absolute;
+/* ==========================================================================
+   1. UNIFIED INSTITUTIONAL HEADER & NAVIGATION
+   ========================================================================== */
+.nss-header {
+  position: sticky;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
-  animation: nss-scan 2.4s ease-in-out infinite;
-}
-
-@keyframes nss-scan {
-  0%, 100% { top: 5%; }
-  50% { top: 95%; }
-}
-
-/* Modal */
-.nss-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(12, 35, 64, 0.65);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 20px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.nss-modal-backdrop.on {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.nss-modal {
-  background: var(--nss-white);
-  border-radius: var(--nss-radius-lg);
-  max-width: 600px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: var(--nss-shadow-lg);
-  transform: translateY(20px);
-  transition: transform 0.2s ease;
-}
-
-.nss-modal-backdrop.on .nss-modal {
-  transform: translateY(0);
-}
-
-.nss-modal-header {
-  padding: 20px 24px;
-  background: var(--nss-navy);
-  color: var(--nss-white);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.nss-modal-header h3 {
-  color: var(--nss-white);
-  margin: 0;
-  font-size: 18px;
-}
-
-.nss-modal-close {
-  background: none;
-  border: none;
-  color: var(--nss-white);
-  font-size: 24px;
-  cursor: pointer;
-  line-height: 1;
-}
-
-.nss-modal-body {
-  padding: 24px;
-}
-
-.nss-modal-footer {
-  padding: 16px 24px;
-  background: var(--nss-surface);
-  border-top: 1px solid var(--nss-border-light);
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-}
-
-/* Leadership section */
-.nss-leader-card {
-  text-align: center;
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: var(--nss-radius-md);
-  padding: 28px 20px;
-  box-shadow: var(--nss-shadow-sm);
-  transition: transform 0.2s ease;
-}
-
-.nss-leader-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--nss-shadow-md);
-}
-
-.nss-leader-photo {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin: 0 auto 16px;
-  border: 3px solid var(--nss-navy);
-  background: var(--nss-surface-alt);
-}
-
-.nss-leader-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--nss-navy);
-  margin-bottom: 4px;
-}
-
-.nss-leader-role {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--nss-accent);
-  margin-bottom: 8px;
-}
-
-.nss-leader-dept {
-  font-size: 12px;
-  color: var(--nss-text-muted);
-}
-
-/* ==========================================================================
-   NSS Official Footer Overrides (replaces Echo blue footer)
-   ========================================================================== */
-body.nss-page #foot,
-body.nss-page #foot footer,
-body.nss-page footer {
-  background: var(--nss-navy) !important;
-  color: var(--nss-white) !important;
-  border-top: 2px solid rgba(255, 214, 10, 0.25) !important;
-  padding: 44px 0 60px !important;
-  margin-top: auto !important;
-}
-
-body.nss-page footer img {
-  display: none !important; /* Hide Echo Media logo */
-}
-
-body.nss-page footer p {
-  color: #E2E8F0 !important;
-  font-size: 14px !important;
-  margin: 6px 0 !important;
-}
-
-body.nss-page footer p b {
-  color: var(--nss-gold) !important;
-  font-size: 16px !important;
-  letter-spacing: 0.04em !important;
-}
-
-body.nss-page footer .soc a,
-body.nss-page footer a {
-  color: var(--nss-gold) !important;
-  transition: color 0.15s ease !important;
-}
-
-body.nss-page footer a:hover {
-  color: var(--nss-white) !important;
-}
-
-/* ==========================================================================
-   HOMEPAGE PREMIUM REDESIGN (Inspired by NSS IIT Delhi & Institutional Standards)
-   ========================================================================== */
-
-/* Enhanced Header & Navigation */
-.nss-header-sticky {
-  position: sticky;
-  top: 0;
   z-index: 1000;
-  background: rgba(12, 35, 64, 0.98);
-  backdrop-filter: blur(12px);
-  border-bottom: 2px solid rgba(255, 214, 10, 0.3);
-  box-shadow: 0 4px 24px rgba(7, 21, 38, 0.4);
+  background-color: rgba(7, 27, 73, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: var(--nss-shadow-header);
+  transition: background-color 0.2s ease, padding 0.2s ease;
 }
 
-.nss-nav-container {
-  width: min(1240px, 94%);
+.nss-header-wrap {
+  width: min(var(--nss-container), 94%);
   margin: 0 auto;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 74px;
   gap: 20px;
 }
 
-.nss-brand {
+.nss-header-brand {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
   text-decoration: none;
 }
 
-.nss-brand-logo {
-  height: 48px;
+.nss-header-logo {
+  height: 44px;
   width: auto;
-  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+  object-fit: contain;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
-.nss-brand-text {
+.nss-header-identity {
   display: flex;
   flex-direction: column;
 }
 
-.nss-brand-title {
+.nss-brand-name {
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 20px;
-  letter-spacing: 0.04em;
+  font-size: 22px;
   color: var(--nss-white);
+  letter-spacing: 0.05em;
   line-height: 1;
 }
 
-.nss-brand-title span {
-  color: var(--nss-gold);
+.nss-brand-name b {
+  color: var(--nss-yellow);
+  font-weight: normal;
 }
 
 .nss-brand-sub {
   font-size: 11px;
-  color: #94A3B8;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
   letter-spacing: 0.02em;
   white-space: nowrap;
 }
 
-.nss-nav-menu {
+/* Desktop Navigation */
+.nss-header-nav {
   display: flex;
   align-items: center;
-  gap: 6px;
-  list-style: none;
-  margin: 0;
+  gap: 22px;
+}
+
+.nss-nav-item {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 6px 2px;
+  position: relative;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.nss-nav-item:hover {
+  color: var(--nss-yellow);
+}
+
+.nss-nav-item.active {
+  color: var(--nss-white);
+  font-weight: 600;
+}
+
+.nss-nav-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: var(--nss-yellow);
+  border-radius: 2px;
+}
+
+/* Header Actions */
+.nss-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nss-btn-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 9px 20px;
+  background-color: var(--nss-yellow);
+  color: var(--nss-navy);
+  font-size: 13.5px;
+  font-weight: 700;
+  border-radius: var(--nss-radius-full);
+  text-decoration: none;
+  box-shadow: 0 4px 12px rgba(255, 212, 0, 0.3);
+  transition: transform 0.18s ease, background-color 0.18s ease;
+}
+
+.nss-btn-join:hover {
+  background-color: var(--nss-yellow-hover);
+  transform: translateY(-2px);
+}
+
+.nss-btn-login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: transparent;
+  color: var(--nss-white);
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: var(--nss-radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.nss-btn-login:hover {
+  border-color: var(--nss-yellow);
+  color: var(--nss-yellow);
+}
+
+/* Mobile Toggle */
+.nss-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 26px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
   padding: 0;
 }
 
-.nss-nav-link {
-  font-size: 14px;
-  font-weight: 500;
-  color: #E2E8F0;
-  padding: 8px 12px;
-  border-radius: var(--nss-radius-sm);
-  transition: all 0.2s ease;
-  white-space: nowrap;
+.nss-menu-toggle span {
+  display: block;
+  height: 2.5px;
+  width: 100%;
+  background-color: var(--nss-white);
+  border-radius: 2px;
+  transition: all 0.25s ease;
 }
 
-.nss-nav-link:hover,
-.nss-nav-link.active {
-  color: var(--nss-gold);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.nss-nav-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nss-btn-gold {
-  background: var(--nss-gold);
-  color: var(--nss-navy);
-  font-weight: 700;
-  font-size: 13px;
-  padding: 9px 18px;
-  border-radius: var(--nss-radius-full);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  border: 2px solid var(--nss-gold);
-  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
-  white-space: nowrap;
-}
-
-.nss-btn-gold:hover {
-  transform: translateY(-2px);
-  background: #FFE033;
-  box-shadow: 0 4px 14px rgba(255, 214, 10, 0.4);
-}
-
-.nss-btn-outline-gold {
-  background: transparent;
-  color: var(--nss-gold);
-  font-weight: 600;
-  font-size: 13px;
-  padding: 8px 16px;
-  border-radius: var(--nss-radius-full);
-  border: 1.5px solid var(--nss-gold);
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.nss-btn-outline-gold:hover {
-  background: rgba(255, 214, 10, 0.12);
-  color: var(--nss-white);
-  border-color: var(--nss-white);
-}
-
-/* Mobile Hamburger Toggle */
-.nss-mobile-btn {
-  display: none;
-  background: none;
-  border: 0;
-  color: var(--nss-white);
-  font-size: 28px;
-  cursor: pointer;
-  padding: 4px;
-}
-
-.nss-mobile-drawer {
-  display: none;
+/* Mobile Drawer */
+.nss-drawer {
   position: fixed;
-  top: 74px;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(7, 21, 38, 0.98);
-  backdrop-filter: blur(16px);
-  padding: 30px 24px;
+  inset: 0;
+  background-color: rgba(7, 27, 73, 0.98);
+  backdrop-filter: blur(18px);
+  z-index: 1100;
+  display: flex;
   flex-direction: column;
-  gap: 14px;
-  z-index: 999;
+  padding: 24px;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   overflow-y: auto;
 }
 
-.nss-mobile-drawer.open {
-  display: flex;
+.nss-drawer.open {
+  transform: translateX(0);
 }
 
-.nss-mobile-drawer .nss-nav-link {
-  font-size: 18px;
-  padding: 12px 16px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-@media (max-width: 1040px) {
-  .nss-nav-menu,
-  .nss-nav-actions .nss-btn-outline-gold {
-    display: none;
-  }
-  .nss-mobile-btn {
-    display: block;
-  }
-}
-
-/* Enhanced Hero Section */
-.nss-hero-institutional {
-  position: relative;
-  min-height: 86vh;
+.nss-drawer-header {
   display: flex;
   align-items: center;
-  background: radial-gradient(circle at 80% 20%, rgba(37, 99, 235, 0.28) 0%, transparent 60%),
-              linear-gradient(135deg, #071527 0%, #0C2340 50%, #102E54 100%);
-  color: var(--nss-white);
-  padding: 80px 0 90px;
-  overflow: hidden;
+  justify-content: space-between;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.nss-hero-mesh {
+.nss-drawer-close {
+  background: transparent;
+  border: none;
+  color: var(--nss-white);
+  font-size: 32px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.nss-drawer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.nss-drawer-link {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nss-drawer-link:hover,
+.nss-drawer-link.highlight {
+  color: var(--nss-yellow);
+}
+
+/* ==========================================================================
+   2. HOMEPAGE HERO (HIGH CONTRAST & VISIBLE ARTWORK)
+   ========================================================================== */
+.nss-hero {
+  position: relative;
+  min-height: calc(100svh - 72px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px 90px;
+  overflow: hidden;
+  color: var(--nss-white);
+}
+
+.nss-hero-bg {
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1.5px, transparent 1.5px);
-  background-size: 36px 36px;
-  opacity: 0.65;
+  z-index: -1;
+  overflow: hidden;
+  background-color: var(--nss-navy);
+}
+
+.nss-hero-bg-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.92;
+  transform: scale(1.02);
+  transition: transform 0.5s ease-out;
+}
+
+.nss-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(4, 16, 46, 0.72) 0%,
+    rgba(7, 27, 73, 0.58) 50%,
+    rgba(7, 27, 73, 0.88) 100%
+  );
   pointer-events: none;
 }
 
-.nss-hero-container {
-  width: min(1240px, 92%);
+.nss-hero-content {
+  width: min(940px, 100%);
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  align-items: center;
-  gap: 56px;
+  text-align: center;
   position: relative;
   z-index: 2;
 }
 
-.nss-badge-ribbon {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: rgba(255, 214, 10, 0.12);
-  border: 1.5px solid rgba(255, 214, 10, 0.4);
-  color: var(--nss-gold);
-  padding: 6px 18px;
-  border-radius: var(--nss-radius-full);
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  margin-bottom: 24px;
-  text-transform: uppercase;
-}
-
-.nss-hero-headline {
-  font-family: 'Bebas Neue', Impact, sans-serif !important;
-  font-size: clamp(52px, 7vw, 92px);
-  color: var(--nss-white);
-  line-height: 0.94;
-  margin: 0 0 20px;
-  letter-spacing: 0.01em;
-}
-
-.nss-hero-headline .gold {
-  color: var(--nss-gold);
-}
-
-.nss-hero-paragraph {
-  font-size: 17px;
-  line-height: 1.68;
-  color: #E2E8F0;
-  max-width: 580px;
-  margin-bottom: 34px;
-}
-
-.nss-hero-actions {
-  display: flex;
-  gap: 14px;
-  flex-wrap: wrap;
-  align-items: center;
-  margin-bottom: 36px;
-}
-
-.nss-hero-quick-verify {
+.nss-badge-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-  color: #94A3B8;
-  transition: color 0.2s ease;
-}
-
-.nss-hero-quick-verify:hover {
-  color: var(--nss-gold);
-}
-
-/* Hero Right Featured Card */
-.nss-emblem-card {
-  background: rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(16px);
-  border: 1.5px solid rgba(255, 255, 255, 0.18);
-  border-radius: 28px;
-  padding: 40px 32px 30px;
-  text-align: center;
-  box-shadow: 0 24px 60px rgba(0, 10, 30, 0.5);
-  position: relative;
-  overflow: hidden;
-}
-
-.nss-emblem-card::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--nss-accent), var(--nss-gold), var(--nss-accent));
-}
-
-.nss-emblem-img {
-  width: 140px;
-  height: 140px;
-  margin: 0 auto 20px;
-  object-fit: contain;
-  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
-  animation: nss-float 6s ease-in-out infinite;
-}
-
-@keyframes nss-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
-}
-
-.nss-emblem-unit {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 26px;
-  color: var(--nss-white);
-  letter-spacing: 0.04em;
-  margin-bottom: 4px;
-}
-
-.nss-emblem-motto {
-  display: inline-block;
-  background: var(--nss-gold);
-  color: var(--nss-navy);
-  font-weight: 800;
-  font-size: 12px;
-  padding: 4px 14px;
+  padding: 6px 18px;
+  background: rgba(255, 212, 0, 0.14);
+  border: 1px solid rgba(255, 212, 0, 0.45);
   border-radius: var(--nss-radius-full);
+  color: var(--nss-yellow);
+  font-size: 12.5px;
+  font-weight: 700;
   letter-spacing: 0.08em;
-  margin-bottom: 24px;
-}
-
-.nss-quick-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  padding-top: 20px;
-}
-
-.nss-stat-col b {
-  display: block;
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 32px;
-  color: var(--nss-gold);
-  line-height: 1;
-}
-
-.nss-stat-col span {
-  font-size: 11px;
-  color: #CBD5E1;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-@media (max-width: 960px) {
-  .nss-hero-container {
-    grid-template-columns: 1fr;
-    text-align: center;
-    gap: 40px;
-  }
-  .nss-hero-paragraph {
-    margin-left: auto;
-    margin-right: auto;
-  }
-  .nss-hero-actions {
-    justify-content: center;
-  }
-}
-
-/* President & Leadership Spotlight */
-.nss-president-section {
-  padding: 80px 0;
-  background: #ffffff;
-}
-
-.nss-president-card {
-  background: linear-gradient(135deg, #0C2340 0%, #153965 100%);
-  color: var(--nss-white);
-  border-radius: 28px;
-  padding: 48px;
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 48px;
-  align-items: center;
-  box-shadow: 0 20px 50px rgba(12, 35, 64, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.nss-president-card::after {
-  content: "NSS";
-  position: absolute;
-  right: -20px;
-  bottom: -40px;
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 180px;
-  color: rgba(255, 255, 255, 0.03);
-  pointer-events: none;
-}
-
-.nss-president-portrait {
-  width: 100%;
-  aspect-ratio: 1;
-  border-radius: 20px;
-  background: #102E54;
-  border: 4px solid var(--nss-gold);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
-}
-
-.nss-president-portrait img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.nss-president-initials {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 88px;
-  color: var(--nss-gold);
-}
-
-.nss-president-quote {
-  font-size: 18px;
-  line-height: 1.7;
-  color: #E2E8F0;
-  font-style: italic;
-  margin: 0 0 28px;
-  position: relative;
-}
-
-.nss-president-quote::before {
-  content: "“";
-  font-size: 64px;
-  color: var(--nss-gold);
-  line-height: 0;
-  vertical-align: -20px;
-  margin-right: 8px;
-}
-
-.nss-president-name {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 34px;
-  color: var(--nss-white);
-  margin: 0 0 4px;
-  letter-spacing: 0.02em;
-}
-
-.nss-president-role {
-  color: var(--nss-gold);
-  font-weight: 700;
-  font-size: 14px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.nss-president-dept {
-  color: #94A3B8;
-  font-size: 13px;
-  margin-top: 2px;
-}
-
-@media (max-width: 860px) {
-  .nss-president-card {
-    grid-template-columns: 1fr;
-    padding: 32px 24px;
-    text-align: center;
-    gap: 28px;
-  }
-  .nss-president-portrait {
-    max-width: 220px;
-    margin: 0 auto;
-  }
-}
-
-/* Event Cards */
-.nss-event-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 24px;
-}
-
-.nss-event-card {
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: var(--nss-shadow-sm);
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
-  display: flex;
-  flex-direction: column;
-}
-
-.nss-event-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 36px rgba(12, 35, 64, 0.12);
-}
-
-.nss-event-media {
-  position: relative;
-  aspect-ratio: 16/10;
-  overflow: hidden;
-  background: var(--nss-surface-alt);
-}
-
-.nss-event-media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s ease;
-}
-
-.nss-event-card:hover .nss-event-media img {
-  transform: scale(1.05);
-}
-
-.nss-event-tag {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: var(--nss-navy);
-  color: var(--nss-gold);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 12px;
-  border-radius: var(--nss-radius-full);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.nss-event-body {
-  padding: 22px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.nss-event-date {
-  font-size: 12px;
-  color: var(--nss-accent);
-  font-weight: 600;
-  text-transform: uppercase;
-  margin-bottom: 6px;
-}
-
-.nss-event-title {
-  font-size: 19px;
-  font-weight: 700;
-  color: var(--nss-navy);
-  margin: 0 0 10px;
-  line-height: 1.3;
-}
-
-.nss-event-desc {
-  font-size: 14px;
-  color: var(--nss-text-muted);
-  line-height: 1.6;
-  margin: 0 0 16px;
-  flex: 1;
-}
-
-/* Impact Metrics Section */
-.nss-impact-section {
-  background: linear-gradient(135deg, #071527 0%, #0C2340 100%);
-  color: var(--nss-white);
-  padding: 90px 0;
-  position: relative;
-  overflow: hidden;
-}
-
-.nss-impact-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 24px;
-  margin-top: 48px;
-}
-
-.nss-impact-box {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  padding: 32px 20px;
-  text-align: center;
-  transition: transform 0.2s ease;
-}
-
-.nss-impact-box:hover {
-  transform: translateY(-4px);
-  border-color: var(--nss-gold);
-}
-
-.nss-impact-box b {
-  display: block;
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 60px;
-  color: var(--nss-gold);
-  line-height: 1;
-  margin-bottom: 8px;
-}
-
-.nss-impact-box span {
-  font-size: 14px;
-  font-weight: 600;
-  color: #E2E8F0;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-/* Gallery Showcase */
-.nss-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.nss-gallery-item {
-  position: relative;
-  aspect-ratio: 4/3;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: var(--nss-shadow-sm);
-  cursor: pointer;
-}
-
-.nss-gallery-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s ease;
-}
-
-.nss-gallery-item:hover img {
-  transform: scale(1.08);
-}
-
-.nss-gallery-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(12, 35, 64, 0.85) 0%, transparent 60%);
-  display: flex;
-  align-items: flex-end;
-  padding: 16px;
-  opacity: 0;
-  transition: opacity 0.25s ease;
-}
-
-.nss-gallery-item:hover .nss-gallery-overlay {
-  opacity: 1;
-}
-
-.nss-gallery-overlay span {
-  color: var(--nss-white);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-/* Testimonial Cards */
-.nss-testimonial-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-}
-
-.nss-testimonial-card {
-  background: var(--nss-card-bg);
-  border: 1px solid var(--nss-border-light);
-  border-radius: 20px;
-  padding: 32px 28px;
-  box-shadow: var(--nss-shadow-sm);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.nss-testimonial-card p {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--nss-text);
-  font-style: italic;
-  margin: 0 0 20px;
-}
-
-.nss-testimonial-author {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.nss-testimonial-avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: #EFF6FF;
-  color: var(--nss-accent);
-  display: grid;
-  place-items: center;
-  font-weight: 700;
-  font-size: 16px;
-  border: 2px solid var(--nss-accent);
-}
-
-.nss-testimonial-name {
-  font-weight: 700;
-  color: var(--nss-navy);
-  font-size: 15px;
-}
-
-.nss-testimonial-role {
-  font-size: 12px;
-  color: var(--nss-text-muted);
-}
-
-/* High Impact CTA Banner */
-.nss-cta-section {
-  padding: 70px 0;
-  background: #ffffff;
-}
-
-.nss-cta-banner {
-  background: radial-gradient(circle at 10% 20%, rgba(255, 214, 10, 0.15) 0%, transparent 40%),
-              linear-gradient(135deg, #0C2340 0%, #153965 100%);
-  color: var(--nss-white);
-  border-radius: 28px;
-  padding: 60px 40px;
-  text-align: center;
-  box-shadow: 0 20px 48px rgba(12, 35, 64, 0.16);
-  position: relative;
-  overflow: hidden;
-}
-
-.nss-cta-banner h2 {
-  font-family: 'Bebas Neue', Impact, sans-serif !important;
-  font-size: clamp(40px, 6vw, 64px);
-  color: var(--nss-white);
-  margin: 0 0 14px;
-}
-
-.nss-cta-banner p {
-  font-size: 17px;
-  color: #CBD5E1;
-  max-width: 600px;
-  margin: 0 auto 32px;
-  line-height: 1.6;
-}
-
-/* Institutional Footer */
-.nss-footer-institutional {
-  background: #071527;
-  color: #94A3B8;
-  padding: 70px 0 30px;
-  border-top: 3px solid var(--nss-navy);
-}
-
-.nss-footer-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1.2fr;
-  gap: 40px;
-  margin-bottom: 50px;
-}
-
-.nss-footer-brand-title {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 26px;
-  color: var(--nss-white);
-  letter-spacing: 0.03em;
-  margin: 12px 0 6px;
-}
-
-.nss-footer-brand-desc {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #94A3B8;
-  margin-bottom: 16px;
-}
-
-.nss-footer-motto-pill {
-  display: inline-block;
-  background: rgba(255, 214, 10, 0.12);
-  color: var(--nss-gold);
-  border: 1px solid rgba(255, 214, 10, 0.3);
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 14px;
-  border-radius: var(--nss-radius-full);
-}
-
-.nss-footer-heading {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--nss-white);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  margin-bottom: 18px;
-}
-
-.nss-footer-links-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.nss-footer-links-list a {
-  color: #CBD5E1;
-  font-size: 13px;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
-
-.nss-footer-links-list a:hover {
-  color: var(--nss-gold);
-}
-
-.nss-footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 14px;
-  font-size: 12px;
-  color: #64748B;
-}
-
-.nss-media-credit {
-  color: #94A3B8;
-}
-
-.nss-media-credit a {
-  color: var(--nss-gold);
-  text-decoration: none;
-}
-
-@media (max-width: 900px) {
-  .nss-footer-grid {
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
-  }
-}
-
-@media (max-width: 540px) {
-  .nss-footer-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-
-/* ==========================================================================
-   OFFICIAL NSS TGPCOP SCROLL BACKGROUND & DYNAMIC ATMOSPHERE ENGINE
-   Supplied reference design: Parallax Scene + Floating Orbs + Particles + Washes
-   ========================================================================== */
-
-:root {
-  --blue: #004bfe;
-  --navy: #061a52;
-  --yellow: #ffd400;
-}
-
-/* Fixed Multi-Layered Atmosphere Scene */
-.scene {
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  overflow: hidden;
-  background: var(--navy);
-  pointer-events: none;
-}
-
-.scene-image {
-  position: absolute;
-  inset: -7%;
-  width: 114%;
-  height: 114%;
-  object-fit: cover;
-  object-position: center;
-  opacity: 0.94;
-  transform: translate3d(0, var(--image-y, 0px), 0) scale(var(--image-scale, 1.04));
-  will-change: transform;
-}
-
-.scene-tint {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(3, 20, 68, 0.12), rgba(0, 75, 254, 0.04) 34%, rgba(255, 255, 255, 0.08) 52%, rgba(4, 24, 76, 0.22));
-  mix-blend-mode: multiply;
-  pointer-events: none;
-}
-
-.orb {
-  position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.42);
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: 0 0 70px rgba(93, 167, 255, 0.12);
-  will-change: transform;
-  pointer-events: none;
-}
-
-.orb.one {
-  width: 230px;
-  height: 230px;
-  top: 14%;
-  left: -90px;
-}
-
-.orb.two {
-  width: 150px;
-  height: 150px;
-  top: 56%;
-  right: -45px;
-  border-color: rgba(255, 212, 0, 0.45);
-}
-
-.orb.three {
-  width: 70px;
-  height: 70px;
-  top: 74%;
-  left: 17%;
-  background: rgba(255, 212, 0, 0.10);
-}
-
-.particles {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1.6px);
-  background-size: 48px 48px;
-  opacity: 0.14;
-  transform: translateY(var(--dots-y, 0px));
-  will-change: transform;
-}
-
-/* Homepage Global Atmosphere & Wash Transitions */
-body.nss-page.nss-homepage {
-  background: transparent !important;
-  color: #ffffff !important;
-}
-
-body.nss-page.nss-homepage .nss-header-sticky {
-  background: rgba(6, 26, 82, 0.88);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.nss-homepage section[data-section] {
-  position: relative;
-  isolation: isolate;
-  background: transparent !important;
-}
-
-.nss-homepage section[data-section]::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  opacity: var(--wash, 0);
-  background: var(--wash-color, transparent);
-  transition: opacity 0.15s linear;
-}
-
-/* Full-Screen Scroll Hero */
-.nss-scroll-hero {
-  min-height: 100svh;
-  padding: clamp(100px, 14vh, 160px) clamp(20px, 6vw, 80px) 70px;
-  display: flex;
-  align-items: center;
-  position: relative;
-  isolation: isolate;
-}
-
-.nss-scroll-hero-inner {
-  width: min(100%, 1240px);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  align-items: center;
-  gap: 50px;
-}
-
-.eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--yellow);
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.78rem;
-  font-weight: 800;
-  margin-bottom: 16px;
-}
-
-.eyebrow::before {
-  content: "";
-  width: 30px;
-  height: 3px;
-  background: var(--yellow);
-  border-radius: 4px;
-}
-
-.nss-display-title {
-  font-family: 'Bebas Neue', Impact, sans-serif !important;
-  font-size: clamp(3.8rem, 8.5vw, 7.5rem);
-  letter-spacing: -0.01em;
-  line-height: 0.94;
-  margin: 12px 0 20px;
-  color: #ffffff;
-}
-
-.accent-gold {
-  color: var(--yellow) !important;
-}
-
-.nss-hero-lead {
-  font-size: clamp(1.02rem, 1.35vw, 1.2rem);
-  line-height: 1.75;
-  max-width: 650px;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 28px;
-}
-
-.actions-hero {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  margin-top: 24px;
-  align-items: center;
-}
-
-.btn-hero {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 26px;
-  border-radius: 999px;
-  text-decoration: none;
-  font-weight: 800;
-  font-size: 0.92rem;
-  letter-spacing: 0.02em;
-  border: 1.5px solid rgba(255, 255, 255, 0.65);
-  color: #ffffff;
-  backdrop-filter: blur(10px);
-  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.btn-hero.primary {
-  background: var(--yellow);
-  color: #061a52;
-  border-color: var(--yellow);
-}
-
-.btn-hero:hover {
-  transform: translateY(-3px);
-}
-
-.btn-hero.primary:hover {
-  background: #f0c500;
-  border-color: #f0c500;
-}
-
-/* Glass Feature Card in Hero */
-.glass-hero-badge {
-  padding: 34px 30px;
-  background: rgba(5, 25, 75, 0.45);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  border-radius: 26px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-  text-align: center;
-}
-
-.glass-hero-badge .nss-badge-logo {
-  height: 84px;
-  width: auto;
-  margin: 0 auto 14px;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
-}
-
-.glass-hero-badge .nss-badge-unit {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 26px;
-  color: #ffffff;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
-}
-
-.glass-hero-badge .nss-badge-motto {
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--yellow);
-  letter-spacing: 0.1em;
   text-transform: uppercase;
   margin-bottom: 22px;
 }
 
-.stat-row-hero {
+.nss-hero-title {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(48px, 9vw, 92px);
+  letter-spacing: 0.02em;
+  line-height: 0.95;
+  margin: 0 0 14px;
+  color: var(--nss-white);
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+.nss-hero-subtitle {
+  font-size: clamp(20px, 3.2vw, 32px);
+  font-weight: 700;
+  color: var(--nss-yellow);
+  margin: 0 0 20px;
+  letter-spacing: -0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nss-hero-description {
+  font-size: clamp(15px, 1.8vw, 18px);
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 760px;
+  margin: 0 auto 36px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.nss-hero-actions {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 38px;
+}
+
+.nss-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 28px;
+  background-color: var(--nss-royal-blue);
+  color: var(--nss-white);
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: var(--nss-radius-full);
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 6px 20px rgba(6, 71, 200, 0.4);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.nss-btn-primary:hover {
+  background-color: var(--nss-royal-blue-hover);
+  transform: translateY(-2px);
+}
+
+.nss-btn-yellow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 28px;
+  background-color: var(--nss-yellow);
+  color: var(--nss-navy);
+  font-size: 15px;
+  font-weight: 800;
+  border-radius: var(--nss-radius-full);
+  box-shadow: 0 6px 20px rgba(255, 212, 0, 0.35);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.nss-btn-yellow:hover {
+  background-color: var(--nss-yellow-hover);
+  transform: translateY(-2px);
+}
+
+.nss-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 22px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--nss-white);
+  font-size: 13.5px;
+  font-weight: 600;
+  border-radius: var(--nss-radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+
+.nss-btn-ghost:hover {
+  border-color: var(--nss-yellow);
+  color: var(--nss-yellow);
+}
+
+.nss-hero-accreditation {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
   gap: 12px;
+  padding: 10px 22px;
+  background: rgba(7, 27, 73, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--nss-radius-full);
+  backdrop-filter: blur(12px);
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.85);
   flex-wrap: wrap;
 }
 
-.stat-box-hero {
-  flex: 1;
-  min-width: 95px;
-  padding: 14px 12px;
-  border-radius: 16px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.nss-acc-item span {
+  color: var(--nss-yellow);
+  font-weight: 600;
 }
 
-.stat-box-hero b {
-  display: block;
-  font-size: 1.4rem;
-  color: var(--yellow);
-  margin-bottom: 2px;
-  font-weight: 800;
+.nss-acc-dot {
+  color: rgba(255, 255, 255, 0.4);
 }
 
-.stat-box-hero span {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.scroll-hint {
+.nss-scroll-indicator {
   position: absolute;
   bottom: 24px;
   left: 50%;
@@ -2505,32 +515,33 @@ body.nss-page.nss-homepage .nss-header-sticky {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 11px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.85);
-  pointer-events: none;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-.scroll-hint span {
+.nss-scroll-indicator .mouse {
   width: 22px;
   height: 34px;
   border: 1.5px solid rgba(255, 255, 255, 0.7);
-  border-radius: 20px;
+  border-radius: 18px;
   position: relative;
 }
 
-.scroll-hint span::after {
+.nss-scroll-indicator .mouse::after {
   content: "";
   position: absolute;
   width: 4px;
   height: 7px;
   left: 7.5px;
   top: 6px;
-  border-radius: 4px;
-  background: var(--yellow);
-  animation: wheel 1.5s infinite;
+  background-color: var(--nss-yellow);
+  border-radius: 2px;
+  animation: wheel 1.6s infinite;
 }
 
 @keyframes wheel {
@@ -2540,145 +551,909 @@ body.nss-page.nss-homepage .nss-header-sticky {
   }
 }
 
-/* Translucent Cards & Readability Across Sections */
-.nss-homepage .nss-section-header h2 {
-  color: #ffffff !important;
+/* ==========================================================================
+   3. SHARED SECTION UTILITIES & TYPOGRAPHY
+   ========================================================================== */
+.nss-section {
+  padding: 90px 20px;
+  position: relative;
 }
 
-.nss-homepage .nss-section-header p {
-  color: #CBD5E1 !important;
+.nss-section.bg-offwhite {
+  background-color: var(--nss-off-white);
+  color: var(--nss-text-primary);
 }
 
-.nss-homepage .nss-motto-tag {
-  background: rgba(255, 212, 0, 0.14) !important;
-  border-color: rgba(255, 212, 0, 0.4) !important;
-  color: var(--yellow) !important;
+.nss-section.bg-white {
+  background-color: var(--nss-white);
+  color: var(--nss-text-primary);
 }
 
-.nss-homepage .nss-card {
-  background: rgba(12, 35, 64, 0.65) !important;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
-  color: #ffffff !important;
+.nss-section.bg-navy {
+  background-color: var(--nss-navy);
+  color: var(--nss-white);
 }
 
-.nss-homepage .nss-card h3 {
-  color: #ffffff !important;
+.nss-container {
+  width: min(var(--nss-container), 100%);
+  margin: 0 auto;
 }
 
-.nss-homepage .nss-card p {
-  color: #CBD5E1 !important;
+.nss-section-header {
+  text-align: center;
+  max-width: 780px;
+  margin: 0 auto 52px;
 }
 
-.nss-homepage .nss-event-card {
-  background: rgba(12, 35, 64, 0.75) !important;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35) !important;
+.nss-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--nss-royal-blue);
+  margin-bottom: 12px;
 }
 
-.nss-homepage .nss-event-body h3,
-.nss-homepage .nss-event-title {
-  color: #ffffff !important;
+.nss-section.bg-navy .nss-eyebrow {
+  color: var(--nss-yellow);
 }
 
-.nss-homepage .nss-event-desc {
-  color: #CBD5E1 !important;
+.nss-eyebrow::before,
+.nss-eyebrow::after {
+  content: "";
+  width: 20px;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: 2px;
 }
 
-.nss-homepage .nss-event-date {
-  color: var(--yellow) !important;
+.nss-section-title {
+  font-size: clamp(28px, 4.5vw, 42px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 16px;
+  line-height: 1.15;
 }
 
-.nss-homepage .nss-president-card {
-  background: rgba(12, 35, 64, 0.75) !important;
-  backdrop-filter: blur(18px);
-  border: 1.5px solid rgba(255, 212, 0, 0.35) !important;
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4) !important;
+.nss-section.bg-navy .nss-section-title {
+  color: var(--nss-white);
 }
 
-.nss-homepage .nss-president-quote {
-  color: #F1F5F9 !important;
+.nss-section-subtitle {
+  font-size: clamp(15px, 1.6vw, 17px);
+  color: var(--nss-text-secondary);
+  line-height: 1.65;
+  margin: 0;
 }
 
-.nss-homepage .nss-president-name {
-  color: var(--yellow) !important;
+.nss-section.bg-navy .nss-section-subtitle {
+  color: #CBD5E1;
 }
 
-.nss-homepage .nss-president-role {
-  color: #E2E8F0 !important;
+/* ==========================================================================
+   4. FEATURE CARDS (ABOUT SECTION)
+   ========================================================================== */
+.nss-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
 }
 
-.nss-homepage .nss-leader-card {
-  background: rgba(12, 35, 64, 0.65) !important;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  color: #ffffff !important;
+.nss-feature-card {
+  background-color: var(--nss-white);
+  border: 1px solid var(--nss-border);
+  border-radius: var(--nss-radius-card);
+  padding: 36px 28px;
+  box-shadow: var(--nss-shadow-card);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.nss-homepage .nss-leader-name {
-  color: #ffffff !important;
+.nss-feature-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--nss-shadow-hover);
+  border-color: rgba(6, 71, 200, 0.3);
 }
 
-.nss-homepage .nss-leader-role {
-  color: var(--yellow) !important;
+.nss-card-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background-color: rgba(6, 71, 200, 0.08);
+  color: var(--nss-royal-blue);
+  font-size: 26px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 22px;
 }
 
-.nss-homepage .nss-leader-dept {
-  color: #94A3B8 !important;
+.nss-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--nss-navy);
+  margin: 0 0 12px;
+  line-height: 1.3;
 }
 
-.nss-homepage .nss-testimonial-card {
-  background: rgba(12, 35, 64, 0.65) !important;
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.18) !important;
-  color: #CBD5E1 !important;
+.nss-card-desc {
+  font-size: 14.5px;
+  color: var(--nss-text-secondary);
+  line-height: 1.65;
+  margin: 0;
 }
 
-.nss-homepage .nss-testimonial-name {
-  color: #ffffff !important;
+/* ==========================================================================
+   5. KEY ACTIVITIES GRID
+   ========================================================================== */
+.nss-activities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 26px;
 }
 
-.nss-homepage .nss-testimonial-role {
-  color: var(--yellow) !important;
+.nss-activity-card {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--nss-radius-card);
+  padding: 32px 28px;
+  backdrop-filter: blur(12px);
+  transition: transform 0.25s ease, background-color 0.25s ease, border-color 0.25s ease;
+  display: flex;
+  flex-direction: column;
 }
 
-.nss-homepage .nss-impact-section {
-  background: transparent !important;
+.nss-activity-card:hover {
+  transform: translateY(-5px);
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: var(--nss-border-yellow);
 }
 
-.nss-homepage .nss-impact-box {
-  background: rgba(255, 255, 255, 0.08) !important;
-  backdrop-filter: blur(14px);
-  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+.nss-act-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
 }
 
-.nss-homepage .nss-impact-box b {
-  color: var(--yellow) !important;
+.nss-act-icon {
+  font-size: 30px;
 }
 
-.nss-homepage .nss-cta-section {
-  background: transparent !important;
+.nss-act-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border-radius: var(--nss-radius-full);
+  background-color: rgba(255, 212, 0, 0.15);
+  color: var(--nss-yellow);
+  border: 1px solid rgba(255, 212, 0, 0.35);
 }
 
-.nss-homepage .nss-cta-banner {
-  background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.35) 0%, rgba(7, 21, 38, 0.88) 100%) !important;
-  backdrop-filter: blur(20px);
-  border: 1.5px solid rgba(255, 212, 0, 0.35) !important;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+.nss-act-title {
+  font-size: 19px;
+  font-weight: 700;
+  color: var(--nss-white);
+  margin: 0 0 10px;
+  line-height: 1.35;
 }
 
-.nss-homepage .nss-footer-institutional {
-  background: rgba(4, 16, 44, 0.92) !important;
-  backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+.nss-act-desc {
+  font-size: 14px;
+  color: #CBD5E1;
+  line-height: 1.65;
+  margin: 0 0 18px;
+  flex: 1;
 }
 
-@media (max-width: 900px) {
-  .nss-scroll-hero-inner {
-    grid-template-columns: 1fr;
+.nss-act-action {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nss-yellow);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ==========================================================================
+   6. RECENT EVENTS EDITORIAL CARDS
+   ========================================================================== */
+.nss-events-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.nss-event-card {
+  background-color: var(--nss-white);
+  border: 1px solid var(--nss-border);
+  border-radius: var(--nss-radius-card);
+  overflow: hidden;
+  box-shadow: var(--nss-shadow-card);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.nss-event-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--nss-shadow-hover);
+}
+
+.nss-event-body {
+  padding: 30px 26px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.nss-event-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.nss-event-badge {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: var(--nss-radius-full);
+  background-color: rgba(6, 71, 200, 0.1);
+  color: var(--nss-royal-blue);
+}
+
+.nss-event-title {
+  font-size: 18.5px;
+  font-weight: 700;
+  color: var(--nss-navy);
+  margin: 0 0 12px;
+  line-height: 1.35;
+}
+
+.nss-event-desc {
+  font-size: 14px;
+  color: var(--nss-text-secondary);
+  line-height: 1.65;
+  margin: 0 0 20px;
+  flex: 1;
+}
+
+.nss-event-link {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--nss-royal-blue);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nss-event-link:hover {
+  color: var(--nss-royal-blue-hover);
+}
+
+/* ==========================================================================
+   7. NSS PRESIDENT / LEADERSHIP SPOTLIGHT
+   ========================================================================== */
+.nss-leadership-wrap {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.nss-president-card {
+  background-color: var(--nss-white);
+  border: 1px solid var(--nss-border);
+  border-radius: 24px;
+  padding: 44px;
+  box-shadow: var(--nss-shadow-card);
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  align-items: center;
+  gap: 40px;
+}
+
+.nss-president-portrait-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 2px solid var(--nss-yellow);
+  box-shadow: 0 8px 24px rgba(7, 27, 73, 0.14);
+  background-color: var(--nss-surface-muted);
+}
+
+.nss-president-portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.nss-president-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.nss-desk-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--nss-royal-blue);
+  margin-bottom: 12px;
+}
+
+.nss-president-quote {
+  font-size: clamp(16px, 1.8vw, 18px);
+  line-height: 1.7;
+  color: var(--nss-text-primary);
+  font-style: italic;
+  margin: 0 0 24px;
+  position: relative;
+}
+
+.nss-president-info {
+  border-top: 1px solid var(--nss-border);
+  padding-top: 18px;
+}
+
+.nss-president-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--nss-navy);
+  margin: 0 0 4px;
+}
+
+.nss-president-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--nss-royal-blue);
+  margin: 0 0 2px;
+}
+
+.nss-president-college {
+  font-size: 12.5px;
+  color: var(--nss-text-muted);
+}
+
+/* ==========================================================================
+   8. PHOTO GALLERY & EMPTY STATE
+   ========================================================================== */
+.nss-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.nss-gallery-item {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  cursor: pointer;
+  box-shadow: var(--nss-shadow-sm);
+  background-color: var(--nss-surface-muted);
+}
+
+.nss-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.nss-gallery-item:hover img {
+  transform: scale(1.05);
+}
+
+.nss-gallery-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(7, 27, 73, 0.85) 100%);
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  color: var(--nss-white);
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.nss-gallery-item:hover .nss-gallery-overlay {
+  opacity: 1;
+}
+
+.nss-empty-notice {
+  text-align: center;
+  padding: 60px 24px;
+  background-color: var(--nss-white);
+  border: 1.5px dashed var(--nss-border);
+  border-radius: var(--nss-radius-card);
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.nss-empty-icon {
+  font-size: 48px;
+  margin-bottom: 14px;
+  opacity: 0.85;
+}
+
+.nss-empty-notice h3 {
+  color: var(--nss-navy);
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.nss-empty-notice p {
+  color: var(--nss-text-secondary);
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ==========================================================================
+   9. NSS IMPACT (QUALITATIVE PILLARS)
+   ========================================================================== */
+.nss-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
+}
+
+.nss-impact-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--nss-radius-card);
+  padding: 32px 24px;
+  backdrop-filter: blur(12px);
+  text-align: center;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.nss-impact-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--nss-border-yellow);
+}
+
+.nss-impact-icon {
+  font-size: 34px;
+  margin-bottom: 16px;
+}
+
+.nss-impact-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--nss-white);
+  margin: 0 0 10px;
+}
+
+.nss-impact-desc {
+  font-size: 13.5px;
+  color: #CBD5E1;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ==========================================================================
+   10. VOLUNTEER CTA SECTION
+   ========================================================================== */
+.nss-cta-wrap {
+  max-width: 940px;
+  margin: 0 auto;
+  text-align: center;
+  background: linear-gradient(135deg, var(--nss-navy) 0%, #0B2B6D 50%, var(--nss-royal-blue) 100%);
+  border: 2px solid var(--nss-border-yellow);
+  border-radius: 28px;
+  padding: 64px 36px;
+  color: var(--nss-white);
+  box-shadow: var(--nss-shadow-card);
+}
+
+.nss-cta-title {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(38px, 6vw, 64px);
+  letter-spacing: 0.02em;
+  margin: 0 0 14px;
+  color: var(--nss-white);
+}
+
+.nss-cta-desc {
+  font-size: clamp(15px, 1.8vw, 17px);
+  line-height: 1.65;
+  color: #E2E8F0;
+  max-width: 680px;
+  margin: 0 auto 34px;
+}
+
+.nss-cta-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.nss-cta-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  font-size: 13.5px;
+  flex-wrap: wrap;
+}
+
+.nss-cta-links a {
+  color: var(--nss-yellow);
+  text-decoration: underline;
+}
+
+.nss-cta-links a:hover {
+  color: var(--nss-white);
+}
+
+/* ==========================================================================
+   11. INSTITUTIONAL FOOTER
+   ========================================================================== */
+.nss-footer {
+  background-color: var(--nss-navy-dark);
+  color: #CBD5E1;
+  padding: 80px 20px 30px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.nss-footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 48px;
+  margin-bottom: 60px;
+}
+
+.nss-footer-col-title {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--nss-white);
+  margin: 0 0 20px;
+}
+
+.nss-footer-brand-title {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: 24px;
+  color: var(--nss-white);
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+}
+
+.nss-footer-brand-desc {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #94A3B8;
+  margin: 0 0 16px;
+}
+
+.nss-footer-motto-pill {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: var(--nss-radius-full);
+  background-color: rgba(255, 212, 0, 0.12);
+  color: var(--nss-yellow);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  border: 1px solid rgba(255, 212, 0, 0.3);
+}
+
+.nss-footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nss-footer-links a {
+  color: #94A3B8;
+  font-size: 13.5px;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.nss-footer-links a:hover {
+  color: var(--nss-yellow);
+}
+
+.nss-footer-contact-item {
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  color: #94A3B8;
+}
+
+.nss-footer-contact-item b {
+  color: #E2E8F0;
+}
+
+.nss-social-pills {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.nss-social-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  border-radius: var(--nss-radius-full);
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #E2E8F0;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.18s ease;
+}
+
+.nss-social-pill:hover {
+  border-color: var(--nss-yellow);
+  color: var(--nss-yellow);
+}
+
+.nss-footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: #64748B;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nss-footer-bottom a {
+  color: var(--nss-yellow);
+}
+
+/* ==========================================================================
+   12. PORTAL PAGES (LOGIN, REGISTER, STATUS, ID, VERIFY, ADMIN)
+   Clean, institutional form styles scoped to .nss-portal-card
+   ========================================================================== */
+.nss-portal-section {
+  min-height: calc(100vh - 72px);
+  padding: 60px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--nss-off-white);
+}
+
+.nss-portal-card {
+  width: 100%;
+  max-width: 520px;
+  background-color: var(--nss-white);
+  border: 1px solid var(--nss-border);
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: var(--nss-shadow-card);
+}
+
+.nss-portal-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.nss-portal-logo {
+  height: 58px;
+  width: auto;
+  margin: 0 auto 14px;
+}
+
+.nss-portal-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--nss-navy);
+  margin: 0 0 6px;
+}
+
+.nss-portal-sub {
+  font-size: 13.5px;
+  color: var(--nss-text-muted);
+  margin: 0;
+}
+
+.nss-form-group {
+  margin-bottom: 20px;
+}
+
+.nss-form-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nss-navy);
+  margin-bottom: 6px;
+}
+
+.nss-form-input,
+.nss-form-select {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid var(--nss-border);
+  border-radius: var(--nss-radius-sm);
+  font-family: inherit;
+  font-size: 14px;
+  color: var(--nss-text-primary);
+  background-color: #FFFFFF;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.nss-form-input:focus,
+.nss-form-select:focus {
+  outline: none;
+  border-color: var(--nss-royal-blue);
+  box-shadow: 0 0 0 3px rgba(6, 71, 200, 0.15);
+}
+
+.nss-btn-submit {
+  width: 100%;
+  padding: 13px;
+  background-color: var(--nss-royal-blue);
+  color: var(--nss-white);
+  font-size: 15px;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--nss-radius-sm);
+  cursor: pointer;
+  transition: background-color 0.18s ease, transform 0.18s ease;
+}
+
+.nss-btn-submit:hover {
+  background-color: var(--nss-royal-blue-hover);
+  transform: translateY(-1px);
+}
+
+/* Badge styles for statuses */
+.nss-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  border-radius: var(--nss-radius-full);
+  text-transform: uppercase;
+}
+
+.nss-badge.pending {
+  background-color: #FEF3C7;
+  color: #B45309;
+}
+
+.nss-badge.approved {
+  background-color: #DCFCE7;
+  color: #15803D;
+}
+
+.nss-badge.rejected {
+  background-color: #FEE2E2;
+  color: #B91C1C;
+}
+
+/* ==========================================================================
+   13. RESPONSIVE BREAKPOINTS (DESKTOP, LAPTOP, TABLET, MOBILE)
+   Tested: 1920px, 1440px, 1280px, 768px, 390px, 360px
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .nss-header-nav {
+    display: none;
+  }
+  .nss-menu-toggle {
+    display: flex;
+  }
+  .nss-grid-3,
+  .nss-events-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .nss-impact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .nss-gallery-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .nss-footer-grid {
+    grid-template-columns: 1fr 1fr;
     gap: 36px;
+  }
+  .nss-president-card {
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    padding: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .nss-header-wrap {
+    height: 64px;
+  }
+  .nss-brand-sub {
+    display: none;
+  }
+  .nss-hero {
+    min-height: calc(90svh - 64px);
+    padding: 50px 16px 60px;
+  }
+  .nss-hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .nss-hero-actions .nss-btn-primary,
+  .nss-hero-actions .nss-btn-yellow,
+  .nss-hero-actions .nss-btn-ghost {
+    width: 100%;
+  }
+  .nss-hero-accreditation {
+    flex-direction: column;
+    gap: 4px;
+    border-radius: 14px;
+  }
+  .nss-acc-dot {
+    display: none;
+  }
+  .nss-grid-3,
+  .nss-events-grid,
+  .nss-impact-grid,
+  .nss-gallery-grid {
+    grid-template-columns: 1fr;
+  }
+  .nss-president-card {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding: 28px 20px;
+  }
+  .nss-president-portrait-frame {
+    max-width: 200px;
+    margin: 0 auto;
+  }
+  .nss-footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+  .nss-cta-wrap {
+    padding: 44px 20px;
+  }
+  .nss-cta-buttons {
+    flex-direction: column;
+  }
+  .nss-cta-buttons .nss-btn-yellow,
+  .nss-cta-buttons .nss-btn-ghost {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .nss-section {
+    padding: 60px 14px;
+  }
+  .nss-badge-pill {
+    font-size: 11px;
+    padding: 5px 12px;
+  }
+  .nss-portal-card {
+    padding: 24px 16px;
   }
 }
 
@@ -2691,126 +1466,4 @@ body.nss-page.nss-homepage .nss-header-sticky {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-}
-
-
-/* ==========================================================================
-   NSS TGPCOP — TRUTHFUL UI & CLOUDINARY INTEGRATION STYLES
-   ========================================================================== */
-
-/* Intentional Empty / Coming Soon Notice for Photo Gallery */
-.nss-empty-notice {
-  text-align: center;
-  padding: 56px 28px;
-  background: rgba(12, 35, 64, 0.65);
-  backdrop-filter: blur(16px);
-  border: 1.5px dashed rgba(255, 212, 0, 0.35);
-  border-radius: 24px;
-  max-width: 680px;
-  margin: 0 auto;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
-}
-
-.nss-empty-icon {
-  font-size: 46px;
-  margin-bottom: 14px;
-  opacity: 0.9;
-  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.3));
-}
-
-.nss-empty-notice h3 {
-  color: #ffffff;
-  font-size: 1.4rem;
-  margin-bottom: 10px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
-.nss-empty-notice p {
-  color: #CBD5E1;
-  font-size: 0.95rem;
-  line-height: 1.65;
-  margin: 0 auto;
-  max-width: 520px;
-}
-
-/* Executive Desk Monogram & Portrait */
-.nss-president-monogram {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 212, 0, 0.22) 0%, rgba(0, 75, 254, 0.35) 100%);
-  border: 2px solid var(--yellow);
-  display: grid;
-  place-items: center;
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 32px;
-  letter-spacing: 0.05em;
-  color: var(--yellow);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  margin: 0 auto 18px;
-}
-
-.nss-president-img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid var(--yellow);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
-  margin: 0 auto 18px;
-  display: block;
-}
-
-/* Clean Hero Emblem Card without fake stats */
-.glass-hero-badge-clean {
-  padding: 38px 32px;
-  background: rgba(5, 25, 75, 0.5);
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  border-radius: 26px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
-  text-align: center;
-}
-
-.glass-hero-badge-clean .nss-badge-logo {
-  height: 88px;
-  width: auto;
-  margin: 0 auto 16px;
-  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.4));
-}
-
-.glass-hero-badge-clean .nss-badge-unit {
-  font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 28px;
-  color: #ffffff;
-  letter-spacing: 0.05em;
-  margin-bottom: 4px;
-}
-
-.glass-hero-badge-clean .nss-badge-motto {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--yellow);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  margin-bottom: 22px;
-}
-
-.nss-badge-info-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  font-size: 12.5px;
-  color: #E2E8F0;
-  margin-bottom: 20px;
-}
-
-.nss-badge-info-pill span {
-  color: var(--yellow);
-  font-weight: 700;
 }
