@@ -634,18 +634,47 @@
       presImg.src = cfg.presidentPortrait.trim();
     }
 
-    // 2. Media Gallery Section
+    // 2. Event Media Cards
+    const eventImg = document.getElementById('eventHealthCampImg');
+    if (eventImg && cfg.eventHealthCamp && typeof cfg.eventHealthCamp === 'string' && cfg.eventHealthCamp.trim() !== '') {
+      eventImg.src = cfg.eventHealthCamp.trim();
+    }
+
+    // 3. Media Gallery Section
     const galleryGrid = document.getElementById('nssGalleryGrid');
     const galleryNotice = document.getElementById('nssGalleryNotice');
     if (galleryGrid) {
-      const photos = Array.isArray(cfg.galleryPhotos) ? cfg.galleryPhotos.filter(u => typeof u === 'string' && u.trim() !== '') : [];
+      const rawPhotos = Array.isArray(cfg.galleryPhotos) ? cfg.galleryPhotos : [];
+      const photos = rawPhotos.map((item, idx) => {
+        if (typeof item === 'string' && item.trim()) {
+          return {
+            url: item.trim(),
+            thumb: item.trim(),
+            caption: 'NSS Blood Donation Camp — Field Photo ' + (idx + 1),
+            tag: 'Blood Donation Camp'
+          };
+        }
+        if (item && typeof item === 'object' && item.url) {
+          return {
+            url: item.url.trim(),
+            thumb: item.thumb ? item.thumb.trim() : item.url.trim(),
+            caption: item.caption || ('NSS Blood Donation Camp — Field Photo ' + (idx + 1)),
+            tag: item.tag || 'Blood Donation Camp'
+          };
+        }
+        return null;
+      }).filter(Boolean);
+
       if (photos.length > 0) {
         if (galleryNotice) galleryNotice.style.display = 'none';
         galleryGrid.style.display = 'grid';
-        galleryGrid.innerHTML = photos.map((url, i) =>
-          '<div class="nss-gallery-item" onclick="viewPhoto(\'' + url + '\')">' +
-          '<img src="' + url + '" alt="NSS Activity Photo ' + (i + 1) + '" loading="lazy">' +
-          '<div class="nss-gallery-overlay"><span>View Full Image ➔</span></div>' +
+        galleryGrid.innerHTML = photos.map((item, i) =>
+          '<div class="nss-gallery-item" onclick="viewPhoto(\'' + item.url + '\', \'' + item.caption.replace(/'/g, "\\'") + '\')" role="button" tabindex="0" aria-label="' + item.caption.replace(/"/g, '&quot;') + '">' +
+            '<img src="' + item.thumb + '" alt="' + item.caption.replace(/"/g, '&quot;') + '" loading="lazy">' +
+            '<div class="nss-gallery-overlay">' +
+              '<span class="nss-gallery-tag">' + item.tag + '</span>' +
+              '<span class="nss-gallery-caption">' + item.caption + '</span>' +
+            '</div>' +
           '</div>'
         ).join('');
       } else {

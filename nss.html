@@ -251,15 +251,20 @@
 
         <div class="nss-events-grid">
           <article class="nss-event-card">
+            <div class="nss-event-media">
+              <img src="https://res.cloudinary.com/axgam8br/image/upload/f_auto,q_auto,w_800/v1793047208/IMG_1159.jpg" id="eventHealthCampImg" alt="Voluntary Blood Donation & Health Literacy Drive" loading="lazy">
+              <span class="nss-event-tag-pill">Field Documented</span>
+            </div>
             <div class="nss-event-body">
               <div class="nss-event-meta">
                 <span class="nss-event-badge">Healthcare</span>
+                <span class="nss-event-date">Campus Drive</span>
               </div>
               <h3 class="nss-event-title">Voluntary Blood Donation & Health Literacy Drive</h3>
               <p class="nss-event-desc">
                 Organized at campus premises with voluntary student participation, diagnostic vitals checks, and counseling on rational medication compliance.
               </p>
-              <a href="register.html" class="nss-event-link">Volunteer in Next Drive ➔</a>
+              <a href="#gallery" class="nss-event-link">View Camp Photos (8 Photos) ➔</a>
             </div>
           </article>
 
@@ -530,11 +535,42 @@
     }
 
     // Lightbox viewer
-    function viewPhoto(src) {
-      if (window.LB) {
-        window.LB(`<div style="display:grid;place-items:center;height:100%;"><img src="${src}" alt="NSS Photo" style="max-height:85vh;max-width:92vw;border-radius:14px;border:3px solid #fff;box-shadow:0 20px 50px rgba(0,0,0,0.5);"></div>`);
+    function viewPhoto(src, caption) {
+      const capText = caption || 'NSS TGPCOP Blood Donation Camp';
+      let lb = document.getElementById('lb');
+      if (!lb) {
+        lb = document.createElement('div');
+        lb.id = 'lb';
+        document.body.appendChild(lb);
+      }
+      lb.innerHTML = `
+        <div class="nss-lightbox-content" onclick="event.stopPropagation()">
+          <img src="${src}" alt="${capText}" class="nss-lightbox-img">
+          <div class="nss-lightbox-cap">${capText}</div>
+          <button class="nss-lightbox-close" onclick="closePhoto()" aria-label="Close viewer">&times;</button>
+        </div>
+      `;
+      lb.classList.add('on');
+    }
+
+    function closePhoto() {
+      const lb = document.getElementById('lb');
+      if (lb) {
+        lb.classList.remove('on');
+        lb.innerHTML = '';
       }
     }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closePhoto();
+    });
+
+    document.addEventListener('click', (e) => {
+      const lb = document.getElementById('lb');
+      if (lb && lb.classList.contains('on') && e.target === lb) {
+        closePhoto();
+      }
+    });
   </script>
 </body>
 </html>
