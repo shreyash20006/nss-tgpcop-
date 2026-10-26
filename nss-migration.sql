@@ -16,6 +16,35 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- 2. SEQUENTIAL VOLUNTEER ID GENERATOR (Concurrency-Safe)
 CREATE SEQUENCE IF NOT EXISTS public.nss_volunteer_seq START 1 INCREMENT 1;
 
+-- Helper functions (SECURITY DEFINER bypasses RLS recursion)
+CREATE OR REPLACE FUNCTION public.nss_is_coordinator(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $
+  SELECT EXISTS (
+    SELECT 1 FROM public.nss_roles
+    WHERE user_id = p_user_id
+      AND role IN ('coordinator', 'super_admin')
+  );
+$;
+
+CREATE OR REPLACE FUNCTION public.nss_is_super_admin(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $
+  SELECT EXISTS (
+    SELECT 1 FROM public.nss_roles
+    WHERE user_id = p_user_id
+      AND role = 'super_admin'
+  );
+$;
+
 -- ==============================================================================
 -- 3. TABLE: nss_roles (Coordinator & Super Admin Authorization)
 -- ==============================================================================
@@ -30,14 +59,19 @@ CREATE TABLE IF NOT EXISTS public.nss_roles (
 ALTER TABLE public.nss_roles ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Admins can read nss_roles" ON public.nss_roles;
-CREATE POLICY "Admins can read nss_roles" ON public.nss_roles 
-    FOR SELECT TO authenticated 
-    USING (auth.uid() IN (SELECT user_id FROM public.nss_roles));
-
 DROP POLICY IF EXISTS "Super admin manages roles" ON public.nss_roles;
-CREATE POLICY "Super admin manages roles" ON public.nss_roles 
+DROP POLICY IF EXISTS "Users can read own role" ON public.nss_roles;
+DROP POLICY IF EXISTS "Super admins can manage roles" ON public.nss_roles;
+
+-- Authenticated users can read their own role (Direct comparison = ZERO recursion)
+CREATE POLICY "Users can read own role" ON public.nss_roles 
+    FOR SELECT TO authenticated 
+    USING (auth.uid() = user_id);
+
+CREATE POLICY "Super admins can manage roles" ON public.nss_roles 
     FOR ALL TO authenticated 
-    USING (auth.uid() IN (SELECT user_id FROM public.nss_roles WHERE role = 'super_admin'));
+    USING (public.nss_is_super_admin(auth.uid()))
+    WITH CHECK (public.nss_is_super_admin(auth.uid()));
 
 -- ==============================================================================
 -- 4. TABLE: nss_applications (Volunteer Enrollment & Review)
@@ -89,12 +123,12 @@ CREATE POLICY "Applicant can insert own application" ON public.nss_applications
 DROP POLICY IF EXISTS "Coordinator can view all applications" ON public.nss_applications;
 CREATE POLICY "Coordinator can view all applications" ON public.nss_applications 
     FOR SELECT TO authenticated 
-    USING (auth.uid() IN (SELECT user_id FROM public.nss_roles));
+    USING (public.nss_is_coordinator(auth.uid()));
 
 DROP POLICY IF EXISTS "Coordinator can update applications" ON public.nss_applications;
 CREATE POLICY "Coordinator can update applications" ON public.nss_applications 
     FOR UPDATE TO authenticated 
-    USING (auth.uid() IN (SELECT user_id FROM public.nss_roles));
+    USING (public.nss_is_coordinator(auth.uid()));
 
 DROP POLICY IF EXISTS "Public verify endpoint sees approved only" ON public.nss_applications;
 CREATE POLICY "Public verify endpoint sees approved only" ON public.nss_applications 
@@ -118,7 +152,7 @@ ALTER TABLE public.nss_audit_log ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Coordinators can read audit log" ON public.nss_audit_log;
 CREATE POLICY "Coordinators can read audit log" ON public.nss_audit_log 
     FOR SELECT TO authenticated 
-    USING (auth.uid() IN (SELECT user_id FROM public.nss_roles));
+    USING (public.nss_is_coordinator(auth.uid()));
 
 DROP POLICY IF EXISTS "System can insert audit log" ON public.nss_audit_log;
 CREATE POLICY "System can insert audit log" ON public.nss_audit_log 
@@ -152,7 +186,7 @@ CREATE POLICY "Public can view published leadership" ON public.nss_leadership
 DROP POLICY IF EXISTS "Coordinators manage leadership" ON public.nss_leadership;
 CREATE POLICY "Coordinators manage leadership" ON public.nss_leadership 
     FOR ALL TO authenticated 
-    USING (auth.uid() IN (SELECT user_id FROM public.nss_roles));
+    USING (public.nss_is_coordinator(auth.uid()));
 
 -- ==============================================================================
 -- 7. SECURE RPC FUNCTIONS (SECURITY DEFINER)
