@@ -565,6 +565,63 @@
   }
 
   // Expose NSS object globally
+  
+  // NSS Parallax & Dynamic Wash Scroll Engine
+  NSS.initScrollScene = function () {
+    const image = document.getElementById('sceneImage');
+    const particles = document.getElementById('particles');
+    const orbs = [...document.querySelectorAll('.orb')];
+    const sections = [...document.querySelectorAll('section[data-section]')];
+    if (!image && orbs.length === 0) return;
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let ticking = false;
+
+    function update() {
+      const y = window.scrollY || 0;
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const progress = Math.min(1, y / max);
+
+      if (!reduceMotion && image) {
+        image.style.setProperty('--image-y', (-y * 0.075) + 'px');
+        image.style.setProperty('--image-scale', (1.04 + progress * 0.035).toString());
+        if (particles) {
+          particles.style.setProperty('--dots-y', (-y * 0.12) + 'px');
+        }
+        orbs.forEach(orb => {
+          const speed = Number(orb.dataset.speed || 0.1);
+          orb.style.transform = 'translate3d(0, ' + (y * speed) + 'px, 0) rotate(' + (y * 0.018) + 'deg)';
+        });
+      }
+
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const distance = Math.abs(window.innerHeight / 2 - center);
+        section.style.setProperty('--wash', (Math.max(0, 1 - distance / (window.innerHeight * 0.75)) * 0.45).toFixed(3));
+      });
+
+      ticking = false;
+    }
+
+    function requestUpdate() {
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(update);
+      }
+    }
+
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+    update();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', NSS.initScrollScene);
+  } else {
+    NSS.initScrollScene();
+  }
+
   window.NSS = NSS;
 
 })(window);

@@ -2216,3 +2216,479 @@ body.nss-page footer a:hover {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==========================================================================
+   OFFICIAL NSS TGPCOP SCROLL BACKGROUND & DYNAMIC ATMOSPHERE ENGINE
+   Supplied reference design: Parallax Scene + Floating Orbs + Particles + Washes
+   ========================================================================== */
+
+:root {
+  --blue: #004bfe;
+  --navy: #061a52;
+  --yellow: #ffd400;
+}
+
+/* Fixed Multi-Layered Atmosphere Scene */
+.scene {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  background: var(--navy);
+  pointer-events: none;
+}
+
+.scene-image {
+  position: absolute;
+  inset: -7%;
+  width: 114%;
+  height: 114%;
+  object-fit: cover;
+  object-position: center;
+  opacity: 0.94;
+  transform: translate3d(0, var(--image-y, 0px), 0) scale(var(--image-scale, 1.04));
+  will-change: transform;
+}
+
+.scene-tint {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(3, 20, 68, 0.12), rgba(0, 75, 254, 0.04) 34%, rgba(255, 255, 255, 0.08) 52%, rgba(4, 24, 76, 0.22));
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 70px rgba(93, 167, 255, 0.12);
+  will-change: transform;
+  pointer-events: none;
+}
+
+.orb.one {
+  width: 230px;
+  height: 230px;
+  top: 14%;
+  left: -90px;
+}
+
+.orb.two {
+  width: 150px;
+  height: 150px;
+  top: 56%;
+  right: -45px;
+  border-color: rgba(255, 212, 0, 0.45);
+}
+
+.orb.three {
+  width: 70px;
+  height: 70px;
+  top: 74%;
+  left: 17%;
+  background: rgba(255, 212, 0, 0.10);
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.7) 1px, transparent 1.6px);
+  background-size: 48px 48px;
+  opacity: 0.14;
+  transform: translateY(var(--dots-y, 0px));
+  will-change: transform;
+}
+
+/* Homepage Global Atmosphere & Wash Transitions */
+body.nss-page.nss-homepage {
+  background: transparent !important;
+  color: #ffffff !important;
+}
+
+body.nss-page.nss-homepage .nss-header-sticky {
+  background: rgba(6, 26, 82, 0.88);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.nss-homepage section[data-section] {
+  position: relative;
+  isolation: isolate;
+  background: transparent !important;
+}
+
+.nss-homepage section[data-section]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: var(--wash, 0);
+  background: var(--wash-color, transparent);
+  transition: opacity 0.15s linear;
+}
+
+/* Full-Screen Scroll Hero */
+.nss-scroll-hero {
+  min-height: 100svh;
+  padding: clamp(100px, 14vh, 160px) clamp(20px, 6vw, 80px) 70px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+}
+
+.nss-scroll-hero-inner {
+  width: min(100%, 1240px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+  gap: 50px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--yellow);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-bottom: 16px;
+}
+
+.eyebrow::before {
+  content: "";
+  width: 30px;
+  height: 3px;
+  background: var(--yellow);
+  border-radius: 4px;
+}
+
+.nss-display-title {
+  font-family: 'Bebas Neue', Impact, sans-serif !important;
+  font-size: clamp(3.8rem, 8.5vw, 7.5rem);
+  letter-spacing: -0.01em;
+  line-height: 0.94;
+  margin: 12px 0 20px;
+  color: #ffffff;
+}
+
+.accent-gold {
+  color: var(--yellow) !important;
+}
+
+.nss-hero-lead {
+  font-size: clamp(1.02rem, 1.35vw, 1.2rem);
+  line-height: 1.75;
+  max-width: 650px;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 28px;
+}
+
+.actions-hero {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 24px;
+  align-items: center;
+}
+
+.btn-hero {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 26px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 0.92rem;
+  letter-spacing: 0.02em;
+  border: 1.5px solid rgba(255, 255, 255, 0.65);
+  color: #ffffff;
+  backdrop-filter: blur(10px);
+  transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-hero.primary {
+  background: var(--yellow);
+  color: #061a52;
+  border-color: var(--yellow);
+}
+
+.btn-hero:hover {
+  transform: translateY(-3px);
+}
+
+.btn-hero.primary:hover {
+  background: #f0c500;
+  border-color: #f0c500;
+}
+
+/* Glass Feature Card in Hero */
+.glass-hero-badge {
+  padding: 34px 30px;
+  background: rgba(5, 25, 75, 0.45);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  border-radius: 26px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.35);
+  text-align: center;
+}
+
+.glass-hero-badge .nss-badge-logo {
+  height: 84px;
+  width: auto;
+  margin: 0 auto 14px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+.glass-hero-badge .nss-badge-unit {
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: 26px;
+  color: #ffffff;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.glass-hero-badge .nss-badge-motto {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--yellow);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 22px;
+}
+
+.stat-row-hero {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.stat-box-hero {
+  flex: 1;
+  min-width: 95px;
+  padding: 14px 12px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.stat-box-hero b {
+  display: block;
+  font-size: 1.4rem;
+  color: var(--yellow);
+  margin-bottom: 2px;
+  font-weight: 800;
+}
+
+.stat-box-hero span {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+.scroll-hint span {
+  width: 22px;
+  height: 34px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  position: relative;
+}
+
+.scroll-hint span::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 7px;
+  left: 7.5px;
+  top: 6px;
+  border-radius: 4px;
+  background: var(--yellow);
+  animation: wheel 1.5s infinite;
+}
+
+@keyframes wheel {
+  to {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+}
+
+/* Translucent Cards & Readability Across Sections */
+.nss-homepage .nss-section-header h2 {
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-section-header p {
+  color: #CBD5E1 !important;
+}
+
+.nss-homepage .nss-motto-tag {
+  background: rgba(255, 212, 0, 0.14) !important;
+  border-color: rgba(255, 212, 0, 0.4) !important;
+  color: var(--yellow) !important;
+}
+
+.nss-homepage .nss-card {
+  background: rgba(12, 35, 64, 0.65) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-card h3 {
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-card p {
+  color: #CBD5E1 !important;
+}
+
+.nss-homepage .nss-event-card {
+  background: rgba(12, 35, 64, 0.75) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35) !important;
+}
+
+.nss-homepage .nss-event-body h3,
+.nss-homepage .nss-event-title {
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-event-desc {
+  color: #CBD5E1 !important;
+}
+
+.nss-homepage .nss-event-date {
+  color: var(--yellow) !important;
+}
+
+.nss-homepage .nss-president-card {
+  background: rgba(12, 35, 64, 0.75) !important;
+  backdrop-filter: blur(18px);
+  border: 1.5px solid rgba(255, 212, 0, 0.35) !important;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.4) !important;
+}
+
+.nss-homepage .nss-president-quote {
+  color: #F1F5F9 !important;
+}
+
+.nss-homepage .nss-president-name {
+  color: var(--yellow) !important;
+}
+
+.nss-homepage .nss-president-role {
+  color: #E2E8F0 !important;
+}
+
+.nss-homepage .nss-leader-card {
+  background: rgba(12, 35, 64, 0.65) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-leader-name {
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-leader-role {
+  color: var(--yellow) !important;
+}
+
+.nss-homepage .nss-leader-dept {
+  color: #94A3B8 !important;
+}
+
+.nss-homepage .nss-testimonial-card {
+  background: rgba(12, 35, 64, 0.65) !important;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  color: #CBD5E1 !important;
+}
+
+.nss-homepage .nss-testimonial-name {
+  color: #ffffff !important;
+}
+
+.nss-homepage .nss-testimonial-role {
+  color: var(--yellow) !important;
+}
+
+.nss-homepage .nss-impact-section {
+  background: transparent !important;
+}
+
+.nss-homepage .nss-impact-box {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(14px);
+  border: 1.5px solid rgba(255, 255, 255, 0.18) !important;
+}
+
+.nss-homepage .nss-impact-box b {
+  color: var(--yellow) !important;
+}
+
+.nss-homepage .nss-cta-section {
+  background: transparent !important;
+}
+
+.nss-homepage .nss-cta-banner {
+  background: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.35) 0%, rgba(7, 21, 38, 0.88) 100%) !important;
+  backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255, 212, 0, 0.35) !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45) !important;
+}
+
+.nss-homepage .nss-footer-institutional {
+  background: rgba(4, 16, 44, 0.92) !important;
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 900px) {
+  .nss-scroll-hero-inner {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
