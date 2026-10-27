@@ -21,9 +21,9 @@
   <header class="nss-admin-header">
     <div class="nss-admin-header-wrap">
       <div class="nss-admin-title">
-        <a href="index.html" style="display:flex; align-items:center; gap:12px;">
+        <a href="index.html" class="nss-admin-brand-link">
           <img src="assets/nss-logo.png" alt="NSS Logo" onerror="this.src='echo_logo_white_transparent.png'">
-          <div>
+          <div class="nss-admin-title-text">
             <h1>NSS Coordinator Desk</h1>
             <div class="nss-admin-title-sub">TGPCOP Administration Portal</div>
           </div>
@@ -32,11 +32,11 @@
 
       <div class="nss-admin-user">
         <img id="adminAvatar" class="nss-admin-user-avatar" src="" alt="Avatar" style="display:none;">
-        <div style="text-align:right;">
+        <div class="nss-admin-user-info">
           <div id="adminName" class="nss-admin-user-name">Coordinator</div>
           <div id="adminRole" class="nss-admin-user-role">Role: Loading...</div>
         </div>
-        <button class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff; border:none; margin-left:8px;" onclick="logoutAdmin()">
+        <button class="nss-admin-logout-btn" onclick="logoutAdmin()" title="Log out of coordinator desk">
           Logout
         </button>
       </div>
@@ -46,15 +46,17 @@
   <!-- ======================================================================
        2. DASHBOARD BODY & TABS
        ====================================================================== -->
-  <main class="nss-section" style="padding: 32px 0 60px;">
+  <main class="nss-section nss-admin-main" style="padding: 24px 0 60px;">
     <div class="nss-container">
 
       <!-- Navigation breadcrumbs & shortcuts -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px;">
-        <div style="font-size:14px; font-weight:500; color:var(--nss-text-muted);">
-          <a href="index.html" style="color:var(--nss-royal-blue); font-weight:600;">← NSS Public Home</a> &nbsp;|&nbsp; Coordinator Management Console
+      <div class="nss-admin-top-bar">
+        <div class="nss-admin-breadcrumbs">
+          <a href="index.html" class="nss-admin-back-link">← NSS Public Home</a>
+          <span class="nss-crumb-sep">/</span>
+          <span class="nss-crumb-current">Coordinator Management Console</span>
         </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="nss-admin-actions">
           <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="exportCSV()">
             📊 Export Approved CSV
           </button>
@@ -66,46 +68,60 @@
 
       <!-- Live Stats Cards -->
       <div class="nss-stats-grid">
-        <div class="nss-stat-card">
-          <div class="val" id="statTotal">0</div>
-          <div class="lbl">Total Applications</div>
+        <div class="nss-stat-card nss-stat-total">
+          <div class="nss-stat-icon">📑</div>
+          <div class="nss-stat-data">
+            <div class="val" id="statTotal">0</div>
+            <div class="lbl">Total Applications</div>
+          </div>
         </div>
-        <div class="nss-stat-card" style="border-left-color: #D97706;">
-          <div class="val" id="statPending" style="color: #D97706;">0</div>
-          <div class="lbl">Pending Review</div>
+        <div class="nss-stat-card nss-stat-pending">
+          <div class="nss-stat-icon">⏳</div>
+          <div class="nss-stat-data">
+            <div class="val" id="statPending">0</div>
+            <div class="lbl">Pending Review</div>
+          </div>
         </div>
-        <div class="nss-stat-card" style="border-left-color: #16A34A;">
-          <div class="val" id="statApproved" style="color: #16A34A;">0</div>
-          <div class="lbl">Active Volunteers</div>
+        <div class="nss-stat-card nss-stat-approved">
+          <div class="nss-stat-icon">✅</div>
+          <div class="nss-stat-data">
+            <div class="val" id="statApproved">0</div>
+            <div class="lbl">Active Volunteers</div>
+          </div>
         </div>
-        <div class="nss-stat-card" style="border-left-color: #DC2626;">
-          <div class="val" id="statRejected" style="color: #DC2626;">0</div>
-          <div class="lbl">Rejected</div>
+        <div class="nss-stat-card nss-stat-rejected">
+          <div class="nss-stat-icon">❌</div>
+          <div class="nss-stat-data">
+            <div class="val" id="statRejected">0</div>
+            <div class="lbl">Rejected</div>
+          </div>
         </div>
-        <div class="nss-stat-card" style="border-left-color: #64748B;">
-          <div class="val" id="statRevoked" style="color: #64748B;">0</div>
-          <div class="lbl">Revoked</div>
+        <div class="nss-stat-card nss-stat-revoked">
+          <div class="nss-stat-icon">🚫</div>
+          <div class="nss-stat-data">
+            <div class="val" id="statRevoked">0</div>
+            <div class="lbl">Revoked</div>
+          </div>
         </div>
       </div>
 
       <!-- Navigation Tabs -->
-      <div class="nss-tabs">
-        <button class="nss-tab-btn active" id="btnTabPending" onclick="switchTab('pendingTab')">
-          <span>📋 Applications Pending Review</span>
-          <span id="pendingBadge" style="background:#D97706; color:#fff; border-radius:99px; padding:2px 8px; font-size:11px; margin-left:4px;">0</span>
+      <div class="nss-tabs" role="tablist">
+        <button class="nss-tab-btn active" id="btnTabPending" onclick="switchTab('pendingTab')" role="tab">
+          <span>📋 Pending Review</span>
+          <span id="pendingBadge" class="nss-tab-badge">0</span>
         </button>
-        <button class="nss-tab-btn" id="btnTabAll" onclick="switchTab('allTab')">
-          <span>👥 All Enrolled Applicants</span>
+        <button class="nss-tab-btn" id="btnTabAll" onclick="switchTab('allTab')" role="tab">
+          <span>👥 All Applicants</span>
         </button>
-        <button class="nss-tab-btn" id="btnTabScanner" onclick="switchTab('scannerTab')">
-          <span>📹 QR Scanner & Member Verification</span>
+        <button class="nss-tab-btn" id="btnTabScanner" onclick="switchTab('scannerTab')" role="tab">
+          <span>📹 QR Scanner</span>
         </button>
-        <button class="nss-tab-btn" id="btnTabLeaders" onclick="switchTab('leadershipTab')">
-          <span>🎖️ Leadership Directory</span>
+        <button class="nss-tab-btn" id="btnTabLeaders" onclick="switchTab('leadershipTab')" role="tab">
+          <span>🎖️ Leadership</span>
         </button>
-        <button class="nss-tab-btn" id="btnTabBroadcast" onclick="switchTab('broadcastTab')">
+        <button class="nss-tab-btn" id="btnTabBroadcast" onclick="switchTab('broadcastTab')" role="tab">
           <span>📧 Email Broadcast & Events</span>
-          <span>🎖️ Leadership Directory</span>
         </button>
       </div>
 
@@ -115,7 +131,10 @@
       <div id="pendingTab" class="tab-content">
         <div class="nss-table-container">
           <div class="nss-table-toolbar">
-            <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--nss-navy);">Applications Awaiting Coordinator Review</h3>
+            <div class="nss-toolbar-title-group">
+              <h3 class="nss-toolbar-title">Applications Awaiting Review</h3>
+              <p class="nss-toolbar-desc">Review submitted student credentials and grant volunteer ID cards.</p>
+            </div>
             <button class="nss-btn nss-btn-sm nss-btn-outline" onclick="loadDashboard()">🔄 Reload</button>
           </div>
           <div class="nss-table-wrapper">
@@ -142,10 +161,13 @@
            ================================================================== -->
       <div id="allTab" class="tab-content" style="display:none;">
         <div class="nss-table-container">
-          <div class="nss-table-toolbar">
-            <input type="text" id="allSearchInput" class="nss-search-input" placeholder="Search by name, roll no, ref code, volunteer ID..." oninput="handleSearch()">
-            <div style="display:flex; gap:8px; align-items:center;">
-              <select id="allStatusFilter" class="nss-form-select" style="padding:8px 14px; font-size:13px; width:auto; border-radius:var(--nss-radius-full);" onchange="handleFilter()">
+          <div class="nss-table-toolbar nss-table-toolbar-filter">
+            <div class="nss-search-wrap">
+              <span class="nss-search-icon">🔍</span>
+              <input type="text" id="allSearchInput" class="nss-search-input" placeholder="Search by name, roll no, ref code, volunteer ID..." oninput="handleSearch()">
+            </div>
+            <div class="nss-filter-wrap">
+              <select id="allStatusFilter" class="nss-form-select nss-filter-select" onchange="handleFilter()">
                 <option value="all">All Statuses</option>
                 <option value="pending">Pending</option>
                 <option value="approved">Approved</option>
@@ -179,16 +201,16 @@
            TAB 3: BUILT-IN QR SCANNER & MEMBER VERIFICATION
            ================================================================== -->
       <div id="scannerTab" class="tab-content" style="display:none;">
-        <div class="nss-card" style="padding: 32px 24px; max-width: 680px; margin: 0 auto; background: #FFFFFF; border-radius: var(--nss-radius-card); box-shadow: var(--nss-shadow-card);">
+        <div class="nss-card nss-scanner-card">
           
-          <div style="text-align:center; margin-bottom: 24px;">
-            <div style="display:inline-block; font-size: 11px; font-weight: 700; color: var(--nss-royal-blue); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 999px; padding: 3px 12px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px;">
+          <div class="nss-scanner-header">
+            <div class="nss-scanner-badge">
               INSTITUTIONAL CREDENTIAL DESK
             </div>
-            <h2 style="font-size: 24px; font-weight: 800; color: var(--nss-navy); margin: 0 0 6px;">
+            <h2 class="nss-scanner-title">
               Live Volunteer ID & QR Verification
             </h2>
-            <p style="font-size: 13.5px; color: var(--nss-text-muted); margin: 0 auto; max-width: 480px;">
+            <p class="nss-scanner-desc">
               Scan the physical or digital QR code on any volunteer's ID card to verify their active membership in real time.
             </p>
           </div>
@@ -203,7 +225,7 @@
                 </div>
               </div>
 
-              <div style="display:flex; gap:12px; justify-content:center; margin-bottom:24px; flex-wrap:wrap;">
+              <div class="nss-scanner-actions">
                 <button id="btnStartScan" class="nss-btn nss-btn-primary" onclick="startScanner()">
                   📹 Start Camera Scanner
                 </button>
@@ -214,13 +236,13 @@
             </div>
 
             <!-- Manual Input Fallback -->
-            <div style="background:#F8FAFC; border:1px solid var(--nss-border); border-radius:12px; padding:18px; margin-bottom:24px; text-align:left;">
-              <label class="nss-form-label" style="font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:6px; display:block;">
+            <div class="nss-manual-verify-box">
+              <label class="nss-form-label" style="font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:8px; display:block;">
                 Or Enter Volunteer ID / QR Token Manually:
               </label>
-              <div style="display:flex; gap:10px;">
-                <input type="text" id="manualInput" class="nss-form-input" placeholder="e.g. NSS-TGP-2026-0001 or token..." style="padding:10px 14px; font-size:13px;">
-                <button class="nss-btn nss-btn-navy" onclick="handleManualVerify()" style="white-space:nowrap;">
+              <div class="nss-manual-input-row">
+                <input type="text" id="manualInput" class="nss-form-input" placeholder="e.g. NSS-TGP-2026-0001 or token...">
+                <button class="nss-btn nss-btn-navy" onclick="handleManualVerify()">
                   Verify Now
                 </button>
               </div>
@@ -271,7 +293,10 @@
       <div id="leadershipTab" class="tab-content" style="display:none;">
         <div class="nss-table-container">
           <div class="nss-table-toolbar">
-            <h3 style="margin:0; font-size:16px; font-weight:700; color:var(--nss-navy);">NSS Leadership & Advisory Directory</h3>
+            <div class="nss-toolbar-title-group">
+              <h3 class="nss-toolbar-title">NSS Leadership & Advisory Directory</h3>
+              <p class="nss-toolbar-desc">Manage council members and advisory officers displayed on the public site.</p>
+            </div>
             <button class="nss-btn nss-btn-sm nss-btn-primary" onclick="openLeaderModal()">+ Add New Leader</button>
           </div>
           <div class="nss-table-wrapper">
@@ -293,7 +318,7 @@
             </table>
           </div>
         </div>
-      
+      </div>
 
       <!-- ==================================================================
            TAB 5: EMAIL BROADCAST & EVENT UPDATES (BREVO INTEGRATION)
@@ -440,7 +465,6 @@
 
         </div>
       </div>
-</div>
 
     </div>
   </main>

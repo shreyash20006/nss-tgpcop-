@@ -1700,20 +1700,22 @@ img {
 }
 
 /* ==========================================================================
-   ADMIN & COORDINATOR DESK
+   ADMIN & COORDINATOR DESK — MODERN MINIMALIST DESIGN SYSTEM
    ========================================================================== */
 .nss-admin-header {
-  background-color: var(--nss-navy);
-  border-bottom: 2px solid rgba(255, 212, 0, 0.3);
-  padding: 14px 0;
+  background: linear-gradient(180deg, #071B49 0%, #09225E 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 12px 0;
   position: sticky;
   top: 0;
   z-index: 900;
-  box-shadow: var(--nss-shadow-header);
+  box-shadow: 0 4px 20px rgba(7, 27, 73, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .nss-admin-header-wrap {
-  width: min(var(--nss-container), 94%);
+  width: min(var(--nss-container), 95%);
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -1721,26 +1723,29 @@ img {
   gap: 16px;
 }
 
-.nss-admin-title {
+.nss-admin-brand-link {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
+  text-decoration: none;
 }
 
 .nss-admin-title img {
-  height: 44px;
-  width: 44px;
-  max-width: 44px;
-  max-height: 44px;
+  height: 42px;
+  width: 42px;
+  max-width: 42px;
+  max-height: 42px;
   object-fit: contain;
   flex-shrink: 0;
+  border-radius: 8px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 .nss-admin-title h1 {
   font-family: 'Poppins', sans-serif !important;
-  font-size: 19px !important;
+  font-size: 18px !important;
   font-weight: 700 !important;
-  color: var(--nss-white) !important;
+  color: #FFFFFF !important;
   margin: 0 !important;
   line-height: 1.2 !important;
   letter-spacing: -0.01em !important;
@@ -1749,10 +1754,11 @@ img {
 
 .nss-admin-title-sub {
   font-size: 11px;
-  color: var(--nss-yellow);
+  color: #FFD400;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
+  margin-top: 2px;
 }
 
 .nss-admin-user {
@@ -1762,77 +1768,208 @@ img {
 }
 
 .nss-admin-user-avatar {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid var(--nss-yellow);
+  border: 2px solid #FFD400;
   background-color: var(--nss-surface-muted);
+}
+
+.nss-admin-user-info {
+  text-align: right;
 }
 
 .nss-admin-user-name {
   font-size: 13.5px;
   font-weight: 600;
-  color: var(--nss-white);
+  color: #FFFFFF;
+  line-height: 1.2;
 }
 
 .nss-admin-user-role {
   font-size: 10.5px;
   font-weight: 700;
-  color: #CBD5E1;
+  color: #94A3B8;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  margin-top: 2px;
 }
 
-/* Stats Grid */
+.nss-admin-logout-btn {
+  background: #DC2626;
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--nss-radius-full);
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nss-admin-logout-btn:hover {
+  background: #B91C1C;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.3);
+}
+
+/* Top Bar Breadcrumb & Quick Actions */
+.nss-admin-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nss-admin-breadcrumbs {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nss-admin-back-link {
+  color: var(--nss-royal-blue);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.18s ease;
+}
+
+.nss-admin-back-link:hover {
+  color: var(--nss-navy);
+  text-decoration: underline;
+}
+
+.nss-crumb-sep {
+  color: #CBD5E1;
+}
+
+.nss-crumb-current {
+  color: #475569;
+  font-weight: 500;
+}
+
+.nss-admin-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Modern Minimalist Stats Grid */
 .nss-stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 14px;
   margin-bottom: 28px;
 }
 
 .nss-stat-card {
-  background-color: var(--nss-white);
-  border: 1px solid var(--nss-border);
-  border-radius: var(--nss-radius-md);
-  padding: 20px 22px;
-  box-shadow: var(--nss-shadow-card);
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(7, 27, 73, 0.04), 0 4px 14px rgba(7, 27, 73, 0.02);
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-  border-left: 4px solid var(--nss-royal-blue);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  align-items: center;
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.nss-stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: #CBD5E1;
+  transition: background-color 0.2s ease;
 }
 
 .nss-stat-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--nss-shadow-hover);
+  box-shadow: 0 8px 20px rgba(7, 27, 73, 0.08);
+  border-color: #CBD5E1;
+}
+
+.nss-stat-total::before { background-color: var(--nss-royal-blue); }
+.nss-stat-pending::before { background-color: #F59E0B; }
+.nss-stat-approved::before { background-color: #10B981; }
+.nss-stat-rejected::before { background-color: #EF4444; }
+.nss-stat-revoked::before { background-color: #94A3B8; }
+
+.nss-stat-icon {
+  font-size: 26px;
+  line-height: 1;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background-color: #F8FAFC;
+  flex-shrink: 0;
+}
+
+.nss-stat-total .nss-stat-icon { background-color: #EFF6FF; }
+.nss-stat-pending .nss-stat-icon { background-color: #FFFBEB; }
+.nss-stat-approved .nss-stat-icon { background-color: #F0FDF4; }
+.nss-stat-rejected .nss-stat-icon { background-color: #FEF2F2; }
+.nss-stat-revoked .nss-stat-icon { background-color: #F1F5F9; }
+
+.nss-stat-data {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .nss-stat-card .val {
-  font-size: 32px;
+  font-size: 26px;
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.1;
   color: var(--nss-navy);
   letter-spacing: -0.02em;
 }
 
+.nss-stat-pending .val { color: #D97706; }
+.nss-stat-approved .val { color: #16A34A; }
+.nss-stat-rejected .val { color: #DC2626; }
+.nss-stat-revoked .val { color: #64748B; }
+
 .nss-stat-card .lbl {
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--nss-text-muted);
+  color: #64748B;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  margin-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Tabs */
+/* Modern Segmented Pill Tabs */
 .nss-tabs {
   display: flex;
-  gap: 8px;
-  border-bottom: 2px solid var(--nss-border);
+  gap: 4px;
+  background-color: #F1F5F9;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 4px;
   margin-bottom: 24px;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 
@@ -1841,67 +1978,134 @@ img {
 }
 
 .nss-tab-btn {
-  padding: 12px 20px;
+  padding: 9px 16px;
   font-family: 'Poppins', sans-serif;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  color: var(--nss-text-muted);
+  color: #64748B;
   background: transparent;
   border: none;
-  border-bottom: 3px solid transparent;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   white-space: nowrap;
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .nss-tab-btn:hover {
   color: var(--nss-navy);
+  background-color: rgba(255, 255, 255, 0.5);
 }
 
 .nss-tab-btn.active {
+  background-color: #FFFFFF;
   color: var(--nss-royal-blue);
-  border-bottom-color: var(--nss-royal-blue);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(7, 27, 73, 0.08);
 }
 
-/* Data Tables */
+.nss-tab-badge {
+  background-color: #D97706;
+  color: #FFFFFF;
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* Data Table Container */
 .nss-table-container {
-  background-color: var(--nss-white);
-  border: 1px solid var(--nss-border);
-  border-radius: var(--nss-radius-card);
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: var(--nss-shadow-card);
+  box-shadow: 0 2px 12px rgba(7, 27, 73, 0.04);
   margin-bottom: 24px;
 }
 
 .nss-table-toolbar {
-  padding: 16px 22px;
-  border-bottom: 1px solid var(--nss-border);
+  padding: 16px 20px;
+  border-bottom: 1px solid #E2E8F0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 14px;
   flex-wrap: wrap;
-  background-color: #FAFCFF;
+  background-color: #FAFBFD;
+}
+
+.nss-toolbar-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nss-toolbar-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--nss-navy);
+}
+
+.nss-toolbar-desc {
+  margin: 0;
+  font-size: 12.5px;
+  color: #64748B;
+}
+
+.nss-table-toolbar-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.nss-search-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 400px;
+}
+
+.nss-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 13px;
+  color: #94A3B8;
+  pointer-events: none;
 }
 
 .nss-search-input {
-  max-width: 340px;
-  padding: 9px 16px;
-  border: 1px solid var(--nss-border);
+  width: 100%;
+  padding: 9px 14px 9px 34px;
+  border: 1px solid #CBD5E1;
   border-radius: var(--nss-radius-full);
   font-family: 'Poppins', sans-serif;
   font-size: 13px;
-  width: 100%;
+  background-color: #FFFFFF;
+  color: var(--nss-text-primary);
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
 }
 
 .nss-search-input:focus {
   border-color: var(--nss-royal-blue);
-  box-shadow: 0 0 0 3px rgba(6, 71, 200, 0.1);
+  box-shadow: 0 0 0 3px rgba(6, 71, 200, 0.12);
+}
+
+.nss-filter-select {
+  padding: 8px 14px;
+  font-size: 13px;
+  width: auto;
+  min-width: 140px;
+  border-radius: var(--nss-radius-full);
+  border: 1px solid #CBD5E1;
+  background-color: #FFFFFF;
 }
 
 .nss-table-wrapper {
@@ -1918,19 +2122,19 @@ img {
 
 .nss-table th {
   background-color: #F8FAFC;
-  padding: 14px 18px;
+  padding: 12px 18px;
   font-weight: 700;
-  color: var(--nss-text-muted);
+  color: #475569;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   font-size: 11px;
-  border-bottom: 1px solid var(--nss-border);
+  border-bottom: 1px solid #E2E8F0;
   white-space: nowrap;
 }
 
 .nss-table td {
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--nss-border);
+  padding: 13px 18px;
+  border-bottom: 1px solid #F1F5F9;
   color: var(--nss-text-primary);
   vertical-align: middle;
 }
@@ -1943,7 +2147,52 @@ img {
   background-color: #F8FAFD;
 }
 
-/* QR Scanner Styling */
+/* Scanner Card & Viewport */
+.nss-scanner-card {
+  padding: 32px 24px;
+  max-width: 640px;
+  margin: 0 auto;
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(7, 27, 73, 0.06);
+}
+
+.nss-scanner-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.nss-scanner-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--nss-royal-blue);
+  background: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  border-radius: 999px;
+  padding: 3px 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+
+.nss-scanner-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--nss-navy);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.nss-scanner-desc {
+  font-size: 13.5px;
+  color: var(--nss-text-muted);
+  margin: 0 auto;
+  max-width: 480px;
+  line-height: 1.55;
+}
+
 .nss-scanner-wrapper {
   max-width: 520px;
   margin: 0 auto;
@@ -1954,7 +2203,7 @@ img {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  max-height: 400px;
+  max-height: 340px;
   background-color: #000;
   border-radius: var(--nss-radius-lg);
   overflow: hidden;
@@ -1998,6 +2247,32 @@ img {
   50% { top: 94%; }
 }
 
+.nss-scanner-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.nss-manual-verify-box {
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  border-radius: 14px;
+  padding: 18px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.nss-manual-input-row {
+  display: flex;
+  gap: 10px;
+}
+
+.nss-manual-input-row .nss-btn {
+  white-space: nowrap;
+}
+
 /* Modals */
 .nss-modal-backdrop {
   position: fixed;
@@ -2022,7 +2297,7 @@ img {
 
 .nss-modal {
   background-color: var(--nss-white);
-  border-radius: var(--nss-radius-card);
+  border-radius: 20px;
   max-width: 620px;
   width: 100%;
   max-height: 90vh;
@@ -2063,16 +2338,217 @@ img {
 }
 
 .nss-modal-body {
-  padding: 26px;
+  padding: 24px 26px;
 }
 
 .nss-modal-footer {
-  padding: 18px 26px;
+  padding: 16px 26px;
   background-color: var(--nss-off-white);
   border-top: 1px solid var(--nss-border);
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+/* ==========================================================================
+   PHONE VIEWPORT & MOBILE MINIMALIST ADAPTATIONS (320px to 640px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  .nss-stats-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .nss-admin-header {
+    padding: 10px 0;
+  }
+
+  .nss-admin-header-wrap {
+    width: 92%;
+    gap: 8px;
+  }
+
+  .nss-admin-title img {
+    height: 34px;
+    width: 34px;
+  }
+
+  .nss-admin-title h1 {
+    font-size: 15px !important;
+  }
+
+  .nss-admin-title-sub {
+    font-size: 9px;
+    letter-spacing: 0.04em;
+  }
+
+  .nss-admin-user-info {
+    display: none; /* Hide name/role text on small phones to keep bar compact and single-row */
+  }
+
+  .nss-admin-user-avatar {
+    width: 30px;
+    height: 30px;
+  }
+
+  .nss-admin-logout-btn {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .nss-admin-top-bar {
+    margin-bottom: 18px;
+    gap: 10px;
+  }
+
+  .nss-admin-breadcrumbs {
+    font-size: 12px;
+    width: 100%;
+  }
+
+  .nss-admin-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .nss-admin-actions .nss-btn {
+    width: 100%;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  /* 2-column mobile stats grid */
+  .nss-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  /* Total card spans full width at the top */
+  .nss-stat-card.nss-stat-total {
+    grid-column: 1 / -1;
+  }
+
+  .nss-stat-card {
+    padding: 12px 14px;
+    border-radius: 14px;
+    gap: 10px;
+  }
+
+  .nss-stat-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+    border-radius: 10px;
+  }
+
+  .nss-stat-card .val {
+    font-size: 22px;
+  }
+
+  .nss-stat-card .lbl {
+    font-size: 10px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Mobile Tabs */
+  .nss-tabs {
+    padding: 3px;
+    border-radius: 12px;
+    gap: 2px;
+    margin-bottom: 18px;
+  }
+
+  .nss-tab-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 8px;
+    gap: 5px;
+  }
+
+  .nss-tab-badge {
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+
+  /* Mobile Table Toolbar */
+  .nss-table-toolbar {
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .nss-table-toolbar-filter {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .nss-search-wrap {
+    max-width: 100%;
+  }
+
+  .nss-filter-select {
+    width: 100%;
+  }
+
+  .nss-table th {
+    padding: 10px 12px;
+    font-size: 10.5px;
+  }
+
+  .nss-table td {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  /* Mobile Scanner */
+  .nss-scanner-card {
+    padding: 20px 14px;
+    border-radius: 16px;
+  }
+
+  .nss-scanner-title {
+    font-size: 18px;
+  }
+
+  .nss-camera-container {
+    max-height: 250px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+  }
+
+  .nss-manual-input-row {
+    flex-direction: column;
+  }
+
+  .nss-manual-input-row .nss-btn {
+    width: 100%;
+  }
+
+  /* Mobile Modal */
+  .nss-modal {
+    max-width: 95%;
+    border-radius: 16px;
+  }
+
+  .nss-modal-header {
+    padding: 16px 18px;
+  }
+
+  .nss-modal-body {
+    padding: 18px 16px;
+  }
+
+  .nss-modal-footer {
+    padding: 14px 16px;
+    flex-direction: column;
+  }
+
+  .nss-modal-footer .nss-btn {
+    width: 100%;
+  }
 }
 
 /* Google Sign-in Button */
