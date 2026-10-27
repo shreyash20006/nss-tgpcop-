@@ -83,6 +83,12 @@ body.nss-page h2,
 body.nss-page h3,
 body.nss-page h4 {
   font-family: 'Poppins', system-ui, sans-serif;
+  color: inherit;
+}
+
+.bg-white h1, .bg-white h2, .bg-white h3, .bg-white h4,
+.bg-offwhite h1, .bg-offwhite h2, .bg-offwhite h3, .bg-offwhite h4,
+.nss-section:not(.bg-navy) h1, .nss-section:not(.bg-navy) h2, .nss-section:not(.bg-navy) h3, .nss-section:not(.bg-navy) h4 {
   color: var(--nss-navy);
 }
 
@@ -2555,4 +2561,119 @@ img {
 
 .nss-status-body {
   padding: 32px 28px;
+}
+
+
+/* ==========================================================================
+   HIGH-CONTRAST READABILITY ENHANCEMENTS (HERO & ACTIVITIES)
+   ========================================================================== */
+.nss-hero-title,
+h1.nss-hero-title,
+body.nss-page .nss-hero-title,
+body.nss-page h1.nss-hero-title {
+  color: #FFFFFF !important;
+  font-family: 'Bebas Neue', Impact, sans-serif !important;
+  font-size: clamp(52px, 9vw, 98px) !important;
+  letter-spacing: 0.03em !important;
+  line-height: 0.95 !important;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.85), 0 2px 10px rgba(0, 0, 0, 0.7) !important;
+}
+
+.nss-hero-subtitle,
+h2.nss-hero-subtitle,
+body.nss-page .nss-hero-subtitle,
+body.nss-page h2.nss-hero-subtitle {
+  color: #FFD400 !important;
+  font-size: clamp(22px, 3.5vw, 34px) !important;
+  font-weight: 800 !important;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.8) !important;
+}
+
+.nss-hero-description,
+p.nss-hero-description,
+body.nss-page .nss-hero-description,
+body.nss-page p.nss-hero-description {
+  color: #FFFFFF !important;
+  font-size: clamp(15.5px, 1.8vw, 18px) !important;
+  line-height: 1.7 !important;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.8) !important;
+}
+
+.bg-navy .nss-section-title,
+body.nss-page .bg-navy .nss-section-title {
+  color: #FFFFFF !important;
+}
+
+.bg-navy .nss-section-subtitle,
+body.nss-page .bg-navy .nss-section-subtitle {
+  color: #CBD5E1 !important;
+}
+
+.bg-navy .nss-eyebrow {
+  color: #FFD400 !important;
+}
+
+.nss-activity-card {
+  background-color: rgba(7, 27, 73, 0.85) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.22) !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+}
+
+.nss-act-title,
+h3.nss-act-title,
+body.nss-page .nss-act-title,
+body.nss-page h3.nss-act-title {
+  color: #FFFFFF !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.nss-act-desc,
+p.nss-act-desc,
+body.nss-page .nss-act-desc,
+body.nss-page p.nss-act-desc {
+  color: #E2E8F0 !important;
+  font-size: 14px !important;
+  line-height: 1.65 !important;
+}
+
+.nss-act-action,
+body.nss-page .nss-act-action {
+  color: #FFD400 !important;
+  font-weight: 700 !important;
+}
+
+/* Featured Event Layout */
+.nss-events-featured-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.nss-event-card.featured {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  background: #FFFFFF;
+  border: 1px solid var(--nss-border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(7, 27, 73, 0.08);
+}
+
+.nss-event-card.featured .nss-event-media {
+  height: 100%;
+  min-height: 260px;
+}
+
+.nss-event-card.featured .nss-event-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 768px) {
+  .nss-event-card.featured {
+    grid-template-columns: 1fr;
+  }
 }
