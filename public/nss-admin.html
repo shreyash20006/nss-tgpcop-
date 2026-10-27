@@ -103,6 +103,10 @@
         <button class="nss-tab-btn" id="btnTabLeaders" onclick="switchTab('leadershipTab')">
           <span>🎖️ Leadership Directory</span>
         </button>
+        <button class="nss-tab-btn" id="btnTabBroadcast" onclick="switchTab('broadcastTab')">
+          <span>📧 Email Broadcast & Events</span>
+          <span>🎖️ Leadership Directory</span>
+        </button>
       </div>
 
       <!-- ==================================================================
@@ -289,7 +293,154 @@
             </table>
           </div>
         </div>
+      
+
+      <!-- ==================================================================
+           TAB 5: EMAIL BROADCAST & EVENT UPDATES (BREVO INTEGRATION)
+           ================================================================== -->
+      <div id="broadcastTab" class="tab-content" style="display:none;">
+        <div class="nss-table-container" style="padding: 32px 28px;">
+          
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px; margin-bottom:24px; padding-bottom:18px; border-bottom:1px solid var(--nss-border);">
+            <div>
+              <div style="display:inline-flex; align-items:center; gap:6px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:999px; padding:4px 14px; font-size:11.5px; font-weight:700; color:var(--nss-royal-blue); text-transform:uppercase; margin-bottom:8px;">
+                ⚡ Brevo Email Engine
+              </div>
+              <h3 style="margin:0; font-size:20px; font-weight:800; color:var(--nss-navy);">
+                Volunteer Email Broadcast & Event Showcase
+              </h3>
+              <p style="margin:4px 0 0; font-size:13.5px; color:var(--nss-text-muted);">
+                Send official announcements, upcoming event schedules, and achievement photo galleries directly to enrolled volunteers' inboxes.
+              </p>
+            </div>
+            <div style="background:#F8FAFC; border:1px solid var(--nss-border); border-radius:12px; padding:10px 16px; font-size:12.5px; text-align:right;">
+              <span style="color:var(--nss-text-muted);">Deliverable Volunteers:</span>
+              <strong id="broadcastRecipientCount" style="color:var(--nss-navy); font-size:14px; margin-left:6px;">0</strong>
+            </div>
+          </div>
+
+          <!-- Quick Template Presets -->
+          <div style="margin-bottom: 24px;">
+            <label style="display:block; font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.04em;">
+              Choose Broadcast Preset
+            </label>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="applyBroadcastPreset('blood_camp')">
+                🩸 Blood Donation Camp Highlights
+              </button>
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="applyBroadcastPreset('upcoming_event')">
+                🌟 Upcoming NSS Event Notice
+              </button>
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="applyBroadcastPreset('achievement')">
+                🏆 Volunteer Award / Achievement
+              </button>
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="applyBroadcastPreset('general')">
+                📢 General Unit Circular
+              </button>
+            </div>
+          </div>
+
+          <!-- Form Grid -->
+          <form id="broadcastForm" onsubmit="event.preventDefault(); sendBroadcast(false);">
+            <div class="nss-form-row">
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastCategory">Campaign Category <span class="req">*</span></label>
+                <select id="broadcastCategory" class="nss-form-select" required>
+                  <option value="Event Announcement">Event Announcement</option>
+                  <option value="Achievement & Recognition">Achievement & Recognition</option>
+                  <option value="Camp Highlights & Photos">Camp Highlights & Photos</option>
+                  <option value="Official Notice">Official Notice</option>
+                </select>
+              </div>
+
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastAudience">Recipient Audience <span class="req">*</span></label>
+                <select id="broadcastAudience" class="nss-form-select" onchange="toggleAudienceOptions(this.value)" required>
+                  <option value="all">👥 All Enrolled Applicants (Approved + Pending)</option>
+                  <option value="approved">✅ Approved Volunteers Only (Active ID Card Holders)</option>
+                  <option value="pending">⏳ Pending Review Applicants</option>
+                  <option value="custom">🧪 Custom / Test Email Only</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="customEmailGroup" class="nss-form-group" style="display:none;">
+              <label class="nss-form-label" for="customEmailInput">Test Email Address <span class="req">*</span></label>
+              <input type="email" id="customEmailInput" class="nss-form-input" placeholder="e.g. coordinator@gmail.com">
+              <div class="nss-form-hint">Enter the specific email address to test delivery without notifying all volunteers.</div>
+            </div>
+
+            <div class="nss-form-row">
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastSubject">Email Subject Line <span class="req">*</span></label>
+                <input type="text" id="broadcastSubject" class="nss-form-input" placeholder="e.g. [NSS TGPCOP] Highlights from the Annual Blood Donation Camp" required>
+              </div>
+
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastTitle">Heading Banner Title <span class="req">*</span></label>
+                <input type="text" id="broadcastTitle" class="nss-form-input" placeholder="e.g. Blood Donation Camp 2026 — Successful Drive & Certificates" required>
+              </div>
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="broadcastDateVenue">Event Date & Venue (Optional)</label>
+              <input type="text" id="broadcastDateVenue" class="nss-form-input" placeholder="e.g. Thursday, 24 Oct 2026 • TGPCOP Campus Seminar Hall">
+            </div>
+
+            <div class="nss-form-group">
+              <label class="nss-form-label" for="broadcastMessage">Message & Announcement Details <span class="req">*</span></label>
+              <textarea id="broadcastMessage" class="nss-form-textarea" rows="5" placeholder="Write the announcement message for volunteers. Double line breaks create separate formatted paragraphs in the email." required></textarea>
+            </div>
+
+            <!-- Achievement & Event Photos -->
+            <div class="nss-form-group" style="background:#F8FAFC; border:1px solid var(--nss-border); border-radius:14px; padding:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                <div>
+                  <label class="nss-form-label" style="margin:0; font-size:14px;">📸 Achievement & Event Photo URLs</label>
+                  <div class="nss-form-hint" style="margin:2px 0 0;">Add image URLs (one per line or separated by comma). Photos will be presented to volunteers inside the email.</div>
+                </div>
+                <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="insertCloudinaryBloodDonationPhotos()">
+                  + Insert Blood Donation Photos
+                </button>
+              </div>
+              <textarea id="broadcastImages" class="nss-form-textarea" rows="3" placeholder="https://res.cloudinary.com/...&#10;https://res.cloudinary.com/..."></textarea>
+              
+              <!-- Live Photo Preview -->
+              <div id="photoPreviewContainer" style="display:none; margin-top:14px; padding-top:14px; border-top:1px dashed var(--nss-border);">
+                <div style="font-size:12px; font-weight:700; color:var(--nss-navy); margin-bottom:8px;">Live Photo Preview:</div>
+                <div id="photoPreviewGrid" style="display:flex; gap:12px; flex-wrap:wrap;"></div>
+              </div>
+            </div>
+
+            <div class="nss-form-row">
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastCtaLabel">Button Label (Optional)</label>
+                <input type="text" id="broadcastCtaLabel" class="nss-form-input" placeholder="e.g. View Full Photo Gallery">
+              </div>
+
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastCtaUrl">Button URL Link (Optional)</label>
+                <input type="url" id="broadcastCtaUrl" class="nss-form-input" placeholder="e.g. https://nss.tgpcop.site/index.html#gallery">
+              </div>
+            </div>
+
+            <!-- Action Status Alert -->
+            <div id="broadcastStatusAlert" style="display:none; padding:14px 18px; border-radius:10px; margin-bottom:20px; font-size:14px;"></div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex; gap:14px; flex-wrap:wrap; align-items:center;">
+              <button type="button" class="nss-btn nss-btn-outline" onclick="sendBroadcast(true)" id="btnTestBroadcast">
+                ✉️ Send Test Email to Me
+              </button>
+              <button type="submit" class="nss-btn nss-btn-primary" id="btnSubmitBroadcast">
+                🚀 Broadcast to Volunteers via Brevo
+              </button>
+            </div>
+          </form>
+
+        </div>
       </div>
+</div>
 
     </div>
   </main>
@@ -539,7 +690,8 @@
         'pendingTab': 'btnTabPending',
         'allTab': 'btnTabAll',
         'scannerTab': 'btnTabScanner',
-        'leadershipTab': 'btnTabLeaders'
+        'leadershipTab': 'btnTabLeaders',
+        'broadcastTab': 'btnTabBroadcast'
       };
       const activeBtn = document.getElementById(btnMap[tabId]);
       if (activeBtn) activeBtn.classList.add('active');

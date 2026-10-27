@@ -527,6 +527,29 @@
         document.getElementById('refCodeDisplay').textContent = data.ref_code || 'NSS-REF-SUCCESS';
         document.getElementById('successCard').style.display = 'block';
 
+        // Trigger Brevo Confirmation Email & Contact Sync
+        try {
+          fetch('/api/send-registration-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              fullName: fullName,
+              email: collegeEmail,
+              personalEmail: personalEmail,
+              rollNumber: rollNumber,
+              course: course,
+              academicYear: year,
+              refCode: data.ref_code || 'NSS-REF-SUCCESS'
+            })
+          }).then(r => r.json()).then(res => {
+            console.log('[Brevo Email Status]:', res);
+          }).catch(err => {
+            console.warn('[Brevo Email Notice]:', err);
+          });
+        } catch (err) {
+          console.warn('[Brevo Non-blocking Error]:', err);
+        }
+
       } catch (err) {
         console.error('Submission error:', err);
         showAlert(err.message || 'An error occurred while submitting your registration. Please try again.', true);
