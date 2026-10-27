@@ -690,6 +690,22 @@
     NSS.applyCloudinaryAssets();
   }
 
+  
+  // Dynamic footer year helper
+  function updateFooterYear() {
+    try {
+      const yr = new Date().getFullYear();
+      document.querySelectorAll('.nss-dynamic-year').forEach(el => {
+        el.textContent = yr;
+      });
+    } catch (e) {}
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', updateFooterYear);
+  } else {
+    updateFooterYear();
+  }
+
   window.NSS = NSS;
 
 })(window);

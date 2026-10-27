@@ -1266,56 +1266,90 @@ img {
 }
 
 /* ==========================================================================
-   11. INSTITUTIONAL FOOTER
+   11. INSTITUTIONAL FOOTER — COMPACT, ACCESSIBLE, PREMIUM NAVY
    ========================================================================== */
 .nss-footer {
-  background-color: var(--nss-navy-dark);
-  color: #CBD5E1;
-  padding: 80px 20px 30px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: #071B49 !important;
+  background-image: none !important;
+  color: #E2E8F0;
+  padding: 56px 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
 }
 
 .nss-footer-grid {
   display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
-  gap: 48px;
-  margin-bottom: 60px;
+  grid-template-columns: 1.5fr 1fr 1fr 1.1fr;
+  gap: 40px;
+  margin-bottom: 36px;
 }
 
-.nss-footer-col-title {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--nss-white);
-  margin: 0 0 20px;
+.nss-footer-brand-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.nss-footer-logo {
+  height: 48px;
+  width: auto;
+  flex-shrink: 0;
 }
 
 .nss-footer-brand-title {
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 24px;
-  color: var(--nss-white);
+  font-size: 26px;
+  color: #FFFFFF;
   letter-spacing: 0.04em;
-  margin: 0 0 10px;
+  line-height: 1;
+  margin: 0;
+}
+
+.nss-footer-brand-unit {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #FFD400;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-top: 4px;
 }
 
 .nss-footer-brand-desc {
   font-size: 13px;
-  line-height: 1.65;
-  color: #94A3B8;
-  margin: 0 0 16px;
+  line-height: 1.6;
+  color: #CBD5E1;
+  margin: 0 0 14px;
 }
 
 .nss-footer-motto-pill {
   display: inline-block;
   padding: 4px 14px;
   border-radius: var(--nss-radius-full);
-  background-color: rgba(255, 212, 0, 0.12);
-  color: var(--nss-yellow);
+  background-color: rgba(255, 212, 0, 0.14);
+  color: #FFD400;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
-  border: 1px solid rgba(255, 212, 0, 0.3);
+  border: 1px solid rgba(255, 212, 0, 0.35);
+  margin-bottom: 12px;
+}
+
+.nss-footer-accreditation {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: #94A3B8;
+  margin: 0;
+}
+
+.nss-footer-col-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #FFFFFF;
+  margin: 0 0 16px;
 }
 
 .nss-footer-links {
@@ -1324,46 +1358,48 @@ img {
   margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 9px;
 }
 
 .nss-footer-links a {
-  color: #94A3B8;
+  color: #CBD5E1;
   font-size: 13.5px;
   text-decoration: none;
-  transition: color 0.18s ease;
+  transition: color 0.18s ease, transform 0.18s ease;
+  display: inline-block;
 }
 
 .nss-footer-links a:hover {
-  color: var(--nss-yellow);
+  color: #FFD400;
+  transform: translateX(3px);
 }
 
-.nss-footer-contact-item {
+.nss-footer-contact-text {
   font-size: 13px;
   line-height: 1.6;
-  margin-bottom: 12px;
-  color: #94A3B8;
+  color: #CBD5E1;
+  margin: 0 0 14px;
 }
 
-.nss-footer-contact-item b {
-  color: #E2E8F0;
+.nss-footer-contact-text b {
+  color: #FFFFFF;
 }
 
 .nss-social-pills {
   display: flex;
   gap: 10px;
-  margin-top: 14px;
   flex-wrap: wrap;
 }
 
 .nss-social-pill {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   padding: 6px 14px;
   border-radius: var(--nss-radius-full);
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  color: #E2E8F0;
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #FFFFFF;
   font-size: 12px;
   font-weight: 600;
   text-decoration: none;
@@ -1371,24 +1407,43 @@ img {
 }
 
 .nss-social-pill:hover {
-  border-color: var(--nss-yellow);
-  color: var(--nss-yellow);
+  background-color: #0647C8;
+  border-color: #FFD400;
+  color: #FFD400;
+  transform: translateY(-2px);
 }
 
 .nss-footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  font-size: 12.5px;
-  color: #64748B;
+  font-size: 13px;
+  color: #94A3B8;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 14px;
 }
 
-.nss-footer-bottom a {
-  color: var(--nss-yellow);
+.nss-footer-copy {
+  color: #CBD5E1;
+}
+
+.nss-footer-credit {
+  color: #94A3B8;
+  font-size: 13px;
+}
+
+.nss-credit-link {
+  color: #FFD400 !important;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.18s ease, text-decoration 0.18s ease;
+}
+
+.nss-credit-link:hover {
+  text-decoration: underline;
+  opacity: 0.9;
 }
 
 /* ==========================================================================
@@ -1588,9 +1643,19 @@ img {
     max-width: 200px;
     margin: 0 auto;
   }
+  .nss-footer {
+    padding: 36px 16px 20px;
+  }
   .nss-footer-grid {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  .nss-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding-top: 16px;
   }
   .nss-cta-wrap {
     padding: 44px 20px;
@@ -2207,4 +2272,287 @@ img {
   letter-spacing: 0.12em;
   padding: 10px;
   text-transform: uppercase;
+}
+
+/* ==========================================================================
+   REGISTRATION PAGE — SPLIT SECTIONS (HERO WITH SUBTLE PATTERN, PURE LIGHT FORM)
+   ========================================================================== */
+.nss-reg-hero {
+  position: relative;
+  background: linear-gradient(135deg, #071B49 0%, #0B2B6D 50%, #0647C8 100%);
+  color: #FFFFFF;
+  padding: 56px 20px 64px;
+  text-align: center;
+  overflow: hidden;
+}
+
+/* Dots limited strictly to the hero section, smaller, subtle opacity */
+.nss-reg-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.2px, transparent 1.6px);
+  background-size: 32px 32px;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.nss-reg-hero > .nss-container {
+  position: relative;
+  z-index: 2;
+}
+
+.nss-reg-hero-badge {
+  display: inline-block;
+  padding: 5px 16px;
+  background: rgba(255, 212, 0, 0.16);
+  border: 1px solid rgba(255, 212, 0, 0.4);
+  border-radius: 999px;
+  color: #FFD400;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.nss-reg-hero-title {
+  font-size: clamp(28px, 4.5vw, 42px);
+  font-weight: 700;
+  color: #FFFFFF !important;
+  margin: 0 0 12px;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.nss-reg-hero-desc {
+  font-size: clamp(14px, 1.8vw, 16px);
+  color: #CBD5E1;
+  max-width: 620px;
+  margin: 0 auto 16px;
+  line-height: 1.6;
+}
+
+.nss-reg-hero-meta {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.nss-reg-section {
+  background-color: #F7F9FE !important;
+  background-image: none !important;
+  padding: 40px 20px 72px;
+  min-height: 55vh;
+}
+
+.nss-reg-container {
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+.nss-form-card {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  border: 1px solid #E2E8F0;
+  border-radius: 20px;
+  box-shadow: 0 10px 32px -4px rgba(7, 27, 73, 0.08), 0 2px 6px rgba(7, 27, 73, 0.03);
+  padding: 42px 36px;
+  margin-top: -30px;
+  position: relative;
+  z-index: 5;
+}
+
+@media (max-width: 768px) {
+  .nss-reg-hero {
+    padding: 44px 16px 48px;
+  }
+  .nss-reg-section {
+    padding: 24px 12px 50px;
+  }
+  .nss-form-card {
+    padding: 24px 18px;
+    margin-top: -20px;
+    border-radius: 16px;
+  }
+}
+
+.nss-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  .nss-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}
+
+.nss-form-label .req,
+.req {
+  color: #DC2626;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+.nss-form-hint {
+  display: block;
+  font-size: 11.5px;
+  color: #64748B;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.nss-form-error {
+  display: none;
+  font-size: 11.5px;
+  font-weight: 500;
+  color: #DC2626;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+
+.nss-form-error.visible {
+  display: block;
+}
+
+.nss-upload-zone {
+  background-color: #F8FAFC !important;
+  background-image: none !important;
+  border: 2px dashed #CBD5E1;
+  border-radius: 12px;
+  padding: 26px 18px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background-color 0.18s ease;
+}
+
+.nss-upload-zone:hover {
+  border-color: var(--nss-royal-blue);
+  background-color: #F1F5F9 !important;
+}
+
+.nss-upload-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.nss-upload-preview {
+  display: none;
+  width: 100px;
+  height: 125px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin: 0 auto 12px;
+  border: 2px solid var(--nss-royal-blue);
+}
+
+.nss-checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.nss-checkbox-label input[type="checkbox"] {
+  margin-top: 3px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  accent-color: var(--nss-royal-blue);
+  cursor: pointer;
+}
+
+.nss-motto-tag {
+  display: inline-block;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Button & Card Utilities */
+.nss-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  border-radius: var(--nss-radius-full);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+}
+
+.nss-btn-navy {
+  background-color: var(--nss-navy);
+  color: #FFFFFF !important;
+  border-color: var(--nss-navy);
+}
+.nss-btn-navy:hover {
+  background-color: #0A2664;
+  color: #FFFFFF !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 14px rgba(7, 27, 73, 0.25);
+}
+
+.nss-btn-outline {
+  background-color: transparent;
+  color: var(--nss-royal-blue);
+  border: 1.5px solid var(--nss-royal-blue);
+}
+.nss-btn-outline:hover {
+  background-color: rgba(6, 71, 200, 0.08);
+  color: var(--nss-royal-blue-hover);
+  transform: translateY(-2px);
+}
+
+.nss-btn-lg {
+  padding: 14px 32px;
+  font-size: 15.5px;
+}
+
+.nss-btn-sm {
+  padding: 7px 16px;
+  font-size: 12.5px;
+}
+
+.nss-status-card {
+  background: #FFFFFF !important;
+  border: 1px solid var(--nss-border);
+  border-radius: 20px;
+  box-shadow: var(--nss-shadow-card);
+  overflow: hidden;
+  max-width: 620px;
+  margin: 0 auto;
+}
+
+.nss-status-header {
+  background: var(--nss-navy);
+  color: #FFFFFF;
+  padding: 24px 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nss-status-body {
+  padding: 32px 28px;
 }

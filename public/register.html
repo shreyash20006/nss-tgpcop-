@@ -72,16 +72,31 @@
     </nav>
   </div>
 
-  <main class="nss-section">
+  <!-- ======================================================================
+       REGISTRATION HERO SECTION (Contained subtle decorative dot pattern)
+       ====================================================================== -->
+  <header class="nss-reg-hero">
     <div class="nss-container">
-      <div class="nss-section-header">
-        <div class="nss-motto-tag" style="background:#EFF6FF;border-color:#BFDBFE;color:var(--nss-accent);">
-          ENROLLMENT 2026-27
-        </div>
-        <h2>NSS Volunteer Registration</h2>
-        <p>Join the TGPCOP National Service Scheme chapter. Complete the form below to receive your official volunteer credential.</p>
+      <div class="nss-reg-hero-badge">★ ENROLLMENT 2026-27 ★</div>
+      <h1 class="nss-reg-hero-title">NSS Volunteer Registration</h1>
+      <p class="nss-reg-hero-desc">
+        Join the TGPCOP National Service Scheme chapter. Complete the official form below to receive your volunteer credential and digital ID card.
+      </p>
+      <div class="nss-reg-hero-meta">
+        <span>🏛️ TGPCOP Nagpur</span>
+        <span>•</span>
+        <span>NSS Unit 1</span>
+        <span>•</span>
+        <span>Youth Affairs & Sports, Govt. of India</span>
       </div>
+    </div>
+  </header>
 
+  <!-- ======================================================================
+       REGISTRATION FORM SECTION (Clean, light, 100% dot-free background)
+       ====================================================================== -->
+  <main class="nss-reg-section">
+    <div class="nss-container nss-reg-container">
       <!-- Auth State Prompt (if not logged in) -->
       <div id="authPromptCard" class="nss-form-card" style="display:none; text-align:center; padding: 48px 24px;">
         <div style="font-size: 48px; margin-bottom: 14px;">🔒</div>
@@ -262,23 +277,31 @@
   <!-- ======================================================================
        INSTITUTIONAL FOOTER
        ====================================================================== -->
+    <!-- ======================================================================
+       INSTITUTIONAL FOOTER — NSS TGPCOP (OFFICIAL ECHO MEDIA CREDIT)
+       ====================================================================== -->
   <footer class="nss-footer" id="contact">
     <div class="nss-container">
       <div class="nss-footer-grid">
-        <div>
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
-            <img src="assets/nss-logo.png" alt="NSS Emblem" style="height:48px;" onerror="this.src='echo_logo_white_transparent.png'">
-            <div class="nss-footer-brand-title">NSS TGPCOP</div>
+        <!-- Col 1: Institutional Identity -->
+        <div class="nss-footer-col-brand">
+          <div class="nss-footer-brand-wrap">
+            <img src="assets/nss-logo.png" alt="NSS Emblem" class="nss-footer-logo" onerror="this.src='echo_logo_white_transparent.png'">
+            <div>
+              <div class="nss-footer-brand-title">NSS TGPCOP</div>
+              <div class="nss-footer-brand-unit">National Service Scheme • Unit 1</div>
+            </div>
           </div>
           <p class="nss-footer-brand-desc">
-            National Service Scheme (NSS) Unit 1 • Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
+            Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
           </p>
           <div class="nss-footer-motto-pill">★ NOT ME, BUT YOU ★</div>
-          <p style="font-size:12px;margin-top:14px;color:#64748B;">
-            Sponsored by Ministry of Youth Affairs & Sports, Government of India. Affiliated with RTMNU Nagpur.
+          <p class="nss-footer-accreditation">
+            Sponsored by Ministry of Youth Affairs & Sports, Govt. of India. Affiliated with RTMNU Nagpur.
           </p>
         </div>
 
+        <!-- Col 2: Navigation Links -->
         <div>
           <div class="nss-footer-col-title">Navigation</div>
           <ul class="nss-footer-links">
@@ -289,10 +312,11 @@
             <li><a href="index.html#leadership">Leadership Desk</a></li>
             <li><a href="index.html#gallery">Photo Gallery</a></li>
             <li><a href="index.html#impact">NSS Impact</a></li>
-            <li><a href="register.html">Join as Volunteer</a></li>
+            <li><a href="register.html">Volunteer Registration</a></li>
           </ul>
         </div>
 
+        <!-- Col 3: Volunteer Portal Services -->
         <div>
           <div class="nss-footer-col-title">Volunteer Portal</div>
           <ul class="nss-footer-links">
@@ -305,30 +329,31 @@
           </ul>
         </div>
 
+        <!-- Col 4: Official Connect -->
         <div>
           <div class="nss-footer-col-title">Connect With Us</div>
-          <div class="nss-footer-contact-item">
-            <b>Official Contact Desk:</b><br>
-            Email: <a href="mailto:Media@tgpcop.site" style="color:var(--nss-yellow);">Media@tgpcop.site</a><br>
-            Campus: TGPCOP, Wardha Road, Nagpur
-          </div>
+          <p class="nss-footer-contact-text">
+            <b>Campus Address:</b><br>
+            TGPCOP Campus, Wardha Road, Mohgaon, Nagpur - 441108
+          </p>
           <div class="nss-social-pills">
-            <a href="https://www.instagram.com/nss_tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill">
-              @nss_tgpcop
+            <a href="https://www.instagram.com/nss_tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill" aria-label="NSS Instagram">
+              <span>📷 @nss_tgpcop</span>
             </a>
-            <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill">
-              @echo.tgpcop
+            <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-social-pill" aria-label="Echo Media Instagram">
+              <span>🎬 @echo.tgpcop</span>
             </a>
           </div>
         </div>
       </div>
 
+      <!-- Bottom Bar with dynamic copyright and official Echo.TGPCOP Media credit -->
       <div class="nss-footer-bottom">
-        <div>
-          © 2026 National Service Scheme — TGPCOP Unit. All rights reserved.
+        <div class="nss-footer-copy">
+          © <span class="nss-dynamic-year">2026</span> National Service Scheme — TGPCOP Unit. All rights reserved.
         </div>
-        <div>
-          Media & Creative Support by <a href="https://www.echotgpcopmedia.site" target="_blank" rel="noopener noreferrer">ECHO.TGPCOP</a>
+        <div class="nss-footer-credit">
+          Website & Media by <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-credit-link">ECHO.TGPCOP Media</a>
         </div>
       </div>
     </div>
