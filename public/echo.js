@@ -12,7 +12,7 @@ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>[...r.querySelecto
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 var sb=null, _echoIo;
 function shell(){
- if(document.body && (document.body.classList.contains('nss-page') || document.querySelector('.nss-header') || document.querySelector('.nss-footer'))) return;
+ if(!document.body || document.body.classList.contains('nss-page') || document.body.classList.contains('nss-admin-body') || document.querySelector('.nss-header') || document.querySelector('.nss-footer')) return;
  if(!$('#fl')) document.body.insertAdjacentHTML('afterbegin','<div id="fl"></div>');
  if(!$('#lb')) document.body.insertAdjacentHTML('beforeend','<div id="lb"></div>');
  const n=$('#nav');
@@ -107,9 +107,17 @@ function shatterInit(){
 }
 /* ---- Scroll progress bar (all pages) ---- */
 function sprog(){
- if(matchMedia('(prefers-reduced-motion:reduce)').matches||$('.sprog'))return;
+ if(!document.body || (window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches) || $('.sprog')) return;
  document.body.insertAdjacentHTML('beforeend','<div class="sprog"></div>');const b=$('.sprog');
  const u=()=>{const h=document.documentElement.scrollHeight-innerHeight;b.style.transform=`scaleX(${h>0?Math.min(1,scrollY/h):0})`};
  addEventListener('scroll',u,{passive:true});addEventListener('resize',u);u();
 }
-shell();fx();love();ig();shatterInit();sprog();
+if (typeof document !== 'undefined') {
+ if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+   shell(); fx(); love(); ig(); shatterInit(); sprog();
+  });
+ } else {
+  shell(); fx(); love(); ig(); shatterInit(); sprog();
+ }
+}

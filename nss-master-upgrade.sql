@@ -485,6 +485,55 @@ CREATE POLICY "Coordinators manage leadership" ON public.nss_leadership
     WITH CHECK (public.nss_is_coordinator(auth.uid()));
 
 -- ==============================================================================
+-- 6.5. AUTOMATIC APPROVAL NOTIFICATION INFRASTRUCTURE
+-- ==============================================================================
+ALTER TABLE public.nss_applications ADD COLUMN IF NOT EXISTS email_notification_status TEXT DEFAULT 'pending';
+ALTER TABLE public.nss_applications ADD COLUMN IF NOT EXISTS sms_notification_status TEXT DEFAULT 'pending';
+ALTER TABLE public.nss_applications ADD COLUMN IF NOT EXISTS notification_sent_at TIMESTAMPTZ;
+ALTER TABLE public.nss_applications ADD COLUMN IF NOT EXISTS notification_error TEXT;
+
+ALTER TABLE public.nss_students ADD COLUMN IF NOT EXISTS email_notification_status TEXT DEFAULT 'pending';
+ALTER TABLE public.nss_students ADD COLUMN IF NOT EXISTS sms_notification_status TEXT DEFAULT 'pending';
+
+CREATE TABLE IF NOT EXISTS public.nss_notification_logs (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    application_id UUID REFERENCES public.nss_applications(id) ON DELETE CASCADE,
+    volunteer_id TEXT,
+    recipient_name TEXT,
+    recipient_email TEXT,
+    recipient_mobile TEXT,
+    channel TEXT NOT NULL CHECK (channel IN ('email', 'sms', 'whatsapp')),
+    status TEXT NOT NULL CHECK (status IN ('sent', 'failed', 'skipped', 'pending')),
+    subject TEXT,
+    provider_message_id TEXT,
+    error_message TEXT,
+    sent_by UUID REFERENCES auth.users(id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    metadata JSONB DEFAULT '{}'::jsonb
+);
+
+CREATE INDEX IF NOT EXISTS idx_nss_notif_app_id ON public.nss_notification_logs(application_id);
+CREATE INDEX IF NOT EXISTS idx_nss_notif_channel ON public.nss_notification_logs(channel);
+CREATE INDEX IF NOT EXISTS idx_nss_notif_status ON public.nss_notification_logs(status);
+
+ALTER TABLE public.nss_notification_logs ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Staff can view notification logs" ON public.nss_notification_logs;
+CREATE POLICY "Staff can view notification logs" ON public.nss_notification_logs 
+    FOR SELECT TO authenticated 
+    USING (public.nss_is_staff(auth.uid()));
+
+DROP POLICY IF EXISTS "System can insert notification logs" ON public.nss_notification_logs;
+CREATE POLICY "System can insert notification logs" ON public.nss_notification_logs 
+    FOR INSERT TO authenticated 
+    WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Staff can update notification logs" ON public.nss_notification_logs;
+CREATE POLICY "Staff can update notification logs" ON public.nss_notification_logs 
+    FOR UPDATE TO authenticated 
+    USING (public.nss_is_staff(auth.uid()));
+
+-- ==============================================================================
 -- 7. VERIFICATION QUERY
 -- ==============================================================================
 SELECT 

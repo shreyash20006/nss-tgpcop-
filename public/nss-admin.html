@@ -23,12 +23,12 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Application Modules (Cache-busted) -->
-  <script src="volunteers-data.js?v=20261030-master-v1"></script>
-  <script src="directory-seed-data.js?v=20261030-master-v1"></script>
-  <script src="cloudinary-config.js?v=20261030-master-v1"></script>
-  <script src="env.js?v=20261030-master-v1"></script>
-  <script src="echo.js?v=20261030-master-v1"></script>
-  <script src="nss.js?v=20261030-master-v1"></script>
+  <script src="volunteers-data.js?v=20261030-master-v2"></script>
+  <script src="directory-seed-data.js?v=20261030-master-v2"></script>
+  <script src="cloudinary-config.js?v=20261030-master-v2"></script>
+  <script src="env.js?v=20261030-master-v2"></script>
+  <script src="echo.js?v=20261030-master-v2"></script>
+  <script src="nss.js?v=20261030-master-v2"></script>
 
   <style>
     :root {
@@ -1157,9 +1157,10 @@
                   <th>Name</th>
                   <th>Roll No</th>
                   <th>Course & Year</th>
-                  <th>Card Hash</th>
+                  <th>Email Notif</th>
+                  <th>SMS Notif</th>
                   <th>Issue Date</th>
-                  <th style="text-align:right;">ID Card</th>
+                  <th style="text-align:right;">Actions</th>
                 </tr>
               </thead>
               <tbody id="approvedAppsTableBody">
@@ -1333,29 +1334,34 @@
            ==================================================================== -->
       <section id="tab-sms-records" class="admin-content-pane">
         <div class="chart-box">
-          <h3>📱 SMS & WhatsApp Broadcast Logs</h3>
-          <p style="font-size:13px; color:var(--nss-text-muted);">Log of campus mobile broadcasts and automated SMS status alerts.</p>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+            <div>
+              <h3 style="margin:0;">📱 SMS & Automated Notification Logs</h3>
+              <p style="font-size:13px; color:var(--nss-text-muted); margin:4px 0 0;">Audit log of automated approval emails, SMS dispatches, and broadcast notices.</p>
+            </div>
+            <button type="button" class="btn-nss btn-nss-outline btn-nss-sm" onclick="loadSmsRecordsTab()">
+              🔄 Refresh Logs
+            </button>
+          </div>
           <div class="table-card" style="margin-top:16px;">
-            <table class="nss-data-table">
-              <thead>
-                <tr>
-                  <th>Timestamp</th>
-                  <th>Recipient Type</th>
-                  <th>Count</th>
-                  <th>Channel</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Today</td>
-                  <td>Enrolled Volunteers</td>
-                  <td>10</td>
-                  <td>Transactional Email / SMS</td>
-                  <td><span class="status-badge approved">Delivered</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-responsive">
+              <table class="nss-data-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Recipient</th>
+                    <th>Channel</th>
+                    <th>Subject / Message</th>
+                    <th>Status</th>
+                    <th>Error / Provider Note</th>
+                    <th style="text-align:right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="smsLogsTableBody">
+                  <tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">Loading notification logs...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </section>
@@ -1650,10 +1656,31 @@
           <tr><td style="color:#64748B;">Division:</td><td id="mDivision"></td></tr>
           <tr><td style="color:#64748B;">Submitted At:</td><td id="mSubmitted"></td></tr>
         </table>
+
+        <!-- Approval Notification Status & Action Card -->
+        <div id="mNotificationBox" style="margin-top:16px; background:#F8FAFC; border:1px solid var(--nss-border); border-radius:10px; padding:14px; font-size:12px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="color:var(--nss-navy); font-size:12.5px;">📢 Automatic Approval Notifications</strong>
+            <button type="button" class="btn-nss btn-nss-outline btn-nss-sm" id="btnRetryNotification" onclick="retryActiveNotification()" style="display:none;">
+              🔄 Resend Notification
+            </button>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div>
+              <span style="color:#64748B;">Email (Brevo):</span>
+              <span id="mEmailNotifStatus" class="status-badge" style="margin-left:4px;">Pending</span>
+            </div>
+            <div>
+              <span style="color:#64748B;">SMS:</span>
+              <span id="mSmsNotifStatus" class="status-badge" style="margin-left:4px;">Pending</span>
+            </div>
+          </div>
+          <div id="mNotifSentAt" style="font-size:11px; color:#64748B; margin-top:8px;"></div>
+        </div>
       </div>
       <div class="nss-modal-foot">
         <button type="button" class="btn-nss btn-nss-outline" onclick="closeAppModal()">Close</button>
-        <button type="button" class="btn-nss btn-nss-danger" onclick="openRejectModalFromActive()">Reject</button>
+        <button type="button" class="btn-nss btn-nss-danger" id="btnModalReject" onclick="openRejectModalFromActive()">Reject</button>
         <button type="button" class="btn-nss btn-nss-success" id="btnModalApprove" onclick="approveActiveApp()">Approve Application</button>
       </div>
     </div>
@@ -1801,6 +1828,7 @@
       if (tabId === 'tab-rejected') loadRejectedTab();
       if (tabId === 'tab-coordinators') loadCoordinatorsTab();
       if (tabId === 'tab-login-activity') loadAuditLogsTab();
+      if (tabId === 'tab-sms-records') loadSmsRecordsTab();
       if (tabId !== 'tab-qr-scanner') stopScanner();
     }
 
@@ -2103,17 +2131,17 @@
       btn.textContent = 'Importing...';
 
       try {
-        const NSS = window.NSS = window.NSS || {};
-        const dir = NSS.Directory;
+        const nssGlobal = window.NSS || (typeof NSS !== 'undefined' ? NSS : null);
+        const dir = (nssGlobal && nssGlobal.Directory) || (window.NSS && window.NSS.Directory);
         if (!dir || typeof dir.importNames !== 'function') {
-          throw new Error('NSS Directory module is not fully loaded. Please hard refresh the page with Ctrl+F5 or Shift+Reload.');
+          throw new Error('NSS Directory module is updating or loading. Please hard refresh (Ctrl+F5) and try again.');
         }
 
         const res = await dir.importNames(stagedExcelNames, stagedBatchId);
         alert('Successfully imported ' + res.count + ' volunteer names to Directory!\nImport Batch ID: ' + res.batchId);
         closeExcelImportModal();
-        await loadDirectoryTab();
-        loadOverviewTab();
+        if (typeof loadDirectoryTab === 'function') await loadDirectoryTab();
+        if (typeof loadOverviewTab === 'function') loadOverviewTab();
       } catch (err) {
         console.error('Import failed:', err);
         alert('Import failed: ' + (err.message || 'Unknown error'));
@@ -2373,9 +2401,16 @@
       if (!confirm('Approve this volunteer application and issue digital ID credentials?')) return;
       const NSS = window.NSS = window.NSS || {};
       try {
-        await NSS.Admin.approveApp(id);
-        alert('Application approved successfully!');
+        const res = await NSS.Admin.approveApp(id);
+        let msg = 'Application approved successfully!';
+        if (res && res.notification) {
+          msg += '\n• Brevo Email: ' + (res.notification.emailStatus || 'sent') + '\n• SMS Alert: ' + (res.notification.smsStatus || 'sent');
+        }
+        alert(msg);
+        cachedAll = await NSS.Admin.loadAll();
         loadPendingTab();
+        loadApplicationsTab();
+        loadApprovedTab();
         loadOverviewTab();
       } catch (e) {
         alert(e.message || 'Approval failed.');
@@ -2393,21 +2428,25 @@
 
       const tb = document.getElementById('approvedAppsTableBody');
       if (!approved || approved.length === 0) {
-        tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:32px; color:#94A3B8;">No approved volunteers yet.</td></tr>';
+        tb.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:32px; color:#94A3B8;">No approved volunteers yet.</td></tr>';
         return;
       }
 
       tb.innerHTML = approved.map(app => {
         const ph = app.photo_url ? '<img src="' + app.photo_url + '" style="width:34px; height:40px; object-fit:cover; border-radius:6px;">' : '📷';
+        const emStatus = app.email_notification_status || 'sent';
+        const smsStatus = app.sms_notification_status || 'pending';
         return '<tr>' +
           '<td><strong style="color:var(--nss-royal-blue);">' + (app.volunteer_id || 'ID-PENDING') + '</strong></td>' +
           '<td>' + ph + '</td>' +
           '<td><strong>' + app.full_name + '</strong></td>' +
           '<td>' + (app.roll_number || '—') + '</td>' +
           '<td>' + (app.course || '—') + ' (' + (app.academic_year || '—') + ')</td>' +
-          '<td><code>' + (app.card_hash ? app.card_hash.slice(0, 10) + '...' : '—') + '</code></td>' +
+          '<td><span class="status-badge ' + (emStatus === 'sent' ? 'approved' : (emStatus === 'failed' ? 'rejected' : 'pending')) + '">' + emStatus + '</span></td>' +
+          '<td><span class="status-badge ' + (smsStatus === 'sent' ? 'approved' : (smsStatus === 'failed' ? 'rejected' : 'pending')) + '">' + smsStatus + '</span></td>' +
           '<td>' + (NSS.formatDate ? NSS.formatDate(app.approved_at || app.submitted_at) : '—') + '</td>' +
-          '<td style="text-align:right;">' +
+          '<td style="text-align:right; white-space:nowrap;">' +
+            '<button type="button" class="btn-nss btn-nss-outline btn-nss-sm" style="margin-right:4px;" onclick="retryAppNotification(\'' + app.id + '\')">🔄 Resend</button>' +
             '<a href="my-id.html" target="_blank" class="btn-nss btn-nss-outline btn-nss-sm">View Card</a>' +
           '</td>' +
         '</tr>';
@@ -2464,6 +2503,39 @@
       const stEl = document.getElementById('mStatusBadge');
       stEl.innerHTML = '<span class="status-badge ' + (app.status || 'pending').toLowerCase() + '">' + (app.status || 'Pending') + '</span>';
 
+      // Update Notification Card
+      const emBadge = document.getElementById('mEmailNotifStatus');
+      const smsBadge = document.getElementById('mSmsNotifStatus');
+      const sentAtEl = document.getElementById('mNotifSentAt');
+      const btnRetry = document.getElementById('btnRetryNotification');
+      const btnApprove = document.getElementById('btnModalApprove');
+      const btnReject = document.getElementById('btnModalReject');
+
+      const emStatus = app.email_notification_status || (app.status === 'approved' ? 'sent' : 'pending');
+      const smsStatus = app.sms_notification_status || (app.status === 'approved' ? 'sent' : 'pending');
+
+      if (emBadge) {
+        emBadge.textContent = emStatus.toUpperCase();
+        emBadge.className = 'status-badge ' + (emStatus === 'sent' ? 'approved' : (emStatus === 'failed' ? 'rejected' : 'pending'));
+      }
+      if (smsBadge) {
+        smsBadge.textContent = smsStatus.toUpperCase();
+        smsBadge.className = 'status-badge ' + (smsStatus === 'sent' ? 'approved' : (smsStatus === 'failed' ? 'rejected' : 'pending'));
+      }
+      if (sentAtEl) {
+        sentAtEl.textContent = app.notification_sent_at ? ('Delivery timestamp: ' + (NSS.formatDate ? NSS.formatDate(app.notification_sent_at, true) : app.notification_sent_at)) : (app.status === 'approved' ? 'Automated notice dispatched.' : 'Notification will be triggered automatically upon approval.');
+      }
+
+      if (app.status === 'approved') {
+        if (btnRetry) btnRetry.style.display = 'inline-block';
+        if (btnApprove) btnApprove.style.display = 'none';
+        if (btnReject) btnReject.style.display = 'none';
+      } else {
+        if (btnRetry) btnRetry.style.display = 'none';
+        if (btnApprove) btnApprove.style.display = 'inline-block';
+        if (btnReject) btnReject.style.display = 'inline-block';
+      }
+
       document.getElementById('appModal').style.display = 'flex';
     }
 
@@ -2476,19 +2548,82 @@
       if (!activeApp) return;
       const btn = document.getElementById('btnModalApprove');
       btn.disabled = true;
-      btn.textContent = 'Approving...';
+      btn.textContent = 'Approving & Notifying...';
       try {
         const NSS = window.NSS = window.NSS || {};
-        await NSS.Admin.approveApp(activeApp.id);
-        alert('Application approved successfully!');
+        const res = await NSS.Admin.approveApp(activeApp.id);
+        let msg = 'Application approved successfully!';
+        if (res && res.notification) {
+          msg += '\n• Brevo Email: ' + (res.notification.emailStatus || 'sent') + '\n• SMS: ' + (res.notification.smsStatus || 'sent');
+        }
+        alert(msg);
         closeAppModal();
+        cachedAll = await NSS.Admin.loadAll();
         loadApplicationsTab();
+        loadPendingTab();
+        loadApprovedTab();
         loadOverviewTab();
       } catch (e) {
         alert(e.message || 'Approval failed.');
       } finally {
         btn.disabled = false;
         btn.textContent = 'Approve Application';
+      }
+    }
+
+    async function retryActiveNotification() {
+      if (!activeApp) return;
+      await retryAppNotification(activeApp.id);
+      openAppModal(activeApp.id);
+    }
+
+    async function retryAppNotification(appId) {
+      const btn = document.getElementById('btnRetryNotification');
+      if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+      try {
+        const NSS = window.NSS = window.NSS || {};
+        const res = await NSS.Admin.sendApprovalNotification(appId, { forceRetry: true });
+        alert('Notification dispatch outcome:\n• Email: ' + (res.emailStatus || 'sent') + '\n• SMS: ' + (res.smsStatus || 'sent'));
+        cachedAll = await NSS.Admin.loadAll();
+        loadApprovedTab();
+        loadApplicationsTab();
+      } catch (e) {
+        alert('Retry failed: ' + (e.message || 'Network error'));
+      } finally {
+        if (btn) { btn.disabled = false; btn.textContent = '🔄 Resend Notification'; }
+      }
+    }
+
+    async function loadSmsRecordsTab() {
+      const NSS = window.NSS = window.NSS || {};
+      const tb = document.getElementById('smsLogsTableBody');
+      if (!tb) return;
+      tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">Loading notification logs...</td></tr>';
+
+      try {
+        const logs = await NSS.Admin.loadNotificationLogs();
+        if (!logs || logs.length === 0) {
+          tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">No notification logs recorded yet.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = logs.map(l => {
+          const dt = NSS.formatDate ? NSS.formatDate(l.created_at, true) : l.created_at;
+          const stClass = l.status === 'sent' ? 'approved' : (l.status === 'failed' ? 'rejected' : 'pending');
+          return '<tr>' +
+            '<td>' + dt + '</td>' +
+            '<td>' + (l.recipient_email || l.recipient_phone || '—') + '</td>' +
+            '<td><span class="status-badge" style="background:#EEF2FF; color:var(--nss-royal-blue);">' + (l.channel || 'email').toUpperCase() + '</span></td>' +
+            '<td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + (l.subject || l.message || 'Approval Notice') + '</td>' +
+            '<td><span class="status-badge ' + stClass + '">' + (l.status || 'sent') + '</span></td>' +
+            '<td style="font-size:11px; color:#64748B; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + (l.error_message || l.provider_message_id || 'OK') + '</td>' +
+            '<td style="text-align:right;">' +
+              (l.application_id ? '<button type="button" class="btn-nss btn-nss-outline btn-nss-sm" onclick="retryAppNotification(\'' + l.application_id + '\')">🔄 Resend</button>' : '—') +
+            '</td>' +
+          '</tr>';
+        }).join('');
+      } catch (err) {
+        tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:#DC2626;">Failed to load logs: ' + err.message + '</td></tr>';
       }
     }
 
@@ -2501,7 +2636,9 @@
         await NSS.Admin.rejectApp(activeApp.id, reason);
         alert('Application rejected.');
         closeAppModal();
+        cachedAll = await NSS.Admin.loadAll();
         loadApplicationsTab();
+        loadPendingTab();
         loadOverviewTab();
       } catch (e) {
         alert(e.message || 'Rejection failed.');

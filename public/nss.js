@@ -55,7 +55,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   NSS.Auth = {
     async getCurrentUser() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return null;
       try {
         const { data: { session } } = await sb.auth.getSession();
@@ -72,7 +74,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
      * Automatically attempts invitation activation for invited emails (e.g. President)
      */
     async getUserRole(userId = null) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return 'volunteer';
       try {
         const user = userId ? { id: userId } : await this.getCurrentUser();
@@ -150,7 +154,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
      * Records Google login activity via secure RPC
      */
     async recordLogin() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return;
       try {
         const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
@@ -161,7 +167,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async signOut() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (sb) {
         await sb.auth.signOut();
       }
@@ -174,7 +182,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   NSS.App = {
     async getUserApplication(userId) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb || !userId) return null;
       try {
         const { data, error } = await sb
@@ -191,7 +201,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async checkExistingByRoll(rollNumber) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb || !rollNumber) return null;
       try {
         const { data, error } = await sb
@@ -207,7 +219,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async submitApplication(appData) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Database client unavailable');
       const user = await NSS.Auth.getCurrentUser();
       if (!user) throw new Error('Authentication required before submitting application.');
@@ -276,7 +290,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   NSS.Students = {
     async loadStudents({ page = 1, limit = 20, search = '', status = 'all', course = 'all', academicYear = 'all' } = {}) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return { students: [], total: 0, page, totalPages: 1 };
 
       try {
@@ -317,7 +333,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async getStudentById(studentId) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb || !studentId) return null;
       try {
         const { data, error } = await sb.from('nss_students').select('*').eq('id', studentId).single();
@@ -329,7 +347,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async updateStudent(studentId, fields) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb || !studentId) throw new Error('Database unavailable');
       const { data, error } = await sb
         .from('nss_students')
@@ -375,7 +395,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   NSS.LoginActivity = {
     async loadActivity({ page = 1, limit = 20, role = 'all', isRegistered = 'all', search = '' } = {}) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return { logs: [], total: 0, page, totalPages: 1 };
 
       try {
@@ -417,7 +439,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   NSS.RoleInvitations = {
     async listInvitations() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return [];
       try {
         const { data, error } = await sb
@@ -433,7 +457,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async listActiveStaff() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return [];
       try {
         const { data, error } = await sb
@@ -447,7 +473,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async createInvitation({ email, name, role, metadata = {} }) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Database client unavailable');
       const cleanEmail = email.trim().toLowerCase();
       const user = await NSS.Auth.getCurrentUser();
@@ -480,7 +508,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async revokeInvitation(invitationId) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Database client unavailable');
       const { error } = await sb
         .from('nss_role_invitations')
@@ -491,7 +521,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async revokeStaffRole(userId) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Database client unavailable');
       const { error } = await sb
         .from('nss_roles')
@@ -510,7 +542,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
      * Loads live database statistics from Supabase without mock inflation
      */
     async loadLiveStats() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       const stats = {
         totalApplications: 0,
         pendingCount: 0,
@@ -584,7 +618,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async loadPending() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return [];
       try {
         const { data, error } = await sb
@@ -601,7 +637,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async loadAll(statusFilter = 'all', searchQuery = '') {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return [];
       try {
         let query = sb.from('nss_applications').select('*').order('submitted_at', { ascending: false });
@@ -622,7 +660,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async approveApp(appId) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Supabase client unavailable');
       const { data, error } = await sb.rpc('nss_approve_volunteer', { app_id: appId });
       if (error) throw error;
@@ -636,11 +676,72 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         }).eq('registration_id', appId);
       } catch (ignore) {}
 
+      // AUTOMATIC NOTIFICATION TRIGGER: Send Approval Email (via Brevo) & SMS
+      let notificationResult = null;
+      try {
+        notificationResult = await this.sendApprovalNotification(appId, { forceRetry: false });
+      } catch (notifErr) {
+        console.warn('[Automatic Approval Notification Notice]:', notifErr.message);
+      }
+
+      return {
+        ...data,
+        notification: notificationResult
+      };
+    },
+
+    async sendApprovalNotification(appId, { forceRetry = false } = {}) {
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
+      let token = null;
+      if (sb) {
+        try {
+          const { data: { session } } = await sb.auth.getSession();
+          if (session && session.access_token) token = session.access_token;
+        } catch (ignore) {}
+      }
+
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      const res = await fetch('/api/send-approval-notification', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          applicationId: appId,
+          forceRetry
+        })
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to dispatch approval notification');
+      }
       return data;
     },
 
+    async loadNotificationLogs(appId = null) {
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
+      if (!sb) return [];
+      try {
+        let q = sb.from('nss_notification_logs').select('*').order('created_at', { ascending: false });
+        if (appId) q = q.eq('application_id', appId);
+        const { data, error } = await q.limit(50);
+        if (error) throw error;
+        return data || [];
+      } catch (e) {
+        console.warn('Could not fetch notification logs:', e);
+        return [];
+      }
+    },
+
     async rejectApp(appId, reason = '') {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Supabase client unavailable');
       const { data, error } = await sb.rpc('nss_reject_volunteer', { app_id: appId, reason });
       if (error) throw error;
@@ -655,7 +756,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async revokeCard(appId, reason = '') {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Supabase client unavailable');
       const { data, error } = await sb.rpc('nss_revoke_card', { app_id: appId, reason });
       if (error) throw error;
@@ -670,7 +773,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async loadLeadership() {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return [];
       try {
         const { data, error } = await sb
@@ -685,7 +790,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async saveLeadership(profile) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Supabase unavailable');
       const { data, error } = await sb
         .from('nss_leadership')
@@ -697,7 +804,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async deleteLeadership(id) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) throw new Error('Supabase unavailable');
       const { error } = await sb.from('nss_leadership').delete().eq('id', id);
       if (error) throw error;
@@ -758,7 +867,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async loadDirectory({ page = 1, limit = 20, search = '', filter = 'all', batch = 'all' } = {}) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       let records = [];
       let totalCount = 0;
 
@@ -850,7 +961,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         updated_at: new Date().toISOString()
       })).filter(r => r.full_name.length > 0);
 
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (sb) {
         try {
           const dbRows = recordsToInsert.map(r => ({
@@ -903,7 +1016,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         throw new Error('Please provide a valid email address.');
       }
 
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (sb) {
         try {
           await sb
@@ -928,7 +1043,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     },
 
     async removeEmail(recordId) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (sb) {
         try {
           await sb
@@ -982,7 +1099,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   NSS.EmailLogs = {
     async getLogs(limit = 30) {
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (sb) {
         try {
           const { data, error } = await sb
@@ -1003,7 +1122,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
 
     async saveLogs(records = []) {
       if (!records || !records.length) return;
-      const sb = await NSS.getSupabase();
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (sb) {
         try {
           await sb.from('nss_email_logs').insert(records);
