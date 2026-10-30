@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261031-v4">
+  <link rel="stylesheet" href="nss.css?v=20261031-v5">
 
   <!-- Early Global NSS Definition -->
   <script>
@@ -20,16 +20,17 @@
   </script>
 
   <!-- Core External Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Application Modules (Cache-busted) -->
-  <script src="volunteers-data.js?v=20261031-v4"></script>
-  <script src="directory-seed-data.js?v=20261031-v4"></script>
-  <script src="cloudinary-config.js?v=20261031-v4"></script>
-  <script src="env.js?v=20261031-v4"></script>
-  <script src="echo.js?v=20261031-v4"></script>
-  <script src="nss.js?v=20261031-v4"></script>
+  <script src="volunteers-data.js?v=20261031-v5"></script>
+  <script src="directory-seed-data.js?v=20261031-v5"></script>
+  <script src="cloudinary-config.js?v=20261031-v5"></script>
+  <script src="env.js?v=20261031-v5"></script>
+  <script src="echo.js?v=20261031-v5"></script>
+  <script src="nss.js?v=20261031-v5"></script>
 
   <style>
     :root {
@@ -1400,6 +1401,22 @@
               🔄 Refresh Logs
             </button>
           </div>
+          <!-- Brevo Template 14 Test Card -->
+          <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:16px 20px; margin-top:16px; margin-bottom:16px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div>
+              <div style="font-weight:700; color:#166534; font-size:14px; display:flex; align-items:center; gap:6px;">
+                <span>📧</span> Test Brevo Approval Notification (Template ID: 14)
+              </div>
+              <div style="font-size:12px; color:#15803D; margin-top:2px;">
+                Send a sample approval email from <strong>nss@tgpcop.site</strong> with all 7 exact params before approving real students.
+              </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+              <input type="email" id="testEmailRecipientInput" placeholder="authorized-test@example.com" style="padding:8px 12px; border:1px solid #86EFAC; border-radius:6px; font-size:13px; width:240px; background:#FFFFFF;">
+              <button type="button" class="btn-nss btn-nss-success btn-nss-sm" onclick="sendTestApprovalNotification()">Send Test Email</button>
+            </div>
+          </div>
+
           <div class="table-card" style="margin-top:16px;">
             <div class="table-responsive">
               <table class="nss-data-table">
@@ -1786,7 +1803,7 @@
     // 1. Admin Authentication & Role Guard
     async function initAdminAuth() {
       if (window.ready) await window.ready;
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!NSS.Auth || typeof NSS.Auth.getCurrentUser !== 'function') {
         setTimeout(initAdminAuth, 100);
         return;
@@ -1901,7 +1918,7 @@
 
     // 3. Overview Tab & Charts Loader
     async function loadOverviewTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!NSS.Admin || typeof NSS.Admin.loadLiveStats !== 'function') {
         setTimeout(loadOverviewTab, 100);
         return;
@@ -1992,7 +2009,7 @@
 
     // 4. Volunteer Directory Controller
     async function loadDirectoryTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const dirMod = NSS.Directory;
       if (!dirMod || typeof dirMod.loadDirectory !== 'function') {
         setTimeout(loadDirectoryTab, 100);
@@ -2242,7 +2259,7 @@
     let currentEditingDirId = null;
 
     function openEmailModal(recordId) {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const allDir = (cachedDirectoryResult && cachedDirectoryResult.allRecords)
         ? cachedDirectoryResult.allRecords
         : (NSS.Directory ? NSS.Directory._getLocalStore() : []);
@@ -2270,7 +2287,7 @@
     }
 
     async function saveVolunteerEmail() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!currentEditingDirId) return;
       const email = document.getElementById('dirVolunteerEmailInput').value.trim();
       const btn = document.getElementById('btnSaveEmail');
@@ -2278,7 +2295,7 @@
       btn.textContent = 'Saving...';
 
       try {
-        const NSS = window.NSS = window.NSS || {};
+        var NSS = window.NSS = window.NSS || {};
         await NSS.Directory.saveEmail(currentEditingDirId, email);
         closeEmailModal();
         await loadDirectoryTab();
@@ -2292,12 +2309,12 @@
     }
 
     async function removeVolunteerEmail() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!currentEditingDirId) return;
       if (!confirm('Are you sure you want to remove this email address?')) return;
 
       try {
-        const NSS = window.NSS = window.NSS || {};
+        var NSS = window.NSS = window.NSS || {};
         await NSS.Directory.removeEmail(currentEditingDirId);
         closeEmailModal();
         await loadDirectoryTab();
@@ -2308,7 +2325,7 @@
     }
 
     function exportDirectoryCSV() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (NSS.Directory && typeof NSS.Directory.exportCSV === 'function') {
         NSS.Directory.exportCSV();
       }
@@ -2316,7 +2333,7 @@
 
     // 7. Student Registry Controller
     async function loadStudentsTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const stMod = NSS.Students;
       if (!stMod) return;
 
@@ -2354,7 +2371,7 @@
     function handleStudentsSearch() { loadStudentsTab(); }
     function handleStudentsFilter() { loadStudentsTab(); }
     function exportStudentsCSV() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (NSS.Students && typeof NSS.Students.exportStudentsCSV === 'function') {
         NSS.Students.exportStudentsCSV();
       }
@@ -2362,7 +2379,7 @@
 
     // 8. Google Users Controller
     async function loadGoogleUsersTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!NSS.LoginActivity) return;
       const q = document.getElementById('googleUsersSearch')?.value || '';
 
@@ -2397,7 +2414,7 @@
 
     // 9. All Applications & Review Controller
     async function loadApplicationsTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const appMod = NSS.Admin;
       if (!appMod) return;
 
@@ -2453,7 +2470,7 @@
 
     // 10. Pending Tab Controller
     async function loadPendingTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const appMod = NSS.Admin;
       if (!appMod) return;
 
@@ -2488,7 +2505,7 @@
 
     async function quickApprove(id) {
       if (!confirm('Approve this volunteer application and issue digital ID credentials?')) return;
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       try {
         const res = await NSS.Admin.approveApp(id);
         let msg = 'Application approved successfully!';
@@ -2508,7 +2525,7 @@
 
     // 11. Approved Volunteers Tab
     async function loadApprovedTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!cachedAll || cachedAll.length === 0) {
         cachedAll = await NSS.Admin.loadAll();
       }
@@ -2544,7 +2561,7 @@
 
     // 12. Rejected Volunteers Tab
     async function loadRejectedTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!cachedAll || cachedAll.length === 0) {
         cachedAll = await NSS.Admin.loadAll();
       }
@@ -2639,7 +2656,7 @@
       btn.disabled = true;
       btn.textContent = 'Approving & Notifying...';
       try {
-        const NSS = window.NSS = window.NSS || {};
+        var NSS = window.NSS = window.NSS || {};
         const res = await NSS.Admin.approveApp(activeApp.id);
         let msg = 'Application approved successfully!';
         if (res && res.notification) {
@@ -2667,11 +2684,11 @@
     }
 
     async function retryAppNotification(appId) {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const btn = document.getElementById('btnRetryNotification');
       if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
       try {
-        const NSS = window.NSS = window.NSS || {};
+        var NSS = window.NSS = window.NSS || {};
         const res = await NSS.Admin.sendApprovalNotification(appId, { forceRetry: true });
         alert('Notification dispatch outcome:\n• Email: ' + (res.emailStatus || 'sent') + '\n• SMS: ' + (res.smsStatus || 'sent'));
         cachedAll = await NSS.Admin.loadAll();
@@ -2685,7 +2702,7 @@
     }
 
     async function loadSmsRecordsTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const tb = document.getElementById('smsLogsTableBody');
       if (!tb) return;
       tb.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:32px; color:#94A3B8;">Loading notification logs...</td></tr>';
@@ -2721,7 +2738,7 @@
       if (!activeApp) return;
       const reason = prompt('Please enter the reason for application rejection:');
       if (!reason) return;
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       try {
         await NSS.Admin.rejectApp(activeApp.id, reason);
         alert('Application rejected.');
@@ -2740,7 +2757,7 @@
       const aud = document.getElementById('broadcastAudience')?.value || 'directory_all_with_email';
       const warningBox = document.getElementById('broadcastWarningBox');
       const customGroup = document.getElementById('customEmailGroup');
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
 
       if (customGroup) customGroup.style.display = aud === 'custom' ? 'block' : 'none';
 
@@ -2818,7 +2835,7 @@
       const message = document.getElementById('broadcastMessage').value.trim();
       const templateId = document.getElementById('broadcastTemplateId').value.trim();
 
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const allDir = (cachedDirectoryResult && cachedDirectoryResult.allRecords)
         ? cachedDirectoryResult.allRecords
         : (NSS.Directory ? NSS.Directory._getLocalStore() : []);
@@ -2946,11 +2963,11 @@
     }
 
     async function handleScannedData(data) {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const out = document.getElementById('qrScanOutput');
       out.innerHTML = '<div style="font-weight:700; color:var(--nss-navy);">Verifying token: ' + data + '...</div>';
 
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       try {
         let res = null;
         if (NSS.QRVerify) res = await NSS.QRVerify(data);
@@ -2976,7 +2993,7 @@
 
     // 16. President & Staff Governance
     async function loadCoordinatorsTab() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (!NSS.RoleInvitations) return;
       try {
         const staff = await NSS.RoleInvitations.listActiveStaff();
@@ -3002,7 +3019,7 @@
     }
 
     async function claimPresidentRole() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       const sb = await NSS.getSupabase();
       if (!sb || !cachedCurrentUser) {
         alert('Supabase session not ready.');
@@ -3027,7 +3044,7 @@
     }
 
     function exportApprovedCSV() {
-      const NSS = window.NSS = window.NSS || {};
+      var NSS = window.NSS = window.NSS || {};
       if (NSS.Admin && typeof NSS.Admin.exportApprovedCSV === 'function') {
         NSS.Admin.exportApprovedCSV();
       }
@@ -3045,6 +3062,55 @@
     // Auto-init on page load
     document.addEventListener('DOMContentLoaded', initAdminAuth);
     document.addEventListener('echo-auth', initAdminAuth);
+  
+    // Brevo Template 14 Live Tester
+    async function sendTestApprovalNotification() {
+      const emailInput = document.getElementById('testEmailRecipientInput');
+      const testEmail = (emailInput ? emailInput.value : '').trim();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!testEmail || !emailRegex.test(testEmail)) {
+        alert('Please enter a valid authorized test email address.');
+        return;
+      }
+
+      if (!confirm('DISPATCH TEST EMAIL:\n\nBrevo Template: 14 (NSS Volunteer Approval)\nSender: nss@tgpcop.site\nRecipient: ' + testEmail + '\n\nProceed with test dispatch?')) {
+        return;
+      }
+
+      try {
+        var NSS = window.NSS = window.NSS || {};
+        const sb = NSS.getSupabase ? await NSS.getSupabase() : (window.getSB ? window.getSB() : null);
+        let token = null;
+        if (sb) {
+          try {
+            const { data: { session } } = await sb.auth.getSession();
+            if (session && session.access_token) token = session.access_token;
+          } catch (e) {}
+        }
+
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+
+        const res = await fetch('/api/send-approval-notification', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            testEmail: testEmail
+          })
+        });
+
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.email && data.email.status === 'sent') {
+          alert('Test email successfully sent via Brevo Template 14!\n\nRecipient: ' + testEmail + '\nBrevo Message ID: ' + (data.email.messageId || 'OK') + '\nTemplate ID: ' + data.templateId);
+          if (typeof loadSmsRecordsTab === 'function') loadSmsRecordsTab();
+        } else {
+          alert('Test dispatch outcome:\nStatus: ' + (data.email ? data.email.status : 'failed') + '\nMessage: ' + (data.email?.error || data.error || 'Check server configuration or BREVO_API_KEY in Vercel.'));
+        }
+      } catch (err) {
+        alert('Failed to send test email: ' + err.message);
+      }
+    }
+  
   </script>
 </body>
 </html>

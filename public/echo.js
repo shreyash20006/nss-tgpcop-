@@ -46,21 +46,30 @@ function paint(u){window.USER=u||null;const a=$('#auth');
 window.signIn=()=>sb?sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:new URL('index.html',location.href).href}}):alert('Setup pending: add Supabase keys in Vercel Environment Variables');
 window.getSB=()=>sb;
 window.ready=new Promise(res=>{
- if(!C.URL.startsWith('http')){paint(null);return res()}
- const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
- s.onload=async()=>{
-  try {
-   sb=supabase.createClient(C.URL,C.KEY);
-   const{data}=await sb.auth.getSession();
-   paint(data.session?.user);
-   sb.auth.onAuthStateChange((_,x)=>paint(x?.user));
-  } catch(err) {
-   console.warn('Supabase init error:', err);
-   paint(null);
+ if(!C.URL.startsWith('http')){paint(null);return res();}
+ let done=false;const finish=()=>{if(!done){done=true;res();}};
+ const initClient=()=>{
+  if(typeof window.supabase!=='undefined'&&typeof window.supabase.createClient==='function'){
+   try {
+    sb=window.supabase.createClient(C.URL,C.KEY);
+    finish();
+    sb.auth.getSession().then(({data})=>{
+     paint(data?.session?.user);
+     sb.auth.onAuthStateChange((_,x)=>paint(x?.user));
+    }).catch(err=>{console.warn('Supabase getSession error:',err);paint(null);});
+    return true;
+   } catch(e){console.warn('Supabase init error:',e);paint(null);finish();return true;}
   }
-  res();
+  return false;
  };
- s.onerror=()=>{paint(null);res()};document.head.appendChild(s)});
+ if(initClient())return;
+ const timer=setTimeout(()=>{console.warn('[Echo] CDN timeout, proceeding with graceful degradation.');finish();},2500);
+ const s=document.createElement('script');
+ s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js';
+ s.onload=()=>{clearTimeout(timer);if(!initClient())finish();};
+ s.onerror=()=>{clearTimeout(timer);paint(null);finish();};
+ document.head.appendChild(s);
+});
 /* ---- Wall of Love ---- */
 const SAMPLE=[{name:'Campus Student',role:'Student',text:'Echo captures every fest so perfectly. The photos are always the best part of the day!'},{name:'Faculty Member',role:'Teacher',text:'Professional, creative and always on time. Proud of this student team.'},{name:'Club Member',role:'Student',text:'Their reels make our events go viral on campus. Love the Echo style!'}];
 async function love(){const g=$('#lv');if(!g)return;await ready;let d=[];
