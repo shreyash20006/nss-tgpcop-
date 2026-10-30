@@ -551,6 +551,310 @@
     }
   };
 
+  // ==========================================================================
+  // NSS VOLUNTEER DIRECTORY MODULE (STRICT PRIVACY - ONLY FULL NAME + EMAIL)
+  // ==========================================================================
+  NSS.Directory = {
+    _getLocalStore() {
+      try {
+        const stored = localStorage.getItem('nss_directory_store_v1');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+
+      const seed = (window.NSS_DIRECTORY_SEED && Array.isArray(window.NSS_DIRECTORY_SEED))
+        ? window.NSS_DIRECTORY_SEED
+        : [];
+      return seed;
+    },
+
+    _saveLocalStore(list) {
+      try {
+        localStorage.setItem('nss_directory_store_v1', JSON.stringify(list));
+      } catch (e) {}
+    },
+
+    async loadDirectory({ page = 1, limit = 20, search = '', filter = 'all', batch = 'all' } = {}) {
+      const sb = await NSS.getSupabase();
+      let list = [];
+      let dbConnected = false;
+
+      if (sb) {
+        try {
+          const { data, error } = await sb
+            .from('nss_volunteer_directory')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            list = data;
+            dbConnected = true;
+            this._saveLocalStore(data);
+          }
+        } catch (e) {
+          console.warn('Supabase directory table fetch error, falling back to local store:', e);
+        }
+      }
+
+      if (!dbConnected || list.length === 0) {
+        list = this._getLocalStore();
+      }
+
+      // Compute stats
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const stats = {
+        total: list.length,
+        withEmail: list.filter(v => v.email && emailRegex.test(v.email)).length,
+        pendingEmail: list.filter(v => !v.email || !emailRegex.test(v.email)).length
+      };
+
+      // Extract unique batch IDs
+      const batchList = [...new Set(list.map(v => v.import_batch_id).filter(Boolean))];
+
+      // Filter by Search
+      let filtered = [...list];
+      if (search && search.trim()) {
+        const q = search.trim().toLowerCase();
+        filtered = filtered.filter(v =>
+          (v.full_name && v.full_name.toLowerCase().includes(q)) ||
+          (v.email && v.email.toLowerCase().includes(q))
+        );
+      }
+
+      // Filter by Email Status
+      if (filter === 'with_email') {
+        filtered = filtered.filter(v => v.email && emailRegex.test(v.email));
+      } else if (filter === 'pending_email') {
+        filtered = filtered.filter(v => !v.email || !emailRegex.test(v.email));
+      }
+
+      // Filter by Batch
+      if (batch && batch !== 'all') {
+        filtered = filtered.filter(v => v.import_batch_id === batch);
+      }
+
+      // Pagination
+      const totalFiltered = filtered.length;
+      const totalPages = Math.max(1, Math.ceil(totalFiltered / limit));
+      const currentPage = Math.min(Math.max(1, page), totalPages);
+      const startIdx = (currentPage - 1) * limit;
+      const paginatedList = filtered.slice(startIdx, startIdx + limit);
+
+      return {
+        list: paginatedList,
+        total: totalFiltered,
+        page: currentPage,
+        totalPages,
+        limit,
+        stats,
+        batchList,
+        allRecords: list
+      };
+    },
+
+    async importNames(namesList, batchId = null) {
+      if (!Array.isArray(namesList) || namesList.length === 0) {
+        throw new Error('No valid volunteer names to import.');
+      }
+
+      const cleanBatchId = batchId || ('BATCH-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substr(2, 4).toUpperCase());
+
+      // STRICT PRIVACY: Extract ONLY full_name and source_row_number
+      // All other fields (phone, aadhaar, DOB, address, category, etc.) are strictly discarded
+      const recordsToInsert = namesList.map((item, idx) => ({
+        full_name: typeof item === 'string' ? item.trim() : (item.name || item.full_name || '').trim(),
+        email: null,
+        email_status: 'pending',
+        import_batch_id: cleanBatchId,
+        source_row_number: typeof item === 'object' && item.row ? item.row : (idx + 1),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      })).filter(r => r.full_name.length > 0);
+
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        try {
+          await sb
+            .from('nss_volunteer_directory')
+            .upsert(recordsToInsert, { onConflict: 'import_batch_id,source_row_number' });
+        } catch (e) {
+          console.warn('Supabase directory upsert failed, saving to local store:', e);
+        }
+      }
+
+      // Sync local store
+      const localList = this._getLocalStore();
+      const updatedLocal = [...recordsToInsert.map((r, i) => ({
+        id: 'dir-' + cleanBatchId + '-' + (r.source_row_number || i + 1),
+        ...r
+      })), ...localList];
+
+      this._saveLocalStore(updatedLocal);
+      return {
+        batchId: cleanBatchId,
+        count: recordsToInsert.length
+      };
+    },
+
+    async saveEmail(id, email) {
+      const cleanEmail = (email || '').trim().toLowerCase();
+      if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        throw new Error('Please enter a valid email address (e.g. name@example.com).');
+      }
+
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        try {
+          await sb
+            .from('nss_volunteer_directory')
+            .update({ email: cleanEmail, email_status: 'added', updated_at: new Date().toISOString() })
+            .eq('id', id);
+        } catch (e) {
+          console.warn('DB update failed, using local store:', e);
+        }
+      }
+
+      // Update local store
+      const localList = this._getLocalStore();
+      const item = localList.find(x => x.id === id);
+      if (item) {
+        item.email = cleanEmail;
+        item.email_status = 'added';
+        item.updated_at = new Date().toISOString();
+        this._saveLocalStore(localList);
+      }
+      return true;
+    },
+
+    async removeEmail(id) {
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        try {
+          await sb
+            .from('nss_volunteer_directory')
+            .update({ email: null, email_status: 'pending', updated_at: new Date().toISOString() })
+            .eq('id', id);
+        } catch (e) {
+          console.warn('DB update failed, using local store:', e);
+        }
+      }
+
+      // Update local store
+      const localList = this._getLocalStore();
+      const item = localList.find(x => x.id === id);
+      if (item) {
+        item.email = null;
+        item.email_status = 'pending';
+        item.updated_at = new Date().toISOString();
+        this._saveLocalStore(localList);
+      }
+      return true;
+    },
+
+    async exportCSV() {
+      const { allRecords } = await this.loadDirectory({ limit: 10000 });
+      if (!allRecords || !allRecords.length) {
+        alert('Directory is empty.');
+        return;
+      }
+
+      const headers = ['Volunteer Full Name', 'Email Address', 'Email Status', 'Import Batch ID', 'Source Row', 'Added Date'];
+      const rows = allRecords.map(r => [
+        `"${(r.full_name || '').replace(/"/g, '""')}"`,
+        `"${r.email || ''}"`,
+        `"${r.email_status || 'pending'}"`,
+        `"${r.import_batch_id || ''}"`,
+        `"${r.source_row_number || ''}"`,
+        `"${r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : ''}"`
+      ]);
+
+      const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `nss_volunteer_directory_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  // NSS Email Activity Logs Module
+  NSS.EmailLogs = {
+    _getLocalLogs() {
+      try {
+        const stored = localStorage.getItem('nss_email_logs_v1');
+        if (stored) return JSON.parse(stored);
+      } catch (e) {}
+      return [];
+    },
+
+    _saveLocalLogs(logs) {
+      try {
+        localStorage.setItem('nss_email_logs_v1', JSON.stringify(logs.slice(0, 200)));
+      } catch (e) {}
+    },
+
+    async saveLogs(entries) {
+      if (!Array.isArray(entries) || entries.length === 0) return;
+
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        try {
+          await sb.from('nss_email_logs').insert(entries.map(e => ({
+            directory_id: e.directory_id || null,
+            recipient_email: e.email,
+            recipient_name: e.name,
+            subject: e.subject,
+            category: e.category || 'Bulk Broadcast',
+            template_id: e.templateId || null,
+            status: e.status || 'sent',
+            error_message: e.error || null,
+            batch_id: e.batchId || null,
+            sent_at: new Date().toISOString()
+          })));
+        } catch (err) {
+          console.warn('DB log insert error:', err);
+        }
+      }
+
+      // Sync local
+      const current = this._getLocalLogs();
+      const updated = [...entries.map((e, idx) => ({
+        id: 'log-' + Date.now() + '-' + idx,
+        recipient_email: e.email,
+        recipient_name: e.name,
+        subject: e.subject,
+        category: e.category || 'Bulk Broadcast',
+        status: e.status || 'sent',
+        error_message: e.error || null,
+        sent_at: new Date().toISOString()
+      })), ...current];
+
+      this._saveLocalLogs(updated);
+    },
+
+    async getLogs(limit = 20) {
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        try {
+          const { data, error } = await sb
+            .from('nss_email_logs')
+            .select('*')
+            .order('sent_at', { ascending: false })
+            .limit(limit);
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            return data;
+          }
+        } catch (e) {
+          console.warn('DB log query error, fallback to local store:', e);
+        }
+      }
+      return this._getLocalLogs().slice(0, limit);
+    }
+  };
+
   // QR Scanner Controller
   NSS.QRScanner = {
     stream: null,

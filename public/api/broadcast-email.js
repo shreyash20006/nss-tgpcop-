@@ -1,5 +1,5 @@
 /**
- * Serverless API: Broadcast Event & Achievement Announcements via Brevo
+ * Serverless API: Broadcast Event, Directory Announcements & Bulk Emails via Brevo
  * Endpoint: POST /api/broadcast-email
  * Protected by server-side BREVO_API_KEY environment variable
  */
@@ -31,6 +31,7 @@ module.exports = async (req, res) => {
     images = [],
     ctaLabel = '',
     ctaUrl = '',
+    templateId = null,
     recipients = []
   } = req.body || {};
 
@@ -42,70 +43,241 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Recipients array cannot be empty. Please specify at least one recipient.' });
   }
 
+  // Filter valid vs skipped recipients
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const validRecipients = [];
+  const skippedRecipients = [];
+
+  for (const r of recipients) {
+    if (!r) continue;
+    const email = (r.email || r.college_email || '').trim().toLowerCase();
+    const name = (r.name || r.full_name || r.fullName || 'NSS Volunteer').trim();
+    if (email && emailRegex.test(email)) {
+      validRecipients.push({
+        id: r.id || null,
+        email,
+        name,
+        firstName: name.split(' ')[0] || 'Volunteer'
+      });
+    } else {
+      skippedRecipients.push({
+        id: r.id || null,
+        name,
+        reason: email ? 'Invalid email format' : 'Missing email address'
+      });
+    }
+  }
+
+  if (validRecipients.length === 0) {
+    return res.status(400).json({
+      error: 'No valid recipient email addresses found in the selected list.',
+      skippedCount: skippedRecipients.length,
+      skippedRecipients
+    });
+  }
+
   if (!apiKey) {
     console.warn('[Brevo] BREVO_API_KEY is not configured in environment variables.');
     return res.status(200).json({
       success: false,
       warning: 'BREVO_API_KEY is not configured in Vercel Environment Variables. Please set up your Brevo API key to enable email broadcasts.',
-      sent: false
+      sent: false,
+      totalRecipients: recipients.length,
+      validRecipientsCount: validRecipients.length,
+      skippedCount: skippedRecipients.length,
+      skippedRecipients
     });
   }
 
-  // Filter valid emails
-  const validRecipients = recipients.filter(r => r && r.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.email));
-  if (validRecipients.length === 0) {
-    return res.status(400).json({ error: 'No valid recipient email addresses found.' });
-  }
-
   try {
-    // 1. Build Achievement / Event Photo Cards HTML
-    let photosHtml = '';
-    if (Array.isArray(images) && images.length > 0) {
-      const validImages = images.filter(img => typeof img === 'string' && img.trim().startsWith('http'));
-      if (validImages.length > 0) {
-        photosHtml = `
-          <tr>
-            <td style="padding:16px 28px 8px;">
-              <div style="font-size:12px; font-weight:700; color:#0647C8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
-                📸 Event & Achievement Highlights
-              </div>
-              <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
-                ${validImages.map((img, idx) => `
-                  <tr>
-                    <td style="padding-bottom:14px; text-align:center;">
-                      <img src="${escapeHtml(img)}" alt="NSS Event Photo ${idx + 1}" style="width:100%; max-width:540px; height:auto; border-radius:12px; display:block; margin:0 auto; border:1px solid #CBD5E1; box-shadow:0 4px 14px rgba(7,27,73,0.06);">
-                    </td>
-                  </tr>
-                `).join('')}
-              </table>
-            </td>
-          </tr>
-        `;
+    const results = [];
+    let sentCount = 0;
+    let failCount = 0;
+
+    // Send emails individually for 100% privacy and real personalized variable substitution
+    // Limit concurrency to 5 requests at a time to stay safely within Brevo rate limits
+    const concurrency = 5;
+    for (let i = 0; i < validRecipients.length; i += concurrency) {
+      const chunk = validRecipients.slice(i, i + concurrency);
+      
+      await Promise.all(chunk.map(async (rec) => {
+        const personalizedSubject = subject
+          .replace(/\{\{first_name\}\}/gi, rec.firstName)
+          .replace(/\{\{name\}\}/gi, rec.name);
+
+        const personalizedTitle = title
+          .replace(/\{\{first_name\}\}/gi, rec.firstName)
+          .replace(/\{\{name\}\}/gi, rec.name);
+
+        const personalizedMsg = message
+          .replace(/\{\{first_name\}\}/gi, rec.firstName)
+          .replace(/\{\{name\}\}/gi, rec.name);
+
+        let brevoBody;
+        if (templateId && !isNaN(parseInt(templateId, 10))) {
+          brevoBody = {
+            templateId: parseInt(templateId, 10),
+            to: [{ email: rec.email, name: rec.name }],
+            params: {
+              FIRSTNAME: rec.firstName,
+              FULLNAME: rec.name,
+              NAME: rec.name,
+              SUBJECT: personalizedSubject,
+              TITLE: personalizedTitle,
+              MESSAGE: personalizedMsg,
+              DATEVENUE: dateVenue || ''
+            }
+          };
+        } else {
+          const htmlContent = renderBroadcastHtml({
+            subject: personalizedSubject,
+            category,
+            title: personalizedTitle,
+            dateVenue,
+            message: personalizedMsg,
+            images,
+            ctaLabel,
+            ctaUrl,
+            recipientName: rec.name
+          });
+
+          brevoBody = {
+            sender: {
+              name: senderName,
+              email: senderEmail
+            },
+            to: [{ email: rec.email, name: rec.name }],
+            subject: personalizedSubject,
+            htmlContent
+          };
+        }
+
+        try {
+          const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+              'accept': 'application/json',
+              'api-key': apiKey,
+              'content-type': 'application/json'
+            },
+            body: JSON.stringify(brevoBody)
+          });
+
+          const resData = await brevoRes.json();
+          if (brevoRes.ok) {
+            sentCount++;
+            results.push({
+              id: rec.id,
+              email: rec.email,
+              name: rec.name,
+              status: 'sent',
+              messageId: resData.messageId
+            });
+          } else {
+            failCount++;
+            results.push({
+              id: rec.id,
+              email: rec.email,
+              name: rec.name,
+              status: 'failed',
+              error: resData.message || 'Brevo API error'
+            });
+          }
+        } catch (err) {
+          failCount++;
+          results.push({
+            id: rec.id,
+            email: rec.email,
+            name: rec.name,
+            status: 'failed',
+            error: err.message
+          });
+        }
+      }));
+
+      // Small delay between chunks
+      if (i + concurrency < validRecipients.length) {
+        await new Promise(r => setTimeout(r, 60));
       }
     }
 
-    // 2. Format Body Paragraphs
-    const formattedMessage = escapeHtml(message)
-      .split(/\n\s*\n/)
-      .map(p => `<p style="margin:0 0 14px; font-size:14.5px; line-height:1.65; color:#334155;">${p.replace(/\n/g, '<br>')}</p>`)
-      .join('');
+    return res.status(200).json({
+      success: sentCount > 0,
+      sentCount,
+      failCount,
+      skippedCount: skippedRecipients.length,
+      totalRecipients: recipients.length,
+      results,
+      skippedRecipients,
+      message: `Delivered to ${sentCount} recipient(s) via Brevo.${skippedRecipients.length ? ` (${skippedRecipients.length} skipped - missing email)` : ''}`
+    });
 
-    // 3. CTA Button HTML (optional)
-    let ctaHtml = '';
-    if (ctaLabel && ctaUrl && ctaUrl.startsWith('http')) {
-      ctaHtml = `
+  } catch (error) {
+    console.error('[Broadcast Email Error]', error);
+    return res.status(500).json({
+      success: false,
+      error: error.message || 'Internal server error while broadcasting email.'
+    });
+  }
+};
+
+function renderBroadcastHtml(options) {
+  const {
+    subject,
+    category,
+    title,
+    dateVenue,
+    message,
+    images = [],
+    ctaLabel,
+    ctaUrl,
+    recipientName
+  } = options;
+
+  let photosHtml = '';
+  if (Array.isArray(images) && images.length > 0) {
+    const validImages = images.filter(img => typeof img === 'string' && img.trim().startsWith('http'));
+    if (validImages.length > 0) {
+      photosHtml = `
         <tr>
-          <td style="padding:10px 28px 24px; text-align:center;">
-            <a href="${escapeHtml(ctaUrl)}" target="_blank" style="display:inline-block; padding:13px 32px; background-color:#0647C8; color:#FFFFFF; text-decoration:none; font-size:14px; font-weight:700; border-radius:999px; box-shadow:0 4px 14px rgba(6, 71, 200, 0.35);">
-              ${escapeHtml(ctaLabel)} ➔
-            </a>
+          <td style="padding:16px 28px 8px;">
+            <div style="font-size:12px; font-weight:700; color:#0647C8; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:12px;">
+              📸 Event & Achievement Highlights
+            </div>
+            <table role="presentation" width="100%" border="0" cellspacing="0" cellpadding="0">
+              ${validImages.map((img, idx) => `
+                <tr>
+                  <td style="padding-bottom:14px; text-align:center;">
+                    <img src="${escapeHtml(img)}" alt="NSS Event Photo ${idx + 1}" style="width:100%; max-width:540px; height:auto; border-radius:12px; display:block; margin:0 auto; border:1px solid #CBD5E1; box-shadow:0 4px 14px rgba(7,27,73,0.06);">
+                  </td>
+                </tr>
+              `).join('')}
+            </table>
           </td>
         </tr>
       `;
     }
+  }
 
-    // 4. Render Master Broadcast Template
-    const broadcastHtml = `<!DOCTYPE html>
+  const formattedMessage = escapeHtml(message)
+    .split(/\n\s*\n/)
+    .map(p => `<p style="margin:0 0 14px; font-size:14.5px; line-height:1.65; color:#334155;">${p.replace(/\n/g, '<br>')}</p>`)
+    .join('');
+
+  let ctaHtml = '';
+  if (ctaLabel && ctaUrl && ctaUrl.startsWith('http')) {
+    ctaHtml = `
+      <tr>
+        <td style="padding:10px 28px 24px; text-align:center;">
+          <a href="${escapeHtml(ctaUrl)}" target="_blank" style="display:inline-block; padding:13px 32px; background-color:#0647C8; color:#FFFFFF; text-decoration:none; font-size:14px; font-weight:700; border-radius:999px; box-shadow:0 4px 14px rgba(6, 71, 200, 0.35);">
+            ${escapeHtml(ctaLabel)} ➔
+          </a>
+        </td>
+      </tr>
+    `;
+  }
+
+  return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -185,58 +357,7 @@ module.exports = async (req, res) => {
   </table>
 </body>
 </html>`;
-
-    // 5. Send Broadcast via Brevo SMTP API
-    // We can batch up to 50 recipients per call for optimal performance and rate-limiting safety
-    const batchSize = 50;
-    let totalSent = 0;
-    const errors = [];
-
-    for (let i = 0; i < validRecipients.length; i += batchSize) {
-      const chunk = validRecipients.slice(i, i + batchSize);
-      
-      const brevoRes = await fetch('https://api.brevo.com/v3/smtp/email', {
-        method: 'POST',
-        headers: {
-          'accept': 'application/json',
-          'api-key': apiKey,
-          'content-type': 'application/json'
-        },
-        body: JSON.stringify({
-          sender: {
-            name: senderName,
-            email: senderEmail
-          },
-          to: chunk.map(r => ({ email: r.email, name: r.name || r.fullName || 'NSS Volunteer' })),
-          subject: subject,
-          htmlContent: broadcastHtml
-        })
-      });
-
-      const result = await brevoRes.json();
-      if (brevoRes.ok) {
-        totalSent += chunk.length;
-      } else {
-        errors.push(result.message || 'Error sending chunk.');
-      }
-    }
-
-    return res.status(200).json({
-      success: totalSent > 0,
-      sentCount: totalSent,
-      totalRecipients: validRecipients.length,
-      errors: errors.length > 0 ? errors : undefined,
-      message: `Broadcast delivered to ${totalSent} recipient(s) via Brevo!`
-    });
-
-  } catch (error) {
-    console.error('[Broadcast Email Error]', error);
-    return res.status(500).json({
-      success: false,
-      error: error.message || 'Internal server error while broadcasting email.'
-    });
-  }
-};
+}
 
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, c => ({

@@ -12,6 +12,7 @@
   <link rel="stylesheet" href="echo.css">
   <link rel="stylesheet" href="nss.css">
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body class="nss-page">
 
@@ -120,8 +121,12 @@
         <button class="nss-tab-btn" id="btnTabLeaders" onclick="switchTab('leadershipTab')" role="tab">
           <span>🎖️ Leadership</span>
         </button>
+        <button class="nss-tab-btn" id="btnTabDirectory" onclick="switchTab('directoryTab')" role="tab">
+          <span>🗂️ Volunteer Directory</span>
+          <span id="directoryBadge" class="nss-tab-badge">0</span>
+        </button>
         <button class="nss-tab-btn" id="btnTabBroadcast" onclick="switchTab('broadcastTab')" role="tab">
-          <span>📧 Email Broadcast & Events</span>
+          <span>✉️ Bulk Email & Events</span>
         </button>
       </div>
 
@@ -321,6 +326,124 @@
       </div>
 
       <!-- ==================================================================
+           TAB 4: VOLUNTEER DIRECTORY (EXCEL IMPORT & EMAIL MANAGEMENT)
+           ================================================================== -->
+      <div id="directoryTab" class="tab-content" style="display:none;">
+        <div class="nss-table-container">
+          <!-- Directory Header Bar -->
+          <div style="padding: 24px 24px 16px; border-bottom: 1px solid var(--nss-border);">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+              <div>
+                <div style="display:inline-flex; align-items:center; gap:6px; background:#EFF6FF; border:1px solid #BFDBFE; border-radius:999px; padding:4px 14px; font-size:11.5px; font-weight:700; color:var(--nss-royal-blue); text-transform:uppercase; margin-bottom:6px;">
+                  🔒 Privacy-Preserving Directory
+                </div>
+                <h3 style="margin:0; font-size:20px; font-weight:800; color:var(--nss-navy);">
+                  NSS Volunteer Directory
+                </h3>
+                <p style="margin:4px 0 0; font-size:13px; color:var(--nss-text-muted);">
+                  Verified student roster with names and official email addresses. Personal data (Aadhaar, phone, DOB, address) is never imported or stored here.
+                </p>
+              </div>
+              <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="openExcelImportModal()">
+                  📤 Import Excel File
+                </button>
+                <button type="button" class="nss-btn nss-btn-sm nss-btn-primary" id="btnBulkEmailSelected" onclick="sendBulkToSelected()" disabled>
+                  ✉️ Email Selected (<span id="dirSelectedCountBtn">0</span>)
+                </button>
+                <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="NSS.Directory.exportCSV()">
+                  📥 Export CSV
+                </button>
+              </div>
+            </div>
+
+            <!-- Stats Bar -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:12px; margin-top:18px;">
+              <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:12px 14px; text-align:center;">
+                <div style="font-size:11px; font-weight:700; color:#64748B; text-transform:uppercase;">Total In Directory</div>
+                <div id="dirStatTotal" style="font-size:22px; font-weight:800; color:var(--nss-navy); margin-top:2px;">0</div>
+              </div>
+              <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:12px; padding:12px 14px; text-align:center;">
+                <div style="font-size:11px; font-weight:700; color:#065F46; text-transform:uppercase;">With Email Configured</div>
+                <div id="dirStatWithEmail" style="font-size:22px; font-weight:800; color:#059669; margin-top:2px;">0</div>
+              </div>
+              <div style="background:#FFFBEB; border:1px solid #FDE68A; border-radius:12px; padding:12px 14px; text-align:center;">
+                <div style="font-size:11px; font-weight:700; color:#92400E; text-transform:uppercase;">Pending Email</div>
+                <div id="dirStatPendingEmail" style="font-size:22px; font-weight:800; color:#D97706; margin-top:2px;">0</div>
+              </div>
+              <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:12px; padding:12px 14px; text-align:center;">
+                <div style="font-size:11px; font-weight:700; color:#1E40AF; text-transform:uppercase;">Selected for Send</div>
+                <div id="dirStatSelected" style="font-size:22px; font-weight:800; color:var(--nss-royal-blue); margin-top:2px;">0</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toolbar (Search & Filters) -->
+          <div class="nss-table-toolbar">
+            <div class="nss-search-wrap">
+              <span class="nss-search-icon">🔍</span>
+              <input type="text" id="dirSearchInput" class="nss-search-input" placeholder="Search volunteer by name or email..." oninput="handleDirectorySearch()">
+            </div>
+            <div class="nss-table-toolbar-filter">
+              <select id="dirStatusFilter" class="nss-filter-select" onchange="handleDirectoryFilter()">
+                <option value="all">All Email Statuses</option>
+                <option value="with_email">With Email Configured</option>
+                <option value="pending_email">Pending Email Address</option>
+              </select>
+              <select id="dirBatchFilter" class="nss-filter-select" onchange="handleDirectoryFilter()">
+                <option value="all">All Batches</option>
+              </select>
+              <select id="dirPageSize" class="nss-filter-select" onchange="handleDirectoryFilter()">
+                <option value="20">20 / page</option>
+                <option value="50">50 / page</option>
+                <option value="100">100 / page</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Directory Table -->
+          <div class="nss-table-wrapper">
+            <table class="nss-table" id="directoryTable">
+              <thead>
+                <tr>
+                  <th style="width:40px; text-align:center;">
+                    <input type="checkbox" id="dirSelectAllCheckbox" onchange="toggleSelectAllDirectory(this.checked)" title="Select all on this page">
+                  </th>
+                  <th style="width:50px;">#</th>
+                  <th>Volunteer Full Name</th>
+                  <th>Email Address</th>
+                  <th>Email Status</th>
+                  <th>Batch & Source</th>
+                  <th style="text-align:right;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="directoryTableBody">
+                <tr><td colspan="7" style="text-align:center; padding:32px; color:var(--nss-text-muted);">Loading volunteer directory...</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          <div style="padding:14px 20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; border-top:1px solid #E2E8F0; background:#FAFCFF;">
+            <div style="font-size:13px; color:#64748B;" id="dirPaginationInfo">
+              Showing 0 to 0 of 0 volunteers
+            </div>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" id="dirPrevBtn" onclick="changeDirectoryPage(-1)" disabled>
+                ← Previous
+              </button>
+              <span id="dirCurrentPageDisplay" style="font-size:13px; font-weight:700; color:var(--nss-navy); padding:0 8px;">
+                Page 1 of 1
+              </span>
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" id="dirNextBtn" onclick="changeDirectoryPage(1)" disabled>
+                Next →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================================================================
            TAB 5: EMAIL BROADCAST & EVENT UPDATES (BREVO INTEGRATION)
            ================================================================== -->
       <div id="broadcastTab" class="tab-content" style="display:none;">
@@ -350,6 +473,9 @@
               Choose Broadcast Preset
             </label>
             <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="applyBroadcastPreset('welcome')">
+                🎉 Welcome Email to Enrolled Volunteers
+              </button>
               <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="applyBroadcastPreset('blood_camp')">
                 🩸 Blood Donation Camp Highlights
               </button>
@@ -365,13 +491,20 @@
             </div>
           </div>
 
+          <!-- Dynamic Personalization Tip -->
+          <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:10px; padding:12px 16px; margin-bottom:20px; font-size:12.5px; color:#166534; line-height:1.5;">
+            <strong>💡 Dynamic Personalization Variables:</strong>
+            Use <code>{{first_name}}</code> or <code>{{name}}</code> in the Subject Line, Heading Banner Title, or Message Details. Each volunteer will receive an individual email addressed specifically to them (e.g. <em>"Dear Shreyash..."</em>). Recipient email addresses are 100% private and never exposed to one another.
+          </div>
+
           <!-- Form Grid -->
-          <form id="broadcastForm" onsubmit="event.preventDefault(); sendBroadcast(false);">
+          <form id="broadcastForm" onsubmit="event.preventDefault(); promptConfirmBroadcast(false);">
             <div class="nss-form-row">
               <div class="nss-form-group">
                 <label class="nss-form-label" for="broadcastCategory">Campaign Category <span class="req">*</span></label>
                 <select id="broadcastCategory" class="nss-form-select" required>
                   <option value="Event Announcement">Event Announcement</option>
+                  <option value="Welcome & Induction">Welcome & Induction</option>
                   <option value="Achievement & Recognition">Achievement & Recognition</option>
                   <option value="Camp Highlights & Photos">Camp Highlights & Photos</option>
                   <option value="Official Notice">Official Notice</option>
@@ -381,6 +514,8 @@
               <div class="nss-form-group">
                 <label class="nss-form-label" for="broadcastAudience">Recipient Audience <span class="req">*</span></label>
                 <select id="broadcastAudience" class="nss-form-select" onchange="toggleAudienceOptions(this.value)" required>
+                  <option value="directory_selected">📋 Selected Directory Volunteers (<span id="broadcastAudienceSelectedSpan">0</span> selected)</option>
+                  <option value="directory_all_with_email">📋 All Directory Volunteers With Valid Email</option>
                   <option value="all">👥 All Enrolled Applicants (Approved + Pending)</option>
                   <option value="approved">✅ Approved Volunteers Only (Active ID Card Holders)</option>
                   <option value="pending">⏳ Pending Review Applicants</option>
@@ -388,6 +523,9 @@
                 </select>
               </div>
             </div>
+
+            <!-- Audience Missing Email Warning Box -->
+            <div id="broadcastWarningBox" style="display:none; background:#FFFBEB; border:1px solid #F59E0B; border-radius:10px; padding:12px 16px; margin-bottom:18px; font-size:13px; color:#92400E; line-height:1.5;"></div>
 
             <div id="customEmailGroup" class="nss-form-group" style="display:none;">
               <label class="nss-form-label" for="customEmailInput">Test Email Address <span class="req">*</span></label>
@@ -398,18 +536,26 @@
             <div class="nss-form-row">
               <div class="nss-form-group">
                 <label class="nss-form-label" for="broadcastSubject">Email Subject Line <span class="req">*</span></label>
-                <input type="text" id="broadcastSubject" class="nss-form-input" placeholder="e.g. [NSS TGPCOP] Highlights from the Annual Blood Donation Camp" required>
+                <input type="text" id="broadcastSubject" class="nss-form-input" placeholder="e.g. [NSS TGPCOP] Welcome to the NSS Family, {{first_name}}!" required>
               </div>
 
               <div class="nss-form-group">
                 <label class="nss-form-label" for="broadcastTitle">Heading Banner Title <span class="req">*</span></label>
-                <input type="text" id="broadcastTitle" class="nss-form-input" placeholder="e.g. Blood Donation Camp 2026 — Successful Drive & Certificates" required>
+                <input type="text" id="broadcastTitle" class="nss-form-input" placeholder="e.g. Annual Blood Donation Camp — Commendable Participation" required>
               </div>
             </div>
 
-            <div class="nss-form-group">
-              <label class="nss-form-label" for="broadcastDateVenue">Event Date & Venue (Optional)</label>
-              <input type="text" id="broadcastDateVenue" class="nss-form-input" placeholder="e.g. Thursday, 24 Oct 2026 • TGPCOP Campus Seminar Hall">
+            <div class="nss-form-row">
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastTemplateId">Brevo Template ID (Optional)</label>
+                <input type="number" id="broadcastTemplateId" class="nss-form-input" placeholder="e.g. 1 (Leave blank to use built-in NSS template)">
+                <div class="nss-form-hint">If specified, Brevo will dispatch your custom Brevo template passing FIRSTNAME and FULLNAME parameters.</div>
+              </div>
+
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="broadcastDateVenue">Event Date & Venue (Optional)</label>
+                <input type="text" id="broadcastDateVenue" class="nss-form-input" placeholder="e.g. Thursday, 24 Oct 2026 • TGPCOP Campus Seminar Hall">
+              </div>
             </div>
 
             <div class="nss-form-group">
@@ -462,6 +608,41 @@
               </button>
             </div>
           </form>
+
+          <!-- Email Dispatch Activity Log -->
+          <div style="margin-top:38px; padding-top:24px; border-top:1px solid var(--nss-border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+              <div>
+                <h4 style="margin:0; font-size:16px; font-weight:800; color:var(--nss-navy);">📜 Recent Email Dispatch Logs</h4>
+                <p style="margin:2px 0 0; font-size:12px; color:var(--nss-text-muted);">Real-time delivery status of past bulk and single email dispatches.</p>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button type="button" class="nss-btn nss-btn-sm nss-btn-outline" onclick="loadEmailLogs()">
+                  🔄 Refresh Logs
+                </button>
+                <button type="button" class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff; display:none;" id="btnRetryFailedEmails" onclick="retryFailedEmails()">
+                  🔁 Retry Failed (<span id="retryFailedCountSpan">0</span>)
+                </button>
+              </div>
+            </div>
+            <div class="nss-table-wrapper">
+              <table class="nss-table" id="emailLogsTable">
+                <thead>
+                  <tr>
+                    <th>Date & Time</th>
+                    <th>Recipient Name</th>
+                    <th>Email Address</th>
+                    <th>Subject Line</th>
+                    <th>Status</th>
+                    <th>Message / Error</th>
+                  </tr>
+                </thead>
+                <tbody id="emailLogsTableBody">
+                  <tr><td colspan="6" style="text-align:center; padding:24px; color:var(--nss-text-muted);">No email dispatch logs recorded yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
 
         </div>
       </div>
@@ -582,6 +763,158 @@
   </div>
 
   <!-- ======================================================================
+       MODAL 5: EXCEL IMPORT (STRICT PRIVACY - ONLY FULL NAME)
+       ====================================================================== -->
+  <div id="excelImportModal" class="nss-modal-backdrop">
+    <div class="nss-modal" style="max-width:640px;">
+      <div class="nss-modal-header">
+        <h3 style="margin:0; font-size:18px;">📤 Import Volunteers from Excel</h3>
+        <button type="button" class="nss-modal-close" onclick="closeExcelImportModal()">&times;</button>
+      </div>
+      <div class="nss-modal-body">
+        <div style="background:#EFF6FF; border:1px solid #BFDBFE; border-radius:10px; padding:12px 16px; margin-bottom:18px; font-size:12.5px; color:#1E40AF; line-height:1.5;">
+          <strong>🔒 Strict Privacy Protection Guaranteed:</strong>
+          <br>This system extracts <strong>ONLY the 'Full Name' column</strong>. All personal fields (Aadhaar, phone, DOB, address, category, gender) and existing spreadsheet emails are completely ignored, stripped, and never stored.
+        </div>
+
+        <!-- File Dropzone -->
+        <div id="excelDropzone" style="border:2px dashed #CBD5E1; border-radius:14px; padding:28px 18px; text-align:center; background:#F8FAFC; cursor:pointer; transition:border .2s;" onclick="document.getElementById('excelFileInput').click()">
+          <div style="font-size:36px; margin-bottom:8px;">📊</div>
+          <div style="font-weight:700; color:var(--nss-navy); font-size:15px; margin-bottom:4px;">
+            Click to upload or drag & drop Excel workbook
+          </div>
+          <div style="font-size:12px; color:var(--nss-text-muted);">
+            Supports <code>.xlsx</code>, <code>.xls</code>, <code>.csv</code> (e.g. <code>4673_NSS EXCEL.xlsx</code>)
+          </div>
+          <input type="file" id="excelFileInput" accept=".xlsx, .xls, .csv" style="display:none;" onchange="handleExcelFileSelected(event)">
+        </div>
+
+        <!-- Analysis / Preview Area -->
+        <div id="excelPreviewSection" style="display:none; margin-top:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div style="font-size:13.5px; font-weight:700; color:var(--nss-navy);">
+              📋 File Analysis Preview
+            </div>
+            <div style="font-size:12px; color:#64748B;">
+              Batch: <code id="importBatchIdText" style="font-weight:700; color:var(--nss-royal-blue);">BATCH-20261030-XYZ</code>
+            </div>
+          </div>
+
+          <!-- Summary Metric Pills -->
+          <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; margin-bottom:14px;">
+            <div style="background:#F1F5F9; border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:11px; color:#64748B; text-transform:uppercase;">Scanned Rows</div>
+              <div id="previewTotalRows" style="font-size:18px; font-weight:800; color:var(--nss-navy);">0</div>
+            </div>
+            <div style="background:#ECFDF5; border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:11px; color:#065F46; text-transform:uppercase;">Valid Names</div>
+              <div id="previewValidNames" style="font-size:18px; font-weight:800; color:#059669;">0</div>
+            </div>
+            <div style="background:#FFFBEB; border-radius:8px; padding:10px; text-align:center;">
+              <div style="font-size:11px; color:#92400E; text-transform:uppercase;">Duplicate Names</div>
+              <div id="previewDuplicateNames" style="font-size:18px; font-weight:800; color:#D97706;">0</div>
+            </div>
+          </div>
+
+          <!-- Sample Table -->
+          <div style="max-height:180px; overflow-y:auto; border:1px solid #E2E8F0; border-radius:8px;">
+            <table class="nss-table" style="font-size:12px; margin:0;">
+              <thead>
+                <tr>
+                  <th style="padding:6px 12px; width:60px;">Row</th>
+                  <th style="padding:6px 12px;">Extracted Full Name (Only)</th>
+                  <th style="padding:6px 12px; text-align:right;">Email Status</th>
+                </tr>
+              </thead>
+              <tbody id="previewNamesTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="nss-modal-footer">
+        <button type="button" class="nss-btn nss-btn-outline" onclick="closeExcelImportModal()">Cancel</button>
+        <button type="button" class="nss-btn nss-btn-primary" id="btnConfirmImport" onclick="executeExcelImport()" disabled>
+          Confirm & Import Names
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 6: ADD / EDIT VOLUNTEER EMAIL
+       ====================================================================== -->
+  <div id="manageEmailModal" class="nss-modal-backdrop">
+    <div class="nss-modal" style="max-width:480px;">
+      <div class="nss-modal-header">
+        <h3 style="margin:0; font-size:18px;" id="emailModalTitle">Add Volunteer Email</h3>
+        <button type="button" class="nss-modal-close" onclick="closeEmailModal()">&times;</button>
+      </div>
+      <form id="manageEmailForm" onsubmit="event.preventDefault(); saveVolunteerEmail();">
+        <div class="nss-modal-body">
+          <input type="hidden" id="dirTargetVolunteerId">
+          <div class="nss-form-group">
+            <label class="nss-form-label">Volunteer Full Name</label>
+            <input type="text" id="dirTargetVolunteerName" class="nss-form-input" style="background:#F1F5F9; font-weight:700; color:var(--nss-navy);" readonly>
+          </div>
+          <div class="nss-form-group">
+            <label class="nss-form-label" for="dirVolunteerEmailInput">Official Email Address <span class="req">*</span></label>
+            <input type="email" id="dirVolunteerEmailInput" class="nss-form-input" placeholder="e.g. volunteer@gmail.com" required>
+            <div class="nss-form-hint">Enter the volunteer's valid email address. Used for official event circulars and digital certificates.</div>
+          </div>
+        </div>
+        <div class="nss-modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+          <button type="button" class="nss-btn" style="background:#DC2626; color:#fff; display:none;" id="btnDeleteEmail" onclick="removeVolunteerEmail()">
+            Remove Email
+          </button>
+          <div style="display:flex; gap:8px; margin-left:auto;">
+            <button type="button" class="nss-btn nss-btn-outline" onclick="closeEmailModal()">Cancel</button>
+            <button type="submit" class="nss-btn nss-btn-primary" id="btnSaveEmail">Save Email</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================================
+       MODAL 7: CONFIRM BULK BROADCAST DISPATCH
+       ====================================================================== -->
+  <div id="broadcastConfirmModal" class="nss-modal-backdrop">
+    <div class="nss-modal" style="max-width:540px;">
+      <div class="nss-modal-header">
+        <h3 style="margin:0; font-size:18px;">Confirm Bulk Email Broadcast</h3>
+        <button type="button" class="nss-modal-close" onclick="closeBroadcastConfirmModal()">&times;</button>
+      </div>
+      <div class="nss-modal-body">
+        <div style="font-size:14px; color:var(--nss-navy); margin-bottom:14px;">
+          Please review the broadcast details before sending:
+        </div>
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:14px 16px; font-size:13px; line-height:1.6; margin-bottom:16px;">
+          <div><strong>Recipient Audience:</strong> <span id="confirmAudienceLabel">Selected Volunteers</span></div>
+          <div><strong>Deliverable Count:</strong> <span id="confirmRecipientCount" style="font-weight:700; color:var(--nss-royal-blue);">0</span></div>
+          <div id="confirmSkippedNotice" style="display:none; color:#D97706; margin-top:4px;">
+            <strong>⚠️ Skipped Volunteers:</strong> <span id="confirmSkippedCount">0</span> (missing or invalid email)
+          </div>
+          <div style="margin-top:8px; padding-top:8px; border-top:1px solid #E2E8F0;">
+            <strong>Subject Preview:</strong> <span id="confirmSubjectPreview" style="color:#0F172A; font-weight:600;">-</span>
+          </div>
+          <div style="margin-top:4px;">
+            <strong>Personalized Example:</strong> <em>"Dear <span id="confirmSampleFirstName">Volunteer</span>..."</em>
+          </div>
+        </div>
+        <div style="font-size:12px; color:#64748B;">
+          🔒 Emails are sent individually to each recipient via Brevo. No recipient will ever see other volunteers' email addresses.
+        </div>
+      </div>
+      <div class="nss-modal-footer">
+        <button type="button" class="nss-btn nss-btn-outline" onclick="closeBroadcastConfirmModal()">Back to Edit</button>
+        <button type="button" class="nss-btn nss-btn-primary" id="btnExecuteBroadcastConfirm" onclick="executeBroadcastSend()">
+          🚀 Confirm & Dispatch Now
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================
        5. INSTITUTIONAL FOOTER
        ====================================================================== -->
     <!-- ======================================================================
@@ -668,6 +1001,7 @@
 
   <!-- Scripts -->
   <script src="volunteers-data.js"></script>
+  <script src="directory-seed-data.js"></script>
   <script src="cloudinary-config.js"></script>
   <script src="env.js"></script>
   <script src="echo.js"></script>
@@ -716,6 +1050,7 @@
         'allTab': 'btnTabAll',
         'scannerTab': 'btnTabScanner',
         'leadershipTab': 'btnTabLeaders',
+        'directoryTab': 'btnTabDirectory',
         'broadcastTab': 'btnTabBroadcast'
       };
       const activeBtn = document.getElementById(btnMap[tabId]);
@@ -723,6 +1058,11 @@
 
       if (tabId === 'allTab') loadAllTab();
       if (tabId === 'leadershipTab') loadLeadershipTab();
+      if (tabId === 'directoryTab') loadDirectoryTab();
+      if (tabId === 'broadcastTab') {
+        updateBroadcastRecipients();
+        loadEmailLogs();
+      }
       if (tabId !== 'scannerTab') stopScanner();
     }
 
@@ -744,6 +1084,11 @@
         // Preload all applications & compute broadcast deliverable recipients
         cachedAll = await NSS.Admin.loadAll();
         updateBroadcastRecipients();
+
+        // Preload directory count for tab badge
+        const dirData = await NSS.Directory.loadDirectory({ limit: 1 });
+        const dirBadge = document.getElementById('directoryBadge');
+        if (dirBadge) dirBadge.textContent = dirData.stats.total;
       } catch (e) {
         console.error('Error loading dashboard:', e);
       }
@@ -1205,26 +1550,457 @@
     }
 
     // ========================================================================
-    // BREVO BROADCAST & EVENT UPDATES CONTROLLER
+    // VOLUNTEER DIRECTORY CONTROLLER
+    // ========================================================================
+    let currentDirectoryPage = 1;
+    let directoryPageLimit = 20;
+    let selectedDirectoryIds = new Set();
+    let cachedDirectoryResult = null;
+    let stagedExcelNames = [];
+    let stagedBatchId = null;
+    let currentEditingDirId = null;
+
+    async function loadDirectoryTab() {
+      const search = document.getElementById('dirSearchInput')?.value || '';
+      const filter = document.getElementById('dirStatusFilter')?.value || 'all';
+      const batch = document.getElementById('dirBatchFilter')?.value || 'all';
+      const limitVal = parseInt(document.getElementById('dirPageSize')?.value || '20', 10);
+      directoryPageLimit = limitVal;
+
+      try {
+        const res = await NSS.Directory.loadDirectory({
+          page: currentDirectoryPage,
+          limit: directoryPageLimit,
+          search,
+          filter,
+          batch
+        });
+
+        cachedDirectoryResult = res;
+
+        // Update stats
+        if (document.getElementById('dirStatTotal')) document.getElementById('dirStatTotal').textContent = res.stats.total;
+        if (document.getElementById('dirStatWithEmail')) document.getElementById('dirStatWithEmail').textContent = res.stats.withEmail;
+        if (document.getElementById('dirStatPendingEmail')) document.getElementById('dirStatPendingEmail').textContent = res.stats.pendingEmail;
+        if (document.getElementById('directoryBadge')) document.getElementById('directoryBadge').textContent = res.stats.total;
+
+        // Populate Batch Filter
+        const batchSelect = document.getElementById('dirBatchFilter');
+        if (batchSelect && res.batchList) {
+          const currentVal = batchSelect.value;
+          batchSelect.innerHTML = '<option value="all">All Batches</option>' +
+            res.batchList.map(b => `<option value="${b}" ${b === currentVal ? 'selected' : ''}>${b}</option>`).join('');
+        }
+
+        renderDirectoryTable(res);
+        updateDirectorySelectionUI();
+      } catch (err) {
+        console.error('Error loading directory:', err);
+      }
+    }
+
+    function renderDirectoryTable(res) {
+      const tb = document.getElementById('directoryTableBody');
+      if (!tb) return;
+
+      if (!res.list || !res.list.length) {
+        tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:36px; color:var(--nss-text-muted);">
+          No volunteer directory records found. Click <strong>"📤 Import Excel File"</strong> to import names.
+        </td></tr>`;
+        document.getElementById('dirPaginationInfo').textContent = 'Showing 0 to 0 of 0 volunteers';
+        document.getElementById('dirPrevBtn').disabled = true;
+        document.getElementById('dirNextBtn').disabled = true;
+        return;
+      }
+
+      const startIndex = (res.page - 1) * res.limit;
+      tb.innerHTML = res.list.map((item, idx) => {
+        const isChecked = selectedDirectoryIds.has(item.id);
+        const hasEmail = item.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(item.email);
+        const emailBadge = hasEmail 
+          ? `<span class="nss-badge approved">Configured</span>` 
+          : `<span class="nss-badge pending">Pending</span>`;
+        const emailDisplay = hasEmail
+          ? `<strong style="color:var(--nss-royal-blue); font-family:monospace;">${item.email}</strong>`
+          : `<span style="color:#94A3B8; font-style:italic;">Not added</span>`;
+
+        return `
+          <tr style="${isChecked ? 'background:#EFF6FF;' : ''}">
+            <td style="text-align:center;">
+              <input type="checkbox" class="dir-row-checkbox" data-id="${item.id}" ${isChecked ? 'checked' : ''} onchange="toggleSelectDirectoryItem('${item.id}', this.checked)">
+            </td>
+            <td><span style="font-weight:600; color:#64748B;">${startIndex + idx + 1}</span></td>
+            <td>
+              <div style="font-weight:700; color:var(--nss-navy); font-size:14px;">${item.full_name}</div>
+            </td>
+            <td>${emailDisplay}</td>
+            <td>${emailBadge}</td>
+            <td>
+              <code style="font-size:11px; font-weight:600; color:#475569;">${item.import_batch_id || 'MANUAL'}</code>
+              <div style="font-size:11px; color:#94A3B8;">${NSS.formatDate(item.created_at)}</div>
+            </td>
+            <td style="text-align:right;">
+              <button class="nss-btn nss-btn-sm ${hasEmail ? 'nss-btn-outline' : 'nss-btn-primary'}" onclick="openEmailModal('${item.id}')">
+                ${hasEmail ? '✏️ Edit Email' : '+ Add Email'}
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Update pagination display
+      const startNum = startIndex + 1;
+      const endNum = Math.min(startIndex + res.list.length, res.total);
+      document.getElementById('dirPaginationInfo').textContent = `Showing ${startNum} to ${endNum} of ${res.total} volunteers`;
+      document.getElementById('dirCurrentPageDisplay').textContent = `Page ${res.page} of ${res.totalPages}`;
+      document.getElementById('dirPrevBtn').disabled = res.page <= 1;
+      document.getElementById('dirNextBtn').disabled = res.page >= res.totalPages;
+
+      // Update select all checkbox state
+      const allCheckedOnPage = res.list.every(i => selectedDirectoryIds.has(i.id));
+      const selectAllEl = document.getElementById('dirSelectAllCheckbox');
+      if (selectAllEl) selectAllEl.checked = allCheckedOnPage && res.list.length > 0;
+    }
+
+    function handleDirectorySearch() {
+      currentDirectoryPage = 1;
+      loadDirectoryTab();
+    }
+
+    function handleDirectoryFilter() {
+      currentDirectoryPage = 1;
+      loadDirectoryTab();
+    }
+
+    function changeDirectoryPage(delta) {
+      if (!cachedDirectoryResult) return;
+      const targetPage = currentDirectoryPage + delta;
+      if (targetPage >= 1 && targetPage <= cachedDirectoryResult.totalPages) {
+        currentDirectoryPage = targetPage;
+        loadDirectoryTab();
+      }
+    }
+
+    function toggleSelectAllDirectory(checked) {
+      if (!cachedDirectoryResult || !cachedDirectoryResult.list) return;
+      cachedDirectoryResult.list.forEach(item => {
+        if (checked) {
+          selectedDirectoryIds.add(item.id);
+        } else {
+          selectedDirectoryIds.delete(item.id);
+        }
+      });
+      renderDirectoryTable(cachedDirectoryResult);
+      updateDirectorySelectionUI();
+    }
+
+    function toggleSelectDirectoryItem(id, checked) {
+      if (checked) {
+        selectedDirectoryIds.add(id);
+      } else {
+        selectedDirectoryIds.delete(id);
+      }
+      updateDirectorySelectionUI();
+    }
+
+    function updateDirectorySelectionUI() {
+      const count = selectedDirectoryIds.size;
+      const selCountEl = document.getElementById('dirStatSelected');
+      const btnEmailSelected = document.getElementById('btnBulkEmailSelected');
+      const countSpan = document.getElementById('dirSelectedCountBtn');
+      const audSelectedSpan = document.getElementById('broadcastAudienceSelectedSpan');
+
+      if (selCountEl) selCountEl.textContent = count;
+      if (countSpan) countSpan.textContent = count;
+      if (audSelectedSpan) audSelectedSpan.textContent = count;
+      if (btnEmailSelected) btnEmailSelected.disabled = count === 0;
+
+      updateBroadcastRecipients();
+    }
+
+    function sendBulkToSelected() {
+      if (selectedDirectoryIds.size === 0) {
+        alert('Please select at least one volunteer from the directory table first.');
+        return;
+      }
+      const audSelect = document.getElementById('broadcastAudience');
+      if (audSelect) audSelect.value = 'directory_selected';
+      switchTab('broadcastTab');
+      updateBroadcastRecipients();
+    }
+
+    // Modal: Manage Email
+    async function openEmailModal(id) {
+      currentEditingDirId = id;
+      const local = (cachedDirectoryResult && cachedDirectoryResult.allRecords)
+        ? cachedDirectoryResult.allRecords
+        : NSS.Directory._getLocalStore();
+      const item = local.find(x => x.id === id);
+      if (!item) return;
+
+      document.getElementById('dirTargetVolunteerId').value = item.id;
+      document.getElementById('dirTargetVolunteerName').value = item.full_name;
+      document.getElementById('dirVolunteerEmailInput').value = item.email || '';
+
+      const btnDelete = document.getElementById('btnDeleteEmail');
+      const modalTitle = document.getElementById('emailModalTitle');
+      if (item.email) {
+        modalTitle.textContent = 'Edit Volunteer Email';
+        if (btnDelete) btnDelete.style.display = 'inline-block';
+      } else {
+        modalTitle.textContent = 'Add Volunteer Email';
+        if (btnDelete) btnDelete.style.display = 'none';
+      }
+
+      document.getElementById('manageEmailModal').classList.add('on');
+    }
+
+    function closeEmailModal() {
+      document.getElementById('manageEmailModal').classList.remove('on');
+      currentEditingDirId = null;
+    }
+
+    async function saveVolunteerEmail() {
+      if (!currentEditingDirId) return;
+      const email = document.getElementById('dirVolunteerEmailInput').value.trim();
+      const btn = document.getElementById('btnSaveEmail');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        await NSS.Directory.saveEmail(currentEditingDirId, email);
+        closeEmailModal();
+        loadDirectoryTab();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Email';
+      }
+    }
+
+    async function removeVolunteerEmail() {
+      if (!currentEditingDirId) return;
+      if (!confirm('Remove this email address? The volunteer status will return to Pending Email.')) return;
+
+      const btn = document.getElementById('btnDeleteEmail');
+      btn.disabled = true;
+      btn.textContent = 'Removing...';
+
+      try {
+        await NSS.Directory.removeEmail(currentEditingDirId);
+        closeEmailModal();
+        loadDirectoryTab();
+      } catch (err) {
+        alert(err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Remove Email';
+      }
+    }
+
+    // Modal: Excel Import
+    function openExcelImportModal() {
+      document.getElementById('excelFileInput').value = '';
+      document.getElementById('excelPreviewSection').style.display = 'none';
+      document.getElementById('btnConfirmImport').disabled = true;
+      stagedExcelNames = [];
+      stagedBatchId = 'BATCH-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substr(2, 4).toUpperCase();
+      document.getElementById('importBatchIdText').textContent = stagedBatchId;
+      document.getElementById('excelImportModal').classList.add('on');
+    }
+
+    function closeExcelImportModal() {
+      document.getElementById('excelImportModal').classList.remove('on');
+      stagedExcelNames = [];
+      stagedBatchId = null;
+    }
+
+    function handleExcelFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          if (typeof XLSX === 'undefined') {
+            alert('Excel parser library is still loading. Please try again in a moment.');
+            return;
+          }
+
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+
+          // Pick sheet: TGPCOP_Volunteer_Registration or 1st sheet
+          const sheetName = workbook.SheetNames.includes('TGPCOP_Volunteer_Registration')
+            ? 'TGPCOP_Volunteer_Registration'
+            : workbook.SheetNames[0];
+
+          const worksheet = workbook.Sheets[sheetName];
+          const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+          if (!rawRows || rawRows.length < 2) {
+            alert('Uploaded sheet contains no readable data rows.');
+            return;
+          }
+
+          // STRICT PRIVACY: Detect ONLY Full Name column index
+          const headerRow = rawRows[0] || [];
+          let nameColIdx = -1;
+          for (let i = 0; i < headerRow.length; i++) {
+            const h = String(headerRow[i] || '').trim();
+            if (/full\s*name/i.test(h)) {
+              nameColIdx = i;
+              break;
+            }
+          }
+          if (nameColIdx === -1) {
+            for (let i = 0; i < headerRow.length; i++) {
+              const h = String(headerRow[i] || '').trim();
+              if (/name/i.test(h) && !/father|mother/i.test(h)) {
+                nameColIdx = i;
+                break;
+              }
+            }
+          }
+
+          if (nameColIdx === -1) {
+            alert('Could not locate a "Full Name" column in the uploaded Excel sheet. Please ensure a "Full Name" column header exists.');
+            return;
+          }
+
+          // Extract non-empty names ONLY
+          const extracted = [];
+          for (let r = 1; r < rawRows.length; r++) {
+            const row = rawRows[r];
+            if (!row) continue;
+            const rawVal = row[nameColIdx];
+            if (rawVal !== undefined && rawVal !== null) {
+              const cleanName = String(rawVal).trim();
+              if (cleanName.length > 0) {
+                extracted.push({
+                  row: r + 1,
+                  name: cleanName
+                });
+              }
+            }
+          }
+
+          if (extracted.length === 0) {
+            alert('No valid volunteer names found in the "Full Name" column.');
+            return;
+          }
+
+          // Count duplicate names in file
+          const nameMap = {};
+          extracted.forEach(item => {
+            const k = item.name.toLowerCase();
+            nameMap[k] = (nameMap[k] || 0) + 1;
+          });
+          const dupCount = Object.values(nameMap).filter(v => v > 1).length;
+
+          stagedExcelNames = extracted;
+
+          // Render Preview
+          document.getElementById('previewTotalRows').textContent = rawRows.length - 1;
+          document.getElementById('previewValidNames').textContent = extracted.length;
+          document.getElementById('previewDuplicateNames').textContent = dupCount;
+
+          const previewTb = document.getElementById('previewNamesTableBody');
+          previewTb.innerHTML = extracted.slice(0, 10).map(item => `
+            <tr>
+              <td style="padding:6px 12px; color:#64748B;">Row ${item.row}</td>
+              <td style="padding:6px 12px; font-weight:700; color:var(--nss-navy);">${item.name}</td>
+              <td style="padding:6px 12px; text-align:right;"><span class="nss-badge pending">Pending Email</span></td>
+            </tr>
+          `).join('') + (extracted.length > 10 ? `<tr><td colspan="3" style="text-align:center; padding:6px; color:#64748B; font-style:italic;">...and ${extracted.length - 10} more names</td></tr>` : '');
+
+          document.getElementById('excelPreviewSection').style.display = 'block';
+          document.getElementById('btnConfirmImport').disabled = false;
+          document.getElementById('btnConfirmImport').textContent = `Confirm & Import ${extracted.length} Names`;
+
+        } catch (err) {
+          console.error('Error parsing excel:', err);
+          alert('Failed to parse Excel file: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    async function executeExcelImport() {
+      if (!stagedExcelNames || stagedExcelNames.length === 0) return;
+      const btn = document.getElementById('btnConfirmImport');
+      btn.disabled = true;
+      btn.textContent = 'Importing...';
+
+      try {
+        const res = await NSS.Directory.importNames(stagedExcelNames, stagedBatchId);
+        alert(`Successfully imported ${res.count} volunteer names to Directory!\nImport Batch ID: ${res.batchId}`);
+        closeExcelImportModal();
+        loadDirectoryTab();
+      } catch (err) {
+        alert('Import failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Confirm & Import Names';
+      }
+    }
+
+    // ========================================================================
+    // BREVO BROADCAST & BULK EMAIL CONTROLLER
     // ========================================================================
     function updateBroadcastRecipients() {
       const aud = document.getElementById('broadcastAudience')?.value || 'all';
       let count = 0;
-      const allVolunteers = (cachedAll && cachedAll.length) ? cachedAll : NSS.mergeVolunteers([]);
+      let warningMsg = '';
 
-      if (aud === 'custom') {
+      const allApps = (cachedAll && cachedAll.length) ? cachedAll : NSS.mergeVolunteers([]);
+      const allDir = (cachedDirectoryResult && cachedDirectoryResult.allRecords)
+        ? cachedDirectoryResult.allRecords
+        : NSS.Directory._getLocalStore();
+
+      const warningBox = document.getElementById('broadcastWarningBox');
+
+      if (aud === 'directory_selected') {
+        const selected = allDir.filter(v => selectedDirectoryIds.has(v.id));
+        const withEmail = selected.filter(v => v.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email));
+        const missingEmail = selected.length - withEmail.length;
+
+        count = withEmail.length;
+        if (selected.length === 0) {
+          warningMsg = '⚠️ No directory volunteers selected yet. Go to <strong>Volunteer Directory</strong> tab to select recipients, or choose "All Directory Volunteers With Valid Email".';
+        } else if (missingEmail > 0) {
+          warningMsg = `⚠️ <strong>Notice:</strong> Out of ${selected.length} selected volunteers, <strong>${missingEmail} volunteer(s) do not have an email address yet</strong> and will be automatically skipped during dispatch.`;
+        }
+      } else if (aud === 'directory_all_with_email') {
+        const withEmail = allDir.filter(v => v.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email));
+        const missingEmail = allDir.length - withEmail.length;
+        count = withEmail.length;
+
+        if (missingEmail > 0) {
+          warningMsg = `ℹ️ <strong>Directory Delivery:</strong> Dispatching to ${withEmail.length} directory volunteers with active emails. (${missingEmail} pending email addresses in directory will be skipped).`;
+        }
+      } else if (aud === 'custom') {
         const customEmail = document.getElementById('customEmailInput')?.value.trim();
         count = customEmail ? 1 : 0;
       } else if (aud === 'approved') {
-        count = allVolunteers.filter(v => v.status === 'approved' && v.college_email).length;
+        count = allApps.filter(v => v.status === 'approved' && v.college_email).length;
       } else if (aud === 'pending') {
-        count = allVolunteers.filter(v => v.status === 'pending' && v.college_email).length;
+        count = allApps.filter(v => v.status === 'pending' && v.college_email).length;
       } else {
-        count = allVolunteers.filter(v => v.college_email).length;
+        count = allApps.filter(v => v.college_email).length;
       }
 
       const countEl = document.getElementById('broadcastRecipientCount');
       if (countEl) countEl.textContent = count;
+
+      if (warningBox) {
+        if (warningMsg) {
+          warningBox.innerHTML = warningMsg;
+          warningBox.style.display = 'block';
+        } else {
+          warningBox.style.display = 'none';
+        }
+      }
     }
 
     function toggleAudienceOptions(val) {
@@ -1244,13 +2020,24 @@
       const images = document.getElementById('broadcastImages');
       const ctaLabel = document.getElementById('broadcastCtaLabel');
       const ctaUrl = document.getElementById('broadcastCtaUrl');
+      const templateId = document.getElementById('broadcastTemplateId');
 
-      if (type === 'blood_camp') {
+      if (type === 'welcome') {
+        if (category) category.value = 'Welcome & Induction';
+        if (subject) subject.value = '[NSS TGPCOP] Welcome to the National Service Scheme, {{first_name}}!';
+        if (title) title.value = 'Welcome to NSS TGPCOP Unit 1';
+        if (dateVenue) dateVenue.value = 'Session 2025–2026 • TGPCOP Campus';
+        if (message) message.value = 'Dear {{first_name}},\n\nWelcome to the official National Service Scheme (NSS Unit 1) at Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur!\n\nWe are delighted to welcome you to our volunteer corps committed to community health awareness, environmental sustainability, blood donation drives, and civic leadership under our institutional motto: "NOT ME, BUT YOU".\n\nYour enrollment is active on our portal. Please check the announcements regularly for upcoming volunteer activities and assembly schedules.';
+        if (images) images.value = 'https://res.cloudinary.com/icgawsqe/image/upload/v1793127512/tgpcop_media_logo.jpg';
+        if (ctaLabel) ctaLabel.value = 'Visit NSS Volunteer Portal';
+        if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site';
+        if (templateId) templateId.value = '';
+      } else if (type === 'blood_camp') {
         if (category) category.value = 'Camp Highlights & Photos';
-        if (subject) subject.value = '[NSS TGPCOP] Highlights from the Voluntary Blood Donation Camp 2026';
-        if (title) title.value = 'Annual Voluntary Blood Donation Camp — Commendable Volunteer Participation';
+        if (subject) subject.value = '[NSS TGPCOP] Highlights from the Voluntary Blood Donation Camp, {{first_name}}';
+        if (title) title.value = 'Annual Voluntary Blood Donation Camp — Commendable Participation';
         if (dateVenue) dateVenue.value = 'Thursday, 24 Oct 2026 • TGPCOP Campus Seminar Hall';
-        if (message) message.value = 'Dear NSS Volunteers,\n\nWe extend our heartfelt gratitude to every enrolled student who contributed to the success of our Voluntary Blood Donation Camp at TGPCOP. Over 70+ life-saving units were collected in collaboration with certified local blood banks.\n\nParticipation certificates and university donor recognitions will be distributed to volunteers during the upcoming assembly. Check out the event highlights and photos below!';
+        if (message) message.value = 'Dear {{first_name}},\n\nWe extend our heartfelt gratitude to every enrolled student who contributed to the success of our Voluntary Blood Donation Camp at TGPCOP. Over 70+ life-saving units were collected in collaboration with certified local blood banks.\n\nParticipation certificates will be distributed to volunteers during the upcoming assembly. Check out the event highlights and photos below!';
         if (images) images.value = 'https://res.cloudinary.com/axgam8br/image/upload/v1793047208/IMG_1159.jpg\nhttps://res.cloudinary.com/axgam8br/image/upload/v1793047210/IMG_1155.jpg\nhttps://res.cloudinary.com/axgam8br/image/upload/v1793047211/IMG_1154.jpg\nhttps://res.cloudinary.com/axgam8br/image/upload/v1793047212/IMG_1150.jpg';
         if (ctaLabel) ctaLabel.value = 'View NSS Photo Gallery';
         if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/index.html#gallery';
@@ -1259,15 +2046,15 @@
         if (subject) subject.value = '[NSS TGPCOP] Upcoming Community Outreach Drive & Attendance Notice';
         if (title) title.value = 'Community Healthcare & Public Hygiene Awareness Drive';
         if (dateVenue) dateVenue.value = 'Saturday, 10 Nov 2026 • Adopted Village Mohgaon';
-        if (message) message.value = 'Dear NSS Volunteers,\n\nAll enrolled volunteers from B. Pharm 1st & 2nd Year are requested to report to the NSS Coordinator Desk for the upcoming public hygiene and healthcare awareness campaign.\n\nUniform/NSS badge is mandatory. University service hours will be accredited to your official volunteer record.';
-        if (ctaLabel) ctaLabel.value = 'Check Your Volunteer ID Card';
-        if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/my-id.html';
+        if (message) message.value = 'Dear {{first_name}},\n\nAll enrolled volunteers are requested to report to the NSS Coordinator Desk for the upcoming public hygiene and healthcare awareness campaign.\n\nUniform/NSS badge is mandatory. University service hours will be accredited to your official volunteer record.';
+        if (ctaLabel) ctaLabel.value = 'Check Your Volunteer Status';
+        if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/status.html';
       } else if (type === 'achievement') {
         if (category) category.value = 'Achievement & Recognition';
-        if (subject) subject.value = '[NSS TGPCOP] Congratulations to Our Active NSS Volunteer Leaders!';
+        if (subject) subject.value = '[NSS TGPCOP] Congratulations to Our Active NSS Volunteer Leaders, {{first_name}}!';
         if (title) title.value = 'Recognition of Outstanding Service & Leadership';
         if (dateVenue) dateVenue.value = 'TGPCOP Campus Seminar Hall';
-        if (message) message.value = 'Dear Volunteers,\n\nHeartiest congratulations to all student volunteers who demonstrated remarkable commitment, crisis management, and teamwork during our recent campus and community drives.';
+        if (message) message.value = 'Dear {{first_name}},\n\nHeartiest congratulations to all student volunteers who demonstrated remarkable commitment, crisis management, and teamwork during our recent campus and community drives.';
         if (ctaLabel) ctaLabel.value = 'Explore Leadership Directory';
         if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/index.html#leadership';
       } else if (type === 'general') {
@@ -1275,7 +2062,7 @@
         if (subject) subject.value = '[NSS TGPCOP] Important Circular for All Enrolled Volunteers';
         if (title) title.value = 'General Unit Circular — Schedule & Guidelines';
         if (dateVenue) dateVenue.value = '';
-        if (message) message.value = 'Dear NSS Volunteers,\n\nPlease review the attached guidelines for upcoming campus drives and ensure your digital ID cards are verified.';
+        if (message) message.value = 'Dear {{first_name}},\n\nPlease review the attached guidelines for upcoming campus drives and ensure your digital ID cards are verified.';
       }
 
       renderPhotoPreview();
@@ -1316,8 +2103,81 @@
       `).join('');
     }
 
+    // Modal: Confirm Bulk Broadcast Dispatch
+    function promptConfirmBroadcast(isTest = false) {
+      if (isTest) {
+        sendBroadcast(true);
+        return;
+      }
+
+      const subject = document.getElementById('broadcastSubject').value.trim();
+      const title = document.getElementById('broadcastTitle').value.trim();
+      const message = document.getElementById('broadcastMessage').value.trim();
+      if (!subject || !title || !message) {
+        showBroadcastAlert('Please fill in Subject, Heading Banner Title, and Message details before sending.', 'error');
+        return;
+      }
+
+      const aud = document.getElementById('broadcastAudience').value;
+      const countEl = document.getElementById('broadcastRecipientCount');
+      const count = parseInt(countEl?.textContent || '0', 10);
+
+      if (count === 0) {
+        alert('There are 0 deliverable recipients with a valid email in this audience.');
+        return;
+      }
+
+      const allDir = (cachedDirectoryResult && cachedDirectoryResult.allRecords)
+        ? cachedDirectoryResult.allRecords
+        : NSS.Directory._getLocalStore();
+
+      let audienceLabel = 'All Enrolled Volunteers';
+      let skippedCount = 0;
+      let sampleName = 'Volunteer';
+
+      if (aud === 'directory_selected') {
+        const selected = allDir.filter(v => selectedDirectoryIds.has(v.id));
+        const withEmail = selected.filter(v => v.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email));
+        audienceLabel = `Selected Directory Volunteers (${selected.length} chosen)`;
+        skippedCount = selected.length - withEmail.length;
+        if (withEmail.length > 0) sampleName = withEmail[0].full_name.split(' ')[0] || 'Volunteer';
+      } else if (aud === 'directory_all_with_email') {
+        const withEmail = allDir.filter(v => v.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email));
+        audienceLabel = 'All Directory Volunteers With Valid Email';
+        skippedCount = allDir.length - withEmail.length;
+        if (withEmail.length > 0) sampleName = withEmail[0].full_name.split(' ')[0] || 'Volunteer';
+      } else if (aud === 'approved') {
+        audienceLabel = 'Approved Volunteers Only';
+      } else if (aud === 'pending') {
+        audienceLabel = 'Pending Review Applicants';
+      }
+
+      document.getElementById('confirmAudienceLabel').textContent = audienceLabel;
+      document.getElementById('confirmRecipientCount').textContent = count;
+      document.getElementById('confirmSubjectPreview').textContent = subject.replace(/\{\{first_name\}\}/gi, sampleName);
+      document.getElementById('confirmSampleFirstName').textContent = sampleName;
+
+      const skipNotice = document.getElementById('confirmSkippedNotice');
+      if (skippedCount > 0) {
+        document.getElementById('confirmSkippedCount').textContent = skippedCount;
+        skipNotice.style.display = 'block';
+      } else {
+        skipNotice.style.display = 'none';
+      }
+
+      document.getElementById('broadcastConfirmModal').classList.add('on');
+    }
+
+    function closeBroadcastConfirmModal() {
+      document.getElementById('broadcastConfirmModal').classList.remove('on');
+    }
+
+    function executeBroadcastSend() {
+      closeBroadcastConfirmModal();
+      sendBroadcast(false);
+    }
+
     async function sendBroadcast(isTest = false) {
-      const alertBox = document.getElementById('broadcastStatusAlert');
       const btnSubmit = document.getElementById('btnSubmitBroadcast');
       const btnTest = document.getElementById('btnTestBroadcast');
 
@@ -1329,6 +2189,7 @@
       const imagesRaw = document.getElementById('broadcastImages').value.trim();
       const ctaLabel = document.getElementById('broadcastCtaLabel').value.trim();
       const ctaUrl = document.getElementById('broadcastCtaUrl').value.trim();
+      const templateId = document.getElementById('broadcastTemplateId')?.value.trim() || null;
       const audience = document.getElementById('broadcastAudience').value;
 
       if (!subject || !title || !message) {
@@ -1338,16 +2199,24 @@
 
       const images = imagesRaw.split(/[\n,]/).map(s => s.trim()).filter(s => s.startsWith('http'));
 
-      // Determine recipients from loaded volunteers
+      // Determine recipients
       let recipients = [];
       const allVolunteers = (cachedAll && cachedAll.length) ? cachedAll : NSS.mergeVolunteers([]);
+      const allDir = (cachedDirectoryResult && cachedDirectoryResult.allRecords)
+        ? cachedDirectoryResult.allRecords
+        : NSS.Directory._getLocalStore();
 
       if (isTest) {
-        // Test mode: send to custom email or coordinator email
         const customEmail = document.getElementById('customEmailInput').value.trim();
         const adminEmail = (window.USER && window.USER.email) || 'viratkhi9089@gmail.com';
         const targetEmail = customEmail || adminEmail;
         recipients = [{ email: targetEmail, name: 'Coordinator Test' }];
+      } else if (audience === 'directory_selected') {
+        const selected = allDir.filter(v => selectedDirectoryIds.has(v.id));
+        recipients = selected.map(v => ({ id: v.id, email: v.email, name: v.full_name }));
+      } else if (audience === 'directory_all_with_email') {
+        const withEmail = allDir.filter(v => v.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email));
+        recipients = withEmail.map(v => ({ id: v.id, email: v.email, name: v.full_name }));
       } else if (audience === 'custom') {
         const customEmail = document.getElementById('customEmailInput').value.trim();
         if (!customEmail) {
@@ -1366,7 +2235,6 @@
           name: v.full_name
         }));
       } else {
-        // 'all'
         recipients = allVolunteers.filter(v => v.college_email).map(v => ({
           email: v.college_email,
           name: v.full_name
@@ -1397,11 +2265,27 @@
             images,
             ctaLabel,
             ctaUrl,
+            templateId,
             recipients
           })
         });
 
         const data = await res.json();
+
+        // Save Activity Logs
+        if (data.results && Array.isArray(data.results)) {
+          await NSS.EmailLogs.saveLogs(data.results.map(r => ({
+            directory_id: r.id,
+            email: r.email,
+            name: r.name,
+            subject,
+            category,
+            templateId,
+            status: r.status,
+            error: r.error
+          })));
+          loadEmailLogs();
+        }
 
         if (data.warning) {
           showBroadcastAlert(`
@@ -1415,7 +2299,7 @@
             5. Click <strong>Save</strong> and Redeploy!
           `, 'warning');
         } else if (data.success) {
-          showBroadcastAlert(`🎉 <strong>Broadcast Sent!</strong> Successfully delivered to ${data.sentCount || recipients.length} recipient(s) via Brevo.`, 'success');
+          showBroadcastAlert(`🎉 <strong>Broadcast Sent!</strong> Successfully delivered to ${data.sentCount || recipients.length} recipient(s) via Brevo.${data.skippedCount ? ` (${data.skippedCount} volunteers without email were safely skipped).` : ''}`, 'success');
         } else {
           showBroadcastAlert(`❌ <strong>Broadcast failed:</strong> ${data.error || data.message || 'Unknown error'}`, 'error');
         }
@@ -1453,6 +2337,117 @@
 
       alertBox.innerHTML = html;
       alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Email Activity Logs Viewer
+    let cachedFailedLogs = [];
+
+    async function loadEmailLogs() {
+      const tb = document.getElementById('emailLogsTableBody');
+      const retryBtn = document.getElementById('btnRetryFailedEmails');
+      const retryCountSpan = document.getElementById('retryFailedCountSpan');
+      if (!tb) return;
+
+      try {
+        const logs = await NSS.EmailLogs.getLogs(30);
+        if (!logs || !logs.length) {
+          tb.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:24px; color:var(--nss-text-muted);">No email dispatch logs recorded yet.</td></tr>`;
+          if (retryBtn) retryBtn.style.display = 'none';
+          return;
+        }
+
+        const failed = logs.filter(l => l.status === 'failed');
+        cachedFailedLogs = failed;
+
+        if (retryBtn) {
+          if (failed.length > 0) {
+            retryBtn.style.display = 'inline-flex';
+            if (retryCountSpan) retryCountSpan.textContent = failed.length;
+          } else {
+            retryBtn.style.display = 'none';
+          }
+        }
+
+        tb.innerHTML = logs.map(l => `
+          <tr>
+            <td style="color:#64748B; font-size:12px;">${NSS.formatDate(l.sent_at, true)}</td>
+            <td style="font-weight:700; color:var(--nss-navy);">${l.recipient_name || 'Volunteer'}</td>
+            <td><code style="color:var(--nss-royal-blue);">${l.recipient_email}</code></td>
+            <td style="max-width:240px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${l.subject}</td>
+            <td>
+              ${l.status === 'sent' 
+                ? '<span class="nss-badge approved">Delivered</span>' 
+                : l.status === 'failed' 
+                  ? '<span class="nss-badge rejected">Failed</span>' 
+                  : '<span class="nss-badge pending">Skipped</span>'
+              }
+            </td>
+            <td style="font-size:12px; color:${l.error_message ? '#DC2626' : '#64748B'};">
+              ${l.error_message || 'Sent successfully via Brevo'}
+            </td>
+          </tr>
+        `).join('');
+
+      } catch (err) {
+        console.error('Error loading email logs:', err);
+      }
+    }
+
+    async function retryFailedEmails() {
+      if (!cachedFailedLogs || cachedFailedLogs.length === 0) {
+        alert('No failed email dispatches found to retry.');
+        return;
+      }
+
+      if (!confirm(`Retry sending ${cachedFailedLogs.length} failed email(s)? Successful emails will NOT be resent.`)) return;
+
+      const subject = document.getElementById('broadcastSubject').value.trim();
+      const category = document.getElementById('broadcastCategory').value;
+      const title = document.getElementById('broadcastTitle').value.trim();
+      const message = document.getElementById('broadcastMessage').value.trim();
+
+      const recipients = cachedFailedLogs.map(l => ({
+        id: l.directory_id,
+        email: l.recipient_email,
+        name: l.recipient_name
+      }));
+
+      const btn = document.getElementById('btnRetryFailedEmails');
+      btn.disabled = true;
+      btn.textContent = 'Retrying...';
+
+      try {
+        const res = await fetch('/api/broadcast-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject,
+            category,
+            title,
+            message,
+            recipients
+          })
+        });
+
+        const data = await res.json();
+        if (data.results) {
+          await NSS.EmailLogs.saveLogs(data.results.map(r => ({
+            directory_id: r.id,
+            email: r.email,
+            name: r.name,
+            subject,
+            status: r.status,
+            error: r.error
+          })));
+        }
+        alert(`Retry finished! Delivered: ${data.sentCount || 0}, Failed: ${data.failCount || 0}`);
+        loadEmailLogs();
+      } catch (err) {
+        alert('Retry request failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Retry Failed';
+      }
     }
 
     // Attach listeners on images & custom email
