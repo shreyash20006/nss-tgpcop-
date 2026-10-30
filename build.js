@@ -60,6 +60,7 @@ const staticFiles = [
   'echo.css',
   'echo.js',
   'env.js',
+  'volunteers-data.js',
   'cloudinary-config.js',
   'echo_logo_white_transparent.png'
 ];

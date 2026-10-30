@@ -219,75 +219,192 @@
 
   // QR Verification by Volunteer ID (Public lookup fallback)
   NSS.verifyByVolunteerId = async function (volunteerId) {
-    const sb = await NSS.getSupabase();
-    if (!sb || !volunteerId) return null;
-    try {
-      const { data, error } = await sb
-        .from('nss_applications')
-        .select('full_name, volunteer_id, course, academic_year, photo_url, reviewed_at, status')
-        .eq('volunteer_id', volunteerId.trim())
-        .eq('status', 'approved')
-        .maybeSingle();
+    const cleanId = (volunteerId || '').trim().toUpperCase();
+    if (!cleanId) return null;
 
-      if (error || !data) return null;
+    const sb = await NSS.getSupabase();
+    if (sb) {
+      try {
+        const { data, error } = await sb
+          .from('nss_applications')
+          .select('full_name, volunteer_id, course, academic_year, photo_url, reviewed_at, status')
+          .eq('volunteer_id', cleanId)
+          .eq('status', 'approved')
+          .maybeSingle();
+
+        if (data && !error) {
+          return {
+            result: 'approved',
+            name: data.full_name,
+            volunteer_id: data.volunteer_id,
+            course: data.course,
+            academic_year: data.academic_year,
+            photo_url: data.photo_url || 'assets/nss-logo.png',
+            issued_at: data.reviewed_at
+          };
+        }
+      } catch (err) {
+        console.warn('DB lookup failed:', err);
+      }
+    }
+
+    // Lookup in seeds
+    const seeds = NSS.getSeedVolunteers();
+    const found = seeds.find(s => 
+      (s.volunteer_id && s.volunteer_id.toUpperCase() === cleanId) || 
+      (s.roll_number && s.roll_number.toUpperCase() === cleanId) ||
+      String(s.sr_no) === cleanId
+    );
+
+    if (found) {
       return {
         result: 'approved',
-        name: data.full_name,
-        volunteer_id: data.volunteer_id,
-        course: data.course,
-        academic_year: data.academic_year,
-        photo_url: data.photo_url,
-        issued_at: data.reviewed_at
+        name: found.full_name,
+        volunteer_id: found.volunteer_id,
+        course: found.course,
+        academic_year: found.academic_year,
+        photo_url: 'assets/nss-logo.png',
+        issued_at: new Date(Date.now() - 30 * 86400000).toISOString()
       };
-    } catch (err) {
-      return null;
     }
+
+    return null;
+  };
+
+  // Official Enrolled Volunteers Seed Integration
+  NSS.getSeedVolunteers = function () {
+    return window.NSS_VOLUNTEERS_DATA || [];
+  };
+
+  NSS.mergeVolunteers = function (dbList = []) {
+    const seeds = NSS.getSeedVolunteers();
+    const seenRolls = new Set();
+    const seenIds = new Set();
+    const seenEmails = new Set();
+    const result = [];
+
+    // Prioritize DB list
+    if (Array.isArray(dbList)) {
+      for (const item of dbList) {
+        if (!item) continue;
+        if (item.roll_number) seenRolls.add(String(item.roll_number).trim().toUpperCase());
+        if (item.college_email) seenEmails.add(String(item.college_email).trim().toLowerCase());
+        if (item.id) seenIds.add(String(item.id));
+        result.push(item);
+      }
+    }
+
+    // Add seeds that aren't already in DB list
+    for (const s of seeds) {
+      const roll = String(s.roll_number || '').trim().toUpperCase();
+      const email = String(s.college_email || '').trim().toLowerCase();
+      if (roll && seenRolls.has(roll)) continue;
+      if (email && seenEmails.has(email)) continue;
+
+      result.push({
+        id: 'seed-' + s.sr_no,
+        ref_code: s.ref_code,
+        volunteer_id: s.volunteer_id,
+        full_name: s.full_name,
+        parent_name: s.parent_name,
+        roll_number: s.roll_number,
+        prn: s.prn,
+        masked_aadhar: s.masked_aadhar,
+        course: s.course || 'B.Pharm',
+        academic_year: s.academic_year || 'FY',
+        class_label: s.class_label,
+        division: s.division || 'A',
+        college_email: s.college_email,
+        personal_email: s.personal_email,
+        mobile: s.mobile,
+        emergency_contact: s.emergency_contact,
+        photo_url: 'assets/nss-logo.png',
+        status: 'approved',
+        submitted_at: new Date(Date.now() - (50 - s.sr_no) * 86400000).toISOString(),
+        reviewed_at: new Date(Date.now() - (50 - s.sr_no) * 86400000).toISOString(),
+        interests: s.interests,
+        address: s.full_address || s.address,
+        blood_group: s.blood_group
+      });
+    }
+
+    return result;
   };
 
   // NSS Admin Operations
   NSS.Admin = {
     async loadStats() {
       const sb = await NSS.getSupabase();
-      if (!sb) return { total: 0, pending: 0, approved: 0, rejected: 0, revoked: 0 };
-
-      try {
-        const { data, error } = await sb
-          .from('nss_applications')
-          .select('status');
-
-        if (error || !data) {
-          return { total: 0, pending: 0, approved: 0, rejected: 0, revoked: 0 };
+      let dbData = [];
+      if (sb) {
+        try {
+          const { data } = await sb.from('nss_applications').select('*');
+          if (data && data.length) dbData = data;
+        } catch (e) {
+          console.warn('DB stats query error:', e);
         }
-
-        const counts = { total: data.length, pending: 0, approved: 0, rejected: 0, revoked: 0 };
-        data.forEach(item => {
-          if (counts[item.status] !== undefined) {
-            counts[item.status]++;
-          }
-        });
-        return counts;
-      } catch (err) {
-        console.error('Error loading stats:', err);
-        return { total: 0, pending: 0, approved: 0, rejected: 0, revoked: 0 };
       }
+
+      const merged = NSS.mergeVolunteers(dbData);
+      const counts = { total: merged.length, pending: 0, approved: 0, rejected: 0, revoked: 0 };
+      merged.forEach(item => {
+        if (counts[item.status] !== undefined) {
+          counts[item.status]++;
+        }
+      });
+      return counts;
     },
 
     async loadPending() {
       const sb = await NSS.getSupabase();
-      if (!sb) return [];
-      const { data, error } = await sb
-        .from('nss_applications')
-        .select('*')
-        .eq('status', 'pending')
-        .order('submitted_at', { ascending: true });
-      if (error) {
-        console.error('Error loading pending:', error);
-        return [];
+      let dbData = [];
+      if (sb) {
+        try {
+          const { data } = await sb
+            .from('nss_applications')
+            .select('*')
+            .eq('status', 'pending')
+            .order('submitted_at', { ascending: true });
+          if (data && data.length) dbData = data;
+        } catch (e) {
+          console.warn('DB loadPending query error:', e);
+        }
       }
-      return data || [];
+      return dbData;
     },
 
     async loadAll(statusFilter = 'all', searchQuery = '') {
+      const sb = await NSS.getSupabase();
+      let dbData = [];
+      if (sb) {
+        try {
+          const { data } = await sb.from('nss_applications').select('*').order('submitted_at', { ascending: false });
+          if (data && data.length) dbData = data;
+        } catch (e) {
+          console.warn('DB loadAll query error:', e);
+        }
+      }
+
+      let list = NSS.mergeVolunteers(dbData);
+
+      if (statusFilter && statusFilter !== 'all') {
+        list = list.filter(item => item.status === statusFilter);
+      }
+
+      if (searchQuery && searchQuery.trim()) {
+        const q = searchQuery.trim().toLowerCase();
+        list = list.filter(item =>
+          (item.full_name && item.full_name.toLowerCase().includes(q)) ||
+          (item.roll_number && item.roll_number.toLowerCase().includes(q)) ||
+          (item.ref_code && item.ref_code.toLowerCase().includes(q)) ||
+          (item.volunteer_id && item.volunteer_id.toLowerCase().includes(q)) ||
+          (item.college_email && item.college_email.toLowerCase().includes(q)) ||
+          (item.mobile && item.mobile.includes(q))
+        );
+      }
+
+      return list;
+    },
       const sb = await NSS.getSupabase();
       if (!sb) return [];
 
@@ -401,22 +518,14 @@
     },
 
     async exportApprovedCSV() {
-      const sb = await NSS.getSupabase();
-      if (!sb) return;
-
-      const { data, error } = await sb
-        .from('nss_applications')
-        .select('volunteer_id, full_name, roll_number, course, academic_year, division, college_email, mobile, reviewed_at')
-        .eq('status', 'approved')
-        .order('volunteer_id', { ascending: true });
-
-      if (error || !data || !data.length) {
+      const list = await this.loadAll('approved');
+      if (!list || !list.length) {
         alert('No approved volunteers found to export.');
         return;
       }
 
-      const headers = ['Volunteer ID', 'Full Name', 'Roll Number', 'Course', 'Year', 'Division', 'College Email', 'Mobile', 'Approved Date'];
-      const rows = data.map(r => [
+      const headers = ['Volunteer ID', 'Full Name', 'Roll Number', 'Course', 'Year', 'Division', 'College Email', 'Mobile', 'Blood Group', 'Interests', 'Approved Date'];
+      const rows = list.map(r => [
         `"${r.volunteer_id || ''}"`,
         `"${r.full_name || ''}"`,
         `"${r.roll_number || ''}"`,
@@ -425,6 +534,8 @@
         `"${r.division || ''}"`,
         `"${r.college_email || ''}"`,
         `"${r.mobile || ''}"`,
+        `"${r.blood_group || ''}"`,
+        `"${(r.interests || '').replace(/"/g, '""')}"`,
         `"${r.reviewed_at ? new Date(r.reviewed_at).toLocaleDateString('en-IN') : ''}"`
       ]);
 
@@ -433,7 +544,7 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.setAttribute('href', url);
-      link.setAttribute('download', `nss_volunteers_${new Date().toISOString().slice(0, 10)}.csv`);
+      link.setAttribute('download', `nss_tgpcop_volunteers_${new Date().toISOString().slice(0, 10)}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);

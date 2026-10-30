@@ -667,6 +667,7 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="volunteers-data.js"></script>
   <script src="cloudinary-config.js"></script>
   <script src="env.js"></script>
   <script src="echo.js"></script>
@@ -739,6 +740,10 @@
         const pending = await NSS.Admin.loadPending();
         cachedPending = pending;
         renderPendingTable(pending);
+
+        // Preload all applications & compute broadcast deliverable recipients
+        cachedAll = await NSS.Admin.loadAll();
+        updateBroadcastRecipients();
       } catch (e) {
         console.error('Error loading dashboard:', e);
       }
@@ -1198,6 +1203,263 @@
     function exportCSV() {
       NSS.Admin.exportApprovedCSV();
     }
+
+    // ========================================================================
+    // BREVO BROADCAST & EVENT UPDATES CONTROLLER
+    // ========================================================================
+    function updateBroadcastRecipients() {
+      const aud = document.getElementById('broadcastAudience')?.value || 'all';
+      let count = 0;
+      const allVolunteers = (cachedAll && cachedAll.length) ? cachedAll : NSS.mergeVolunteers([]);
+
+      if (aud === 'custom') {
+        const customEmail = document.getElementById('customEmailInput')?.value.trim();
+        count = customEmail ? 1 : 0;
+      } else if (aud === 'approved') {
+        count = allVolunteers.filter(v => v.status === 'approved' && v.college_email).length;
+      } else if (aud === 'pending') {
+        count = allVolunteers.filter(v => v.status === 'pending' && v.college_email).length;
+      } else {
+        count = allVolunteers.filter(v => v.college_email).length;
+      }
+
+      const countEl = document.getElementById('broadcastRecipientCount');
+      if (countEl) countEl.textContent = count;
+    }
+
+    function toggleAudienceOptions(val) {
+      const customGroup = document.getElementById('customEmailGroup');
+      if (customGroup) {
+        customGroup.style.display = val === 'custom' ? 'block' : 'none';
+      }
+      updateBroadcastRecipients();
+    }
+
+    function applyBroadcastPreset(type) {
+      const subject = document.getElementById('broadcastSubject');
+      const title = document.getElementById('broadcastTitle');
+      const category = document.getElementById('broadcastCategory');
+      const dateVenue = document.getElementById('broadcastDateVenue');
+      const message = document.getElementById('broadcastMessage');
+      const images = document.getElementById('broadcastImages');
+      const ctaLabel = document.getElementById('broadcastCtaLabel');
+      const ctaUrl = document.getElementById('broadcastCtaUrl');
+
+      if (type === 'blood_camp') {
+        if (category) category.value = 'Camp Highlights & Photos';
+        if (subject) subject.value = '[NSS TGPCOP] Highlights from the Voluntary Blood Donation Camp 2026';
+        if (title) title.value = 'Annual Voluntary Blood Donation Camp — Commendable Volunteer Participation';
+        if (dateVenue) dateVenue.value = 'Thursday, 24 Oct 2026 • TGPCOP Campus Seminar Hall';
+        if (message) message.value = 'Dear NSS Volunteers,\n\nWe extend our heartfelt gratitude to every enrolled student who contributed to the success of our Voluntary Blood Donation Camp at TGPCOP. Over 70+ life-saving units were collected in collaboration with certified local blood banks.\n\nParticipation certificates and university donor recognitions will be distributed to volunteers during the upcoming assembly. Check out the event highlights and photos below!';
+        if (images) images.value = 'https://res.cloudinary.com/axgam8br/image/upload/v1793047208/IMG_1159.jpg\nhttps://res.cloudinary.com/axgam8br/image/upload/v1793047210/IMG_1155.jpg\nhttps://res.cloudinary.com/axgam8br/image/upload/v1793047211/IMG_1154.jpg\nhttps://res.cloudinary.com/axgam8br/image/upload/v1793047212/IMG_1150.jpg';
+        if (ctaLabel) ctaLabel.value = 'View NSS Photo Gallery';
+        if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/index.html#gallery';
+      } else if (type === 'upcoming_event') {
+        if (category) category.value = 'Event Announcement';
+        if (subject) subject.value = '[NSS TGPCOP] Upcoming Community Outreach Drive & Attendance Notice';
+        if (title) title.value = 'Community Healthcare & Public Hygiene Awareness Drive';
+        if (dateVenue) dateVenue.value = 'Saturday, 10 Nov 2026 • Adopted Village Mohgaon';
+        if (message) message.value = 'Dear NSS Volunteers,\n\nAll enrolled volunteers from B. Pharm 1st & 2nd Year are requested to report to the NSS Coordinator Desk for the upcoming public hygiene and healthcare awareness campaign.\n\nUniform/NSS badge is mandatory. University service hours will be accredited to your official volunteer record.';
+        if (ctaLabel) ctaLabel.value = 'Check Your Volunteer ID Card';
+        if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/my-id.html';
+      } else if (type === 'achievement') {
+        if (category) category.value = 'Achievement & Recognition';
+        if (subject) subject.value = '[NSS TGPCOP] Congratulations to Our Active NSS Volunteer Leaders!';
+        if (title) title.value = 'Recognition of Outstanding Service & Leadership';
+        if (dateVenue) dateVenue.value = 'TGPCOP Campus Seminar Hall';
+        if (message) message.value = 'Dear Volunteers,\n\nHeartiest congratulations to all student volunteers who demonstrated remarkable commitment, crisis management, and teamwork during our recent campus and community drives.';
+        if (ctaLabel) ctaLabel.value = 'Explore Leadership Directory';
+        if (ctaUrl) ctaUrl.value = 'https://nss.tgpcop.site/index.html#leadership';
+      } else if (type === 'general') {
+        if (category) category.value = 'Official Notice';
+        if (subject) subject.value = '[NSS TGPCOP] Important Circular for All Enrolled Volunteers';
+        if (title) title.value = 'General Unit Circular — Schedule & Guidelines';
+        if (dateVenue) dateVenue.value = '';
+        if (message) message.value = 'Dear NSS Volunteers,\n\nPlease review the attached guidelines for upcoming campus drives and ensure your digital ID cards are verified.';
+      }
+
+      renderPhotoPreview();
+    }
+
+    function insertCloudinaryBloodDonationPhotos() {
+      const photos = [
+        'https://res.cloudinary.com/axgam8br/image/upload/v1793047208/IMG_1159.jpg',
+        'https://res.cloudinary.com/axgam8br/image/upload/v1793047210/IMG_1155.jpg',
+        'https://res.cloudinary.com/axgam8br/image/upload/v1793047211/IMG_1154.jpg',
+        'https://res.cloudinary.com/axgam8br/image/upload/v1793047212/IMG_1150.jpg'
+      ];
+      const textarea = document.getElementById('broadcastImages');
+      if (textarea) {
+        textarea.value = photos.join('\n');
+        renderPhotoPreview();
+      }
+    }
+
+    function renderPhotoPreview() {
+      const textarea = document.getElementById('broadcastImages');
+      const previewWrap = document.getElementById('photoPreviewContainer');
+      const previewGrid = document.getElementById('photoPreviewGrid');
+      if (!textarea || !previewWrap || !previewGrid) return;
+
+      const urls = textarea.value.split(/[\n,]/).map(u => u.trim()).filter(u => u.startsWith('http'));
+      if (urls.length === 0) {
+        previewWrap.style.display = 'none';
+        previewGrid.innerHTML = '';
+        return;
+      }
+
+      previewWrap.style.display = 'block';
+      previewGrid.innerHTML = urls.map((u, i) => `
+        <div style="position:relative; width:80px; height:60px; border-radius:8px; overflow:hidden; border:1px solid #CBD5E1; background:#000;">
+          <img src="${u}" alt="Preview ${i+1}" style="width:100%; height:100%; object-fit:cover;">
+        </div>
+      `).join('');
+    }
+
+    async function sendBroadcast(isTest = false) {
+      const alertBox = document.getElementById('broadcastStatusAlert');
+      const btnSubmit = document.getElementById('btnSubmitBroadcast');
+      const btnTest = document.getElementById('btnTestBroadcast');
+
+      const subject = document.getElementById('broadcastSubject').value.trim();
+      const category = document.getElementById('broadcastCategory').value;
+      const title = document.getElementById('broadcastTitle').value.trim();
+      const dateVenue = document.getElementById('broadcastDateVenue').value.trim();
+      const message = document.getElementById('broadcastMessage').value.trim();
+      const imagesRaw = document.getElementById('broadcastImages').value.trim();
+      const ctaLabel = document.getElementById('broadcastCtaLabel').value.trim();
+      const ctaUrl = document.getElementById('broadcastCtaUrl').value.trim();
+      const audience = document.getElementById('broadcastAudience').value;
+
+      if (!subject || !title || !message) {
+        showBroadcastAlert('Please fill in Subject, Heading Banner Title, and Message details before sending.', 'error');
+        return;
+      }
+
+      const images = imagesRaw.split(/[\n,]/).map(s => s.trim()).filter(s => s.startsWith('http'));
+
+      // Determine recipients from loaded volunteers
+      let recipients = [];
+      const allVolunteers = (cachedAll && cachedAll.length) ? cachedAll : NSS.mergeVolunteers([]);
+
+      if (isTest) {
+        // Test mode: send to custom email or coordinator email
+        const customEmail = document.getElementById('customEmailInput').value.trim();
+        const adminEmail = (window.USER && window.USER.email) || 'viratkhi9089@gmail.com';
+        const targetEmail = customEmail || adminEmail;
+        recipients = [{ email: targetEmail, name: 'Coordinator Test' }];
+      } else if (audience === 'custom') {
+        const customEmail = document.getElementById('customEmailInput').value.trim();
+        if (!customEmail) {
+          showBroadcastAlert('Please enter a test email address.', 'error');
+          return;
+        }
+        recipients = [{ email: customEmail, name: 'Recipient' }];
+      } else if (audience === 'approved') {
+        recipients = allVolunteers.filter(v => v.status === 'approved' && v.college_email).map(v => ({
+          email: v.college_email,
+          name: v.full_name
+        }));
+      } else if (audience === 'pending') {
+        recipients = allVolunteers.filter(v => v.status === 'pending' && v.college_email).map(v => ({
+          email: v.college_email,
+          name: v.full_name
+        }));
+      } else {
+        // 'all'
+        recipients = allVolunteers.filter(v => v.college_email).map(v => ({
+          email: v.college_email,
+          name: v.full_name
+        }));
+      }
+
+      if (!recipients.length) {
+        showBroadcastAlert('No deliverable recipient email addresses found for this audience.', 'error');
+        return;
+      }
+
+      // UI Loading state
+      const activeBtn = isTest ? btnTest : btnSubmit;
+      const originalText = activeBtn.textContent;
+      activeBtn.disabled = true;
+      activeBtn.textContent = isTest ? '⏳ Sending Test Email...' : `⏳ Broadcasting to ${recipients.length} Volunteers...`;
+
+      try {
+        const res = await fetch('/api/broadcast-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            subject: isTest ? `[TEST] ${subject}` : subject,
+            category,
+            title,
+            dateVenue,
+            message,
+            images,
+            ctaLabel,
+            ctaUrl,
+            recipients
+          })
+        });
+
+        const data = await res.json();
+
+        if (data.warning) {
+          showBroadcastAlert(`
+            <strong>⚠️ Brevo API Key Not Configured on Vercel</strong><br>
+            ${data.warning}<br><br>
+            <strong>How to enable real email sending in 2 minutes:</strong><br>
+            1. Open <a href="https://vercel.com" target="_blank" style="text-decoration:underline; font-weight:700;">Vercel Dashboard</a> ➔ Your Project ➔ <strong>Settings</strong> ➔ <strong>Environment Variables</strong><br>
+            2. Add <code>BREVO_API_KEY</code> = <em>(your API key from Brevo.com -> SMTP & API)</em><br>
+            3. Add <code>BREVO_SENDER_EMAIL</code> = <em>viratkhi9089@gmail.com (or your verified Brevo sender)</em><br>
+            4. Add <code>BREVO_SENDER_NAME</code> = <em>NSS TGPCOP</em><br>
+            5. Click <strong>Save</strong> and Redeploy!
+          `, 'warning');
+        } else if (data.success) {
+          showBroadcastAlert(`🎉 <strong>Broadcast Sent!</strong> Successfully delivered to ${data.sentCount || recipients.length} recipient(s) via Brevo.`, 'success');
+        } else {
+          showBroadcastAlert(`❌ <strong>Broadcast failed:</strong> ${data.error || data.message || 'Unknown error'}`, 'error');
+        }
+      } catch (err) {
+        console.error('Broadcast request error:', err);
+        showBroadcastAlert(`❌ Failed to send request to email server: ${err.message}`, 'error');
+      } finally {
+        activeBtn.disabled = false;
+        activeBtn.textContent = originalText;
+      }
+    }
+
+    function showBroadcastAlert(html, type = 'info') {
+      const alertBox = document.getElementById('broadcastStatusAlert');
+      if (!alertBox) return;
+      alertBox.style.display = 'block';
+
+      if (type === 'success') {
+        alertBox.style.background = '#ECFDF5';
+        alertBox.style.border = '1px solid #10B981';
+        alertBox.style.color = '#065F46';
+      } else if (type === 'warning') {
+        alertBox.style.background = '#FFFBEB';
+        alertBox.style.border = '1px solid #F59E0B';
+        alertBox.style.color = '#92400E';
+      } else if (type === 'error') {
+        alertBox.style.background = '#FEF2F2';
+        alertBox.style.border = '1px solid #EF4444';
+        alertBox.style.color = '#991B1B';
+      } else {
+        alertBox.style.background = '#EFF6FF';
+        alertBox.style.border = '1px solid #3B82F6';
+        alertBox.style.color = '#1E40AF';
+      }
+
+      alertBox.innerHTML = html;
+      alertBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    // Attach listeners on images & custom email
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('broadcastImages')?.addEventListener('input', renderPhotoPreview);
+      document.getElementById('customEmailInput')?.addEventListener('input', updateBroadcastRecipients);
+    });
 
     document.addEventListener('DOMContentLoaded', initAdminAuth);
     document.addEventListener('echo-auth', initAdminAuth);
