@@ -123,6 +123,52 @@
           <p style="font-size: 12px; color: var(--nss-text-muted); margin-top: 14px; line-height: 1.5;">
             Use your college or personal Google account. Faculty coordinators and President will be directed to the Admin Console upon verification.
           </p>
+        
+          <!-- Divider: OR EMAIL OTP -->
+          <div style="margin: 26px 0 20px; border-top: 1px solid var(--nss-border); position: relative; text-align: center;">
+            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #FFFFFF; padding: 0 14px; font-size: 11px; font-weight: 800; color: var(--nss-navy); text-transform: uppercase; letter-spacing: 0.08em;">
+              OR SIGN IN WITH EMAIL OTP
+            </span>
+          </div>
+
+          <!-- Email OTP Section -->
+          <div id="emailOtpSection" style="text-align: left; margin-top: 20px;">
+            <!-- Step 1: Input Email -->
+            <div id="otpStepEmail">
+              <label style="display:block; font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:6px;">
+                Enter Email Address (College / Personal)
+              </label>
+              <div style="display:flex; gap:8px;">
+                <input type="email" id="otpEmailInput" placeholder="name@tgpcop.site or personal@gmail.com" style="flex:1; padding:11px 14px; border:1px solid var(--nss-border); border-radius:8px; font-size:14px; font-family:inherit;" onkeydown="if(event.key==='Enter') sendEmailOtp()">
+                <button type="button" id="btnSendOtp" class="nss-btn" onclick="sendEmailOtp()" style="background:var(--nss-royal-blue); color:#FFFFFF; padding:11px 20px; font-size:13px; font-weight:700; white-space:nowrap; border-radius:8px; border:none; cursor:pointer;">
+                  Send OTP
+                </button>
+              </div>
+              <div id="otpEmailStatus" style="font-size:12px; margin-top:6px; min-height:18px;"></div>
+            </div>
+
+            <!-- Step 2: Input 6-Digit OTP Code -->
+            <div id="otpStepCode" style="display:none; margin-top:14px; background:#F8FAFC; border:1.5px solid #BFDBFE; border-radius:10px; padding:18px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label style="font-size:12.5px; font-weight:700; color:var(--nss-navy);">
+                  Enter 6-Digit Verification Code
+                </label>
+                <button type="button" onclick="resetOtpStep()" style="background:none; border:none; color:var(--nss-royal-blue); font-size:11px; font-weight:700; cursor:pointer; text-decoration:underline;">
+                  Change Email
+                </button>
+              </div>
+              <p style="font-size:12px; color:#64748B; margin:0 0 12px; line-height:1.4;">
+                A one-time verification code has been dispatched to <strong id="otpSentToEmail" style="color:var(--nss-navy);"></strong>. Check your inbox or spam folder.
+              </p>
+              <div style="display:flex; gap:8px;">
+                <input type="text" id="otpCodeInput" maxlength="8" placeholder="123456" style="flex:1; padding:11px 14px; border:1px solid var(--nss-border); border-radius:8px; font-size:16px; font-weight:800; letter-spacing:0.25em; text-align:center; font-family:monospace;" onkeydown="if(event.key==='Enter') verifyEmailOtp()">
+                <button type="button" id="btnVerifyOtp" class="nss-btn" onclick="verifyEmailOtp()" style="background:#16A34A; color:#FFFFFF; padding:11px 22px; font-size:13px; font-weight:700; white-space:nowrap; border-radius:8px; border:none; cursor:pointer;">
+                  Verify & Sign In
+                </button>
+              </div>
+              <div id="otpCodeStatus" style="font-size:12px; margin-top:8px; min-height:18px;"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Access Denied Card (If unauthorized account attempts admin access) -->
