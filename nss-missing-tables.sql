@@ -3,10 +3,9 @@
 -- Tables: public.nss_students, public.nss_login_activity
 -- 
 -- SAFE EXECUTION GUARANTEE:
--- 1. Does not drop or recreate any existing tables.
--- 2. Preserves all 16+ existing volunteer applications and approved records.
--- 3. Automatically populates nss_students from existing nss_applications.
--- 4. Establishes Row-Level Security (RLS) policies for Staff and Students.
+-- 1. Does not drop or alter existing applications or student records.
+-- 2. Compatible with all PostgreSQL versions (eliminates 42P10 ON CONFLICT error).
+-- 3. Idempotent: can be executed multiple times safely.
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
@@ -47,15 +46,18 @@ CREATE TABLE IF NOT EXISTS public.nss_students (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Indexes for high-speed indexing & lookup
-CREATE UNIQUE INDEX IF NOT EXISTS idx_nss_students_roll ON public.nss_students(roll_number) WHERE roll_number IS NOT NULL;
+-- Recreate unconditional unique index on roll_number (PostgreSQL standard allows multiple NULLs in UNIQUE)
+DROP INDEX IF EXISTS public.idx_nss_students_roll;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_nss_students_roll ON public.nss_students(roll_number);
+
 CREATE INDEX IF NOT EXISTS idx_nss_students_user ON public.nss_students(user_id);
 CREATE INDEX IF NOT EXISTS idx_nss_students_email ON public.nss_students(LOWER(google_email));
 CREATE INDEX IF NOT EXISTS idx_nss_students_coll_email ON public.nss_students(LOWER(college_email));
 CREATE INDEX IF NOT EXISTS idx_nss_students_status ON public.nss_students(application_status);
 CREATE INDEX IF NOT EXISTS idx_nss_students_prn ON public.nss_students(prn);
+CREATE INDEX IF NOT EXISTS idx_nss_students_reg_id ON public.nss_students(registration_id);
 
--- Safely sync existing applications into nss_students (without duplicates)
+-- Safely sync applications into nss_students using NOT EXISTS (avoids 42P10 constraint inference errors)
 INSERT INTO public.nss_students (
   user_id, full_name, college_email, roll_number, prn, course, academic_year,
   division, mobile, registration_id, application_status, volunteer_id, created_at, updated_at
@@ -64,25 +66,21 @@ SELECT
   a.user_id, a.full_name, a.college_email, a.roll_number, a.prn, a.course, a.academic_year,
   a.division, a.mobile, a.id, a.status, a.volunteer_id, a.submitted_at, NOW()
 FROM public.nss_applications a
-WHERE a.roll_number IS NOT NULL
-ON CONFLICT (roll_number) DO UPDATE SET 
-  user_id = COALESCE(EXCLUDED.user_id, nss_students.user_id),
-  application_status = EXCLUDED.application_status,
-  volunteer_id = EXCLUDED.volunteer_id,
-  registration_id = EXCLUDED.registration_id,
-  updated_at = NOW();
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.nss_students s 
+  WHERE s.registration_id = a.id 
+     OR (a.roll_number IS NOT NULL AND s.roll_number = a.roll_number)
+);
 
--- Also sync any applications without roll_number
-INSERT INTO public.nss_students (
-  user_id, full_name, college_email, roll_number, prn, course, academic_year,
-  division, mobile, registration_id, application_status, volunteer_id, created_at, updated_at
-)
-SELECT 
-  a.user_id, a.full_name, a.college_email, a.roll_number, a.prn, a.course, a.academic_year,
-  a.division, a.mobile, a.id, a.status, a.volunteer_id, a.submitted_at, NOW()
+-- Keep existing student records updated if application was reviewed
+UPDATE public.nss_students s
+SET 
+  application_status = a.status,
+  volunteer_id = COALESCE(a.volunteer_id, s.volunteer_id),
+  user_id = COALESCE(a.user_id, s.user_id),
+  updated_at = NOW()
 FROM public.nss_applications a
-WHERE a.roll_number IS NULL
-ON CONFLICT DO NOTHING;
+WHERE s.registration_id = a.id OR (a.roll_number IS NOT NULL AND s.roll_number = a.roll_number);
 
 -- RLS: nss_students
 ALTER TABLE public.nss_students ENABLE ROW LEVEL SECURITY;
@@ -99,8 +97,8 @@ CREATE POLICY "Staff can manage student records" ON public.nss_students
   WITH CHECK (public.nss_is_staff(auth.uid()));
 
 DROP POLICY IF EXISTS "Anon count students" ON public.nss_students;
-CREATE POLICY "Anon count students" ON public.nss_students
-  FOR SELECT TO anon
+CREATE POLICY "Anon count students" ON public.nss_students 
+  FOR SELECT TO anon 
   USING (true);
 
 -- ------------------------------------------------------------------------------
@@ -140,13 +138,13 @@ CREATE POLICY "Authenticated users insert own login" ON public.nss_login_activit
   WITH CHECK (auth.uid() = user_id OR public.nss_is_staff(auth.uid()));
 
 DROP POLICY IF EXISTS "Anon insert login activity" ON public.nss_login_activity;
-CREATE POLICY "Anon insert login activity" ON public.nss_login_activity
-  FOR INSERT TO anon
+CREATE POLICY "Anon insert login activity" ON public.nss_login_activity 
+  FOR INSERT TO anon 
   WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Anon count login activity" ON public.nss_login_activity;
-CREATE POLICY "Anon count login activity" ON public.nss_login_activity
-  FOR SELECT TO anon
+CREATE POLICY "Anon count login activity" ON public.nss_login_activity 
+  FOR SELECT TO anon 
   USING (true);
 
 -- End of non-destructive migration
