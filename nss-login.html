@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <link rel="stylesheet" href="nss.css?v=20261031-v5">
 </head>
 <body class="nss-page">
@@ -375,6 +376,110 @@
 
       // New student - send to registration
       window.location.href = 'register.html';
+    }
+
+    
+    // Email OTP Authentication Flow via Supabase
+    let currentOtpEmail = '';
+
+    async function sendEmailOtp() {
+      const emailInput = document.getElementById('otpEmailInput');
+      const statusEl = document.getElementById('otpEmailStatus');
+      const btnSend = document.getElementById('btnSendOtp');
+      const email = (emailInput ? emailInput.value : '').trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+      if (!email || !emailRegex.test(email)) {
+        statusEl.innerHTML = '<span style="color:#DC2626; font-weight:600;">Please enter a valid email address.</span>';
+        return;
+      }
+
+      const sb = window.getSB ? window.getSB() : null;
+      if (!sb) {
+        statusEl.innerHTML = '<span style="color:#DC2626;">Supabase client initializing. Please wait 2 seconds and try again.</span>';
+        return;
+      }
+
+      btnSend.disabled = true;
+      btnSend.textContent = 'Sending...';
+      statusEl.innerHTML = '<span style="color:#0647C8; font-weight:600;">Connecting to Supabase OTP service...</span>';
+
+      try {
+        const { error } = await sb.auth.signInWithOtp({
+          email: email,
+          options: {
+            shouldCreateUser: true
+          }
+        });
+
+        if (error) throw error;
+
+        currentOtpEmail = email;
+        statusEl.innerHTML = '<span style="color:#16A34A; font-weight:700;">✓ Verification code sent to ' + email + '! Check your inbox.</span>';
+        document.getElementById('otpStepCode').style.display = 'block';
+        document.getElementById('otpSentToEmail').textContent = email;
+        setTimeout(() => { document.getElementById('otpCodeInput').focus(); }, 100);
+      } catch (err) {
+        console.error('Error sending OTP:', err);
+        statusEl.innerHTML = '<span style="color:#DC2626; font-weight:600;">' + (err.message || 'Failed to dispatch code. Please try Google sign in.') + '</span>';
+      } finally {
+        btnSend.disabled = false;
+        btnSend.textContent = 'Send OTP';
+      }
+    }
+
+    async function verifyEmailOtp() {
+      const codeInput = document.getElementById('otpCodeInput');
+      const statusEl = document.getElementById('otpCodeStatus');
+      const btnVerify = document.getElementById('btnVerifyOtp');
+      const token = (codeInput ? codeInput.value : '').trim();
+
+      if (!token || token.length < 4) {
+        statusEl.innerHTML = '<span style="color:#DC2626; font-weight:600;">Please enter the 6-digit verification code.</span>';
+        return;
+      }
+
+      const sb = window.getSB ? window.getSB() : null;
+      if (!sb) {
+        statusEl.innerHTML = '<span style="color:#DC2626;">Supabase client initializing. Please wait a moment.</span>';
+        return;
+      }
+
+      btnVerify.disabled = true;
+      btnVerify.textContent = 'Verifying...';
+      statusEl.innerHTML = '<span style="color:#0647C8; font-weight:600;">Validating verification code...</span>';
+
+      try {
+        const { data, error } = await sb.auth.verifyOtp({
+          email: currentOtpEmail,
+          token: token,
+          type: 'email'
+        });
+
+        if (error) throw error;
+
+        statusEl.innerHTML = '<span style="color:#16A34A; font-weight:700;">✓ Code verified! Authenticating session...</span>';
+        
+        // Immediately run role-based routing
+        if (typeof evaluateAuth === 'function') {
+          await evaluateAuth();
+        } else {
+          window.location.reload();
+        }
+      } catch (err) {
+        console.error('Error verifying OTP:', err);
+        statusEl.innerHTML = '<span style="color:#DC2626; font-weight:600;">' + (err.message || 'Invalid or expired OTP code. Please request a new code.') + '</span>';
+      } finally {
+        btnVerify.disabled = false;
+        btnVerify.textContent = 'Verify & Sign In';
+      }
+    }
+
+    function resetOtpStep() {
+      document.getElementById('otpStepCode').style.display = 'none';
+      document.getElementById('otpEmailStatus').textContent = '';
+      document.getElementById('otpCodeStatus').textContent = '';
+      document.getElementById('otpEmailInput').focus();
     }
 
     function signOut() {
