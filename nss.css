@@ -3153,3 +3153,105 @@ body.nss-page .nss-act-action {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* ==========================================================================
+   NSS BACKGROUND THEME (v20261030-theme)
+   Navy/royal gradient + dot grid + Konark-style wheel, taken from the NSS emblem.
+   Dark sections: .nss-hero, .nss-reg-hero, .nss-cta-wrap, .nss-footer, or add .nss-bg
+   Light pages: faint royal-blue wheel watermark on body.nss-page
+   ========================================================================== */
+:root {
+  --nss-wheel-white: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-230 -230 460 460%22 fill=%22none%22 stroke=%22%23FFFFFF%22 stroke-width=%226%22%3E%3Ccircle r=%22218%22 stroke-width=%223%22 stroke-dasharray=%222 9%22 stroke-linecap=%22round%22/%3E%3Ccircle r=%22190%22/%3E%3Ccircle r=%2238%22 stroke-width=%228%22/%3E%3Ccircle r=%2214%22 fill=%22%23FFFFFF%22/%3E%3Cg fill=%22%23FFFFFF%22%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%280%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%280%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%2845%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%2845%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%2890%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%2890%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28135%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28135%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28180%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28180%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28225%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28225%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28270%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28270%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28315%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28315%29%22/%3E%3C/g%3E%3C/svg%3E");
+  --nss-wheel-blue: url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%22-230 -230 460 460%22 fill=%22none%22 stroke=%22%230647C8%22 stroke-width=%226%22%3E%3Ccircle r=%22218%22 stroke-width=%223%22 stroke-dasharray=%222 9%22 stroke-linecap=%22round%22/%3E%3Ccircle r=%22190%22/%3E%3Ccircle r=%2238%22 stroke-width=%228%22/%3E%3Ccircle r=%2214%22 fill=%22%230647C8%22/%3E%3Cg fill=%22%230647C8%22%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%280%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%280%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%2845%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%2845%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%2890%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%2890%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28135%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28135%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28180%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28180%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28225%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28225%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28270%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28270%29%22/%3E%3Cline x1=%220%22 y1=%22-38%22 x2=%220%22 y2=%22-190%22 transform=%22rotate%28315%29%22/%3E%3Ccircle cx=%220%22 cy=%22-205%22 r=%227%22 transform=%22rotate%28315%29%22/%3E%3C/g%3E%3C/svg%3E");
+  --nss-bg-gradient:
+    radial-gradient(circle at 78% 18%, rgba(6, 71, 200, 0.70), transparent 55%),
+    radial-gradient(circle at 12% 95%, rgba(255, 212, 0, 0.14), transparent 45%),
+    linear-gradient(160deg, #071B49 0%, #0A2A73 55%, #0647C8 130%);
+  --nss-dots: radial-gradient(rgba(255, 255, 255, 0.16) 1.2px, transparent 1.5px);
+}
+
+@keyframes nssWheelSpin { to { transform: rotate(360deg); } }
+
+/* Reusable dark background */
+.nss-bg {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--nss-bg-gradient);
+  color: #fff;
+}
+.nss-bg::before,
+.nss-hero-bg::before,
+.nss-reg-hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--nss-dots);
+  background-size: 28px 28px;
+  opacity: 0.5;
+  -webkit-mask-image: linear-gradient(180deg, #000, transparent 85%);
+  mask-image: linear-gradient(180deg, #000, transparent 85%);
+  pointer-events: none;
+}
+.nss-bg::after,
+.nss-hero-bg::after,
+.nss-reg-hero::after,
+.nss-cta-wrap::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  width: min(120vmin, 820px);
+  aspect-ratio: 1;
+  right: -16vmin;
+  top: 50%;
+  margin-top: calc(min(120vmin, 820px) / -2);
+  background: var(--nss-wheel-white) center / contain no-repeat;
+  opacity: 0.09;
+  pointer-events: none;
+  animation: nssWheelSpin 120s linear infinite;
+}
+
+/* Homepage hero: keep artwork, tint it with the NSS gradient */
+.nss-hero-bg { background: var(--nss-bg-gradient); }
+.nss-hero-bg-art { opacity: 0.38; mix-blend-mode: luminosity; }
+.nss-hero-overlay {
+  background: linear-gradient(180deg, rgba(4, 16, 46, 0.55) 0%, rgba(7, 27, 73, 0.35) 50%, rgba(7, 27, 73, 0.85) 100%);
+  z-index: 1;
+}
+.nss-hero::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 6px;
+  background: var(--nss-yellow); z-index: 3;
+}
+
+/* Registration hero + volunteer CTA card */
+.nss-reg-hero { background: var(--nss-bg-gradient); isolation: isolate; }
+.nss-reg-hero::after { right: -22vmin; width: min(90vmin, 620px); margin-top: calc(min(90vmin, 620px) / -2); }
+.nss-reg-hero > .nss-container { z-index: 2; }
+.nss-cta-wrap { position: relative; overflow: hidden; isolation: isolate; background: var(--nss-bg-gradient); }
+.nss-cta-wrap > * { position: relative; z-index: 1; }
+.nss-cta-wrap::after { width: 420px; right: -120px; margin-top: -210px; }
+
+/* Footer: static faint wheel */
+.nss-footer { overflow: hidden; }
+.nss-footer::before {
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  width: 520px; aspect-ratio: 1; right: -140px; top: -120px;
+  background: var(--nss-wheel-white) center / contain no-repeat; opacity: 0.05;
+}
+.nss-footer > * { position: relative; z-index: 1; }
+
+/* Light pages (login, status, my-id, verify, admin): soft watermark */
+body.nss-page::before {
+  content: ""; position: fixed; z-index: -1; pointer-events: none;
+  width: min(110vmin, 760px); aspect-ratio: 1; right: -24vmin; bottom: -26vmin;
+  background: var(--nss-wheel-blue) center / contain no-repeat; opacity: 0.05;
+}
+
+@media (max-width: 600px) {
+  .nss-bg::after, .nss-hero-bg::after { right: -40vmin; opacity: 0.07; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nss-bg::after, .nss-hero-bg::after, .nss-reg-hero::after, .nss-cta-wrap::after { animation: none; }
+}
