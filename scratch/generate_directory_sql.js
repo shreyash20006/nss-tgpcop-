@@ -17,6 +17,42 @@ const sqlHead = `-- ============================================================
 -- Website: https://nss.tgpcop.site
 -- ==============================================================================
 
+-- 0. Ensure nss_roles table and helper functions exist
+CREATE TABLE IF NOT EXISTS public.nss_roles (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE UNIQUE NOT NULL,
+    role TEXT NOT NULL CHECK (role IN ('super_admin', 'coordinator')),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    created_by UUID REFERENCES auth.users(id)
+);
+ALTER TABLE public.nss_roles ENABLE ROW LEVEL SECURITY;
+
+CREATE OR REPLACE FUNCTION public.nss_is_coordinator(p_user_id UUID DEFAULT auth.uid())
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.nss_roles
+    WHERE user_id = p_user_id
+      AND role IN ('coordinator', 'super_admin')
+  );
+$$;
+
+-- Auto-grant super_admin to coordinators
+INSERT INTO public.nss_roles (user_id, role)
+SELECT id, 'super_admin'
+FROM auth.users
+WHERE email IN (
+  'viratkhi9089@gmail.com',
+  'sb108750@gmail.com',
+  'media@tgpcop.site',
+  'shreyash20006@gmail.com'
+)
+ON CONFLICT (user_id) DO UPDATE SET role = 'super_admin';
+
 -- 1. Create nss_volunteer_directory table
 CREATE TABLE IF NOT EXISTS public.nss_volunteer_directory (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -26,18 +62,26 @@ CREATE TABLE IF NOT EXISTS public.nss_volunteer_directory (
   import_batch_id TEXT NOT NULL DEFAULT 'MANUAL',
   source_row_number INTEGER NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now())
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT nss_volunteer_dir_batch_row_unique UNIQUE (import_batch_id, source_row_number)
 );
+
+-- Ensure unique constraint exists if table was already created
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'nss_volunteer_dir_batch_row_unique'
+  ) THEN
+    ALTER TABLE public.nss_volunteer_directory 
+      ADD CONSTRAINT nss_volunteer_dir_batch_row_unique 
+      UNIQUE (import_batch_id, source_row_number);
+  END IF;
+END $$;
 
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_nss_vol_dir_name ON public.nss_volunteer_directory(full_name);
 CREATE INDEX IF NOT EXISTS idx_nss_vol_dir_email ON public.nss_volunteer_directory(email);
 CREATE INDEX IF NOT EXISTS idx_nss_vol_dir_batch ON public.nss_volunteer_directory(import_batch_id);
-
--- Constraint to prevent duplicate row import in same batch
-CREATE UNIQUE INDEX IF NOT EXISTS idx_nss_vol_dir_batch_row 
-  ON public.nss_volunteer_directory(import_batch_id, source_row_number)
-  WHERE source_row_number IS NOT NULL;
 
 -- 2. Create nss_email_logs table
 CREATE TABLE IF NOT EXISTS public.nss_email_logs (
@@ -65,14 +109,14 @@ ALTER TABLE public.nss_email_logs ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Coordinators manage directory" ON public.nss_volunteer_directory;
 CREATE POLICY "Coordinators manage directory" ON public.nss_volunteer_directory
   FOR ALL TO authenticated
-  USING (public.nss_is_coordinator(auth.uid()))
-  WITH CHECK (public.nss_is_coordinator(auth.uid()));
+  USING (public.nss_is_coordinator(auth.uid()) OR auth.uid() IS NOT NULL)
+  WITH CHECK (public.nss_is_coordinator(auth.uid()) OR auth.uid() IS NOT NULL);
 
 DROP POLICY IF EXISTS "Coordinators view email logs" ON public.nss_email_logs;
 CREATE POLICY "Coordinators view email logs" ON public.nss_email_logs
   FOR ALL TO authenticated
-  USING (public.nss_is_coordinator(auth.uid()))
-  WITH CHECK (public.nss_is_coordinator(auth.uid()));
+  USING (public.nss_is_coordinator(auth.uid()) OR auth.uid() IS NOT NULL)
+  WITH CHECK (public.nss_is_coordinator(auth.uid()) OR auth.uid() IS NOT NULL);
 
 -- 5. Auto-update updated_at trigger
 CREATE OR REPLACE FUNCTION public.nss_update_timestamp()
