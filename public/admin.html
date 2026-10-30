@@ -10,12 +10,13 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261030-theme">
+  <link rel="stylesheet" href="nss.css?v=20261031-v4">
 
   <!-- Early Global NSS Definition -->
   <script>
     window.NSS = window.NSS || {};
     var NSS = window.NSS;
+    if (typeof globalThis !== "undefined") globalThis.NSS = window.NSS;
   </script>
 
   <!-- Core External Libraries -->
@@ -23,12 +24,12 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <!-- Application Modules (Cache-busted) -->
-  <script src="volunteers-data.js?v=20261030-master-v2"></script>
-  <script src="directory-seed-data.js?v=20261030-master-v2"></script>
-  <script src="cloudinary-config.js?v=20261030-master-v2"></script>
-  <script src="env.js?v=20261030-master-v2"></script>
-  <script src="echo.js?v=20261030-master-v2"></script>
-  <script src="nss.js?v=20261030-master-v2"></script>
+  <script src="volunteers-data.js?v=20261031-v4"></script>
+  <script src="directory-seed-data.js?v=20261031-v4"></script>
+  <script src="cloudinary-config.js?v=20261031-v4"></script>
+  <script src="env.js?v=20261031-v4"></script>
+  <script src="echo.js?v=20261031-v4"></script>
+  <script src="nss.js?v=20261031-v4"></script>
 
   <style>
     :root {
@@ -44,14 +45,23 @@
       --nss-text-muted: #64748B;
     }
 
-    body.nss-admin-body {
+    body.nss-admin-body,
+    body.nss-page.nss-admin-body {
       margin: 0;
       padding: 0;
       background: var(--nss-bg);
-      font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif !important;
       color: var(--nss-text);
       display: flex;
       min-height: 100vh;
+    }
+
+    body.nss-admin-body h1,
+    body.nss-admin-body h2,
+    body.nss-admin-body h3,
+    body.nss-admin-body h4 {
+      font-family: 'Poppins', system-ui, -apple-system, sans-serif !important;
+      letter-spacing: normal;
     }
 
     /* Layout Containers */
@@ -64,7 +74,7 @@
     /* Sidebar */
     .admin-sidebar {
       width: 270px;
-      background: var(--nss-navy);
+      background: #071B49 !important;
       color: #FFFFFF;
       display: flex;
       flex-direction: column;
@@ -79,37 +89,53 @@
     }
 
     .sidebar-header {
-      padding: 20px 18px;
+      padding: 18px 16px;
+      background: #071B49 !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
       gap: 12px;
+      box-sizing: border-box;
     }
 
     .sidebar-logo {
-      width: 42px;
-      height: 42px;
+      width: 40px;
+      height: 40px;
       object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .sidebar-title {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
     }
 
     .sidebar-title h2 {
-      margin: 0;
-      font-size: 15px;
-      font-weight: 800;
-      letter-spacing: 0.02em;
-      color: #FFFFFF;
+      margin: 0 !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 15px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.02em !important;
+      color: #FFFFFF !important;
+      white-space: nowrap !important;
+      line-height: 1.2 !important;
+      text-transform: none !important;
     }
 
     .sidebar-title p {
-      margin: 2px 0 0;
-      font-size: 11px;
-      color: #94A3B8;
-      font-weight: 500;
+      margin: 2px 0 0 !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 11px !important;
+      color: #94A3B8 !important;
+      font-weight: 500 !important;
+      white-space: nowrap !important;
+      line-height: 1.2 !important;
     }
 
     .sidebar-user {
-      padding: 14px 18px;
-      background: rgba(255, 255, 255, 0.04);
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, 0.04) !important;
       border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
@@ -123,6 +149,7 @@
       object-fit: cover;
       border: 2px solid var(--nss-gold);
       background: #FFFFFF;
+      flex-shrink: 0;
     }
 
     .sidebar-user-details {
@@ -131,6 +158,7 @@
     }
 
     .sidebar-user-name {
+      font-family: 'Poppins', sans-serif !important;
       font-size: 13px;
       font-weight: 700;
       color: #FFFFFF;
@@ -140,6 +168,7 @@
     }
 
     .sidebar-user-role {
+      font-family: 'Poppins', sans-serif !important;
       font-size: 11px;
       font-weight: 700;
       color: var(--nss-gold);
@@ -150,6 +179,7 @@
 
     .sidebar-nav {
       padding: 12px 10px;
+      background: #071B49 !important;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -190,8 +220,8 @@
     }
 
     .nav-item.active {
-      background: var(--nss-royal-blue);
-      color: #FFFFFF;
+      background: #0647C8 !important;
+      color: #FFFFFF !important;
       font-weight: 700;
       box-shadow: 0 4px 12px rgba(6, 71, 200, 0.35);
     }
@@ -287,7 +317,7 @@
     /* Modern Metric Cards */
     .metrics-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 16px;
       margin-bottom: 24px;
     }
@@ -295,13 +325,15 @@
     .metric-card {
       background: #FFFFFF;
       border-radius: 12px;
-      padding: 18px 20px;
+      padding: 16px 18px;
       border: 1px solid var(--nss-border);
       box-shadow: 0 2px 8px rgba(7, 27, 73, 0.04);
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       transition: transform 0.15s ease;
+      min-height: 82px;
+      box-sizing: border-box;
     }
 
     .metric-card:hover {
@@ -309,29 +341,42 @@
     }
 
     .metric-icon {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
+      font-size: 20px;
       flex-shrink: 0;
     }
 
+    .metric-data {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0;
+      flex: 1;
+    }
+
     .metric-data h4 {
-      margin: 0;
-      font-size: 24px;
-      font-weight: 800;
-      color: var(--nss-navy);
-      line-height: 1.1;
+      margin: 0 !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 22px !important;
+      font-weight: 800 !important;
+      color: var(--nss-navy) !important;
+      line-height: 1.1 !important;
     }
 
     .metric-data p {
-      margin: 4px 0 0;
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--nss-text-muted);
+      margin: 4px 0 0 !important;
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 11.5px !important;
+      font-weight: 600 !important;
+      color: var(--nss-text-muted) !important;
+      white-space: nowrap !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Charts Container */
@@ -348,6 +393,18 @@
       border: 1px solid var(--nss-border);
       padding: 22px;
       box-shadow: 0 2px 8px rgba(7, 27, 73, 0.04);
+    }
+
+    .chart-box h3 {
+      font-family: 'Poppins', sans-serif !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      color: var(--nss-navy) !important;
+      text-transform: none !important;
+      margin: 0 0 16px 0 !important;
+      display: flex !important;
+      justify-content: space-between !important;
+      align-items: center !important;
     }
 
     .chart-box h3 {
@@ -591,7 +648,7 @@
     }
   </style>
 </head>
-<body class="nss-admin-body">
+<body class="nss-page nss-admin-body">
 
   <div class="admin-wrapper">
 
@@ -1853,50 +1910,80 @@
       try {
         const stats = await NSS.Admin.loadLiveStats();
 
-        // Update Stat Cards
-        document.getElementById('ovStatTotal').textContent = stats.totalApplications;
-        document.getElementById('ovStatPending').textContent = stats.pendingApplications;
-        document.getElementById('ovStatApproved').textContent = stats.approvedVolunteers;
-        document.getElementById('ovStatDirectory').textContent = stats.directoryRecords;
-        document.getElementById('ovStatStudents').textContent = stats.totalStudents;
-        document.getElementById('ovStatStaff').textContent = stats.coordinatorsCount;
+        const total = stats.totalApplications ?? 0;
+        const pending = stats.pendingApplications ?? stats.pendingCount ?? 0;
+        const approved = stats.approvedVolunteers ?? stats.approvedCount ?? 0;
+        const rejected = stats.rejectedApplications ?? stats.rejectedCount ?? 0;
+        const directory = stats.directoryRecords ?? stats.totalDirectory ?? 0;
+        const students = stats.totalStudents ?? 0;
+        const staff = stats.coordinatorsCount ?? stats.activeStaff ?? 0;
+        const logins = stats.recentLogins ?? stats.totalGoogleUsers ?? 0;
+
+        // Update Stat Cards (Always numbers, never blank or misaligned)
+        document.getElementById('ovStatTotal').textContent = total;
+        document.getElementById('ovStatPending').textContent = pending;
+        document.getElementById('ovStatApproved').textContent = approved;
+        document.getElementById('ovStatDirectory').textContent = directory;
+        document.getElementById('ovStatStudents').textContent = students;
+        document.getElementById('ovStatStaff').textContent = staff;
 
         // Update Sidebar Badges
-        document.getElementById('badgeDirectory').textContent = stats.directoryRecords;
-        document.getElementById('badgeStudents').textContent = stats.totalStudents;
-        document.getElementById('badgeApplications').textContent = stats.totalApplications;
-        document.getElementById('badgePending').textContent = stats.pendingApplications;
-        document.getElementById('badgeApproved').textContent = stats.approvedVolunteers;
-        document.getElementById('badgeLogins').textContent = stats.recentLogins;
+        document.getElementById('badgeDirectory').textContent = directory;
+        document.getElementById('badgeStudents').textContent = students;
+        document.getElementById('badgeApplications').textContent = total;
+        document.getElementById('badgePending').textContent = pending;
+        document.getElementById('badgeApproved').textContent = approved;
+        document.getElementById('badgeLogins').textContent = logins;
 
         // Render Donut Chart
-        const total = stats.totalApplications || 1;
-        const appPct = Math.round((stats.approvedVolunteers / total) * 100);
-        const pendPct = Math.round((stats.pendingApplications / total) * 100);
-        const rejPct = Math.max(0, 100 - appPct - pendPct);
+        const appPct = total > 0 ? Math.round((approved / total) * 100) : 0;
+        const pendPct = total > 0 ? Math.round((pending / total) * 100) : 0;
+        const rejPct = total > 0 ? Math.max(0, 100 - appPct - pendPct) : 0;
 
-        document.getElementById('donutApproved').setAttribute('stroke-dasharray', appPct + ' ' + (100 - appPct));
-        document.getElementById('donutPending').setAttribute('stroke-dasharray', pendPct + ' ' + (100 - pendPct));
-        document.getElementById('donutPending').setAttribute('stroke-dashoffset', '-' + appPct);
-        document.getElementById('donutRejected').setAttribute('stroke-dasharray', rejPct + ' ' + (100 - rejPct));
-        document.getElementById('donutRejected').setAttribute('stroke-dashoffset', '-' + (appPct + pendPct));
+        const donutApp = document.getElementById('donutApproved');
+        const donutPend = document.getElementById('donutPending');
+        const donutRej = document.getElementById('donutRejected');
+        const donutCenter = document.getElementById('donutCenterTotal');
 
-        document.getElementById('legendApproved').textContent = stats.approvedVolunteers;
-        document.getElementById('legendPending').textContent = stats.pendingApplications;
-        document.getElementById('legendRejected').textContent = stats.rejectedApplications;
+        if (donutCenter) donutCenter.textContent = total;
+
+        if (total > 0) {
+          if (donutApp) donutApp.setAttribute('stroke-dasharray', appPct + ' ' + (100 - appPct));
+          if (donutPend) {
+            donutPend.setAttribute('stroke-dasharray', pendPct + ' ' + (100 - pendPct));
+            donutPend.setAttribute('stroke-dashoffset', '-' + appPct);
+          }
+          if (donutRej) {
+            donutRej.setAttribute('stroke-dasharray', rejPct + ' ' + (100 - rejPct));
+            donutRej.setAttribute('stroke-dashoffset', '-' + (appPct + pendPct));
+          }
+        } else {
+          if (donutApp) donutApp.setAttribute('stroke-dasharray', '0 100');
+          if (donutPend) donutPend.setAttribute('stroke-dasharray', '0 100');
+          if (donutRej) donutRej.setAttribute('stroke-dasharray', '0 100');
+        }
+
+        document.getElementById('legendApproved').textContent = approved;
+        document.getElementById('legendPending').textContent = pending;
+        document.getElementById('legendRejected').textContent = rejected;
 
         // Render Year Bars
-        const yr = stats.yearBreakdown || { FY: 0, SY: 0, TY: 0, Final: 0 };
+        const yr = stats.yearBreakdown || {
+          FY: stats.registrationsByYear?.['FY'] || 0,
+          SY: stats.registrationsByYear?.['SY'] || 0,
+          TY: stats.registrationsByYear?.['TY'] || 0,
+          Final: stats.registrationsByYear?.['Fourth Year'] || 0
+        };
         const maxYr = Math.max(yr.FY, yr.SY, yr.TY, yr.Final, 1);
         document.getElementById('countFY').textContent = yr.FY;
         document.getElementById('countSY').textContent = yr.SY;
         document.getElementById('countTY').textContent = yr.TY;
         document.getElementById('countFinal').textContent = yr.Final;
 
-        document.getElementById('barFY').style.width = ((yr.FY / maxYr) * 100) + '%';
-        document.getElementById('barSY').style.width = ((yr.SY / maxYr) * 100) + '%';
-        document.getElementById('barTY').style.width = ((yr.TY / maxYr) * 100) + '%';
-        document.getElementById('barFinal').style.width = ((yr.Final / maxYr) * 100) + '%';
+        document.getElementById('barFY').style.width = Math.round((yr.FY / maxYr) * 100) + '%';
+        document.getElementById('barSY').style.width = Math.round((yr.SY / maxYr) * 100) + '%';
+        document.getElementById('barTY').style.width = Math.round((yr.TY / maxYr) * 100) + '%';
+        document.getElementById('barFinal').style.width = Math.round((yr.Final / maxYr) * 100) + '%';
 
       } catch (e) {
         console.warn('Overview loader warning:', e);
@@ -2183,6 +2270,7 @@
     }
 
     async function saveVolunteerEmail() {
+      const NSS = window.NSS = window.NSS || {};
       if (!currentEditingDirId) return;
       const email = document.getElementById('dirVolunteerEmailInput').value.trim();
       const btn = document.getElementById('btnSaveEmail');
@@ -2204,6 +2292,7 @@
     }
 
     async function removeVolunteerEmail() {
+      const NSS = window.NSS = window.NSS || {};
       if (!currentEditingDirId) return;
       if (!confirm('Are you sure you want to remove this email address?')) return;
 
@@ -2578,6 +2667,7 @@
     }
 
     async function retryAppNotification(appId) {
+      const NSS = window.NSS = window.NSS || {};
       const btn = document.getElementById('btnRetryNotification');
       if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
       try {
@@ -2856,6 +2946,7 @@
     }
 
     async function handleScannedData(data) {
+      const NSS = window.NSS = window.NSS || {};
       const out = document.getElementById('qrScanOutput');
       out.innerHTML = '<div style="font-weight:700; color:var(--nss-navy);">Verifying token: ' + data + '...</div>';
 

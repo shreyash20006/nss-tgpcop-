@@ -572,12 +572,22 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
             if (a.status === 'rejected') stats.rejectedCount++;
             if (a.status === 'revoked') stats.revokedCount++;
 
-            if (a.academic_year && stats.registrationsByYear[a.academic_year] !== undefined) {
-              stats.registrationsByYear[a.academic_year]++;
+            const yr = String(a.academic_year || '').toUpperCase().trim();
+            if (yr.includes('FIRST') || yr === 'FY' || yr.includes('(FY)')) {
+              stats.registrationsByYear['FY'] = (stats.registrationsByYear['FY'] || 0) + 1;
+            } else if (yr.includes('SECOND') || yr === 'SY' || yr.includes('(SY)')) {
+              stats.registrationsByYear['SY'] = (stats.registrationsByYear['SY'] || 0) + 1;
+            } else if (yr.includes('THIRD') || yr === 'TY' || yr.includes('(TY)')) {
+              stats.registrationsByYear['TY'] = (stats.registrationsByYear['TY'] || 0) + 1;
+            } else if (yr.includes('FOUR') || yr.includes('FINAL') || yr.includes('(FINAL)')) {
+              stats.registrationsByYear['Fourth Year'] = (stats.registrationsByYear['Fourth Year'] || 0) + 1;
             }
-            if (a.course && stats.registrationsByCourse[a.course] !== undefined) {
-              stats.registrationsByCourse[a.course]++;
-            }
+
+            const c = String(a.course || '').toUpperCase().trim();
+            if (c.includes('B.PHARM') || c.includes('BACHELOR')) stats.registrationsByCourse['B.Pharm']++;
+            else if (c.includes('M.PHARM') || c.includes('MASTER')) stats.registrationsByCourse['M.Pharm']++;
+            else if (c.includes('D.PHARM') || c.includes('DIPLOMA')) stats.registrationsByCourse['D.Pharm']++;
+            else if (c.includes('PHARM.D') || c.includes('DOCTOR')) stats.registrationsByCourse['Pharm.D']++;
           });
         }
 
@@ -600,6 +610,19 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       } catch (err) {
         console.warn('Error computing live stats:', err);
       }
+
+      stats.pendingApplications = stats.pendingCount;
+      stats.approvedVolunteers = stats.approvedCount;
+      stats.rejectedApplications = stats.rejectedCount;
+      stats.directoryRecords = stats.totalDirectory;
+      stats.coordinatorsCount = stats.activeStaff;
+      stats.recentLogins = stats.totalGoogleUsers;
+      stats.yearBreakdown = {
+        FY: stats.registrationsByYear['FY'] || 0,
+        SY: stats.registrationsByYear['SY'] || 0,
+        TY: stats.registrationsByYear['TY'] || 0,
+        Final: stats.registrationsByYear['Fourth Year'] || 0
+      };
 
       return stats;
     },
@@ -977,7 +1000,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
           }));
           const { data, error } = await sb
             .from('nss_volunteer_directory')
-            .upsert(dbRows, { onConflict: 'import_batch_id,source_row_number' })
+            .insert(dbRows)
             .select();
           if (error) {
             console.warn('Supabase directory upsert warning:', error);
@@ -1278,6 +1301,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     }
   }
 
-  window.NSS = NSS;
+  if (typeof window !== "undefined") window.NSS = NSS;
+  if (typeof globalThis !== "undefined") globalThis.NSS = NSS;
 
 })(typeof window !== 'undefined' ? window : this);

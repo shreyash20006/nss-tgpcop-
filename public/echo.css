@@ -7,8 +7,8 @@ body:not(.nss-page) h1{font-size:clamp(56px,9vw,110px)}body:not(.nss-page) h2{fo
 .wrap{width:min(1120px,92%);margin:auto}section{padding:80px 0;position:relative}
 .marq{background:#fff;color:var(--blue);overflow:hidden;white-space:nowrap;font-weight:700;padding:10px 0}
 .marq div{display:inline-block;animation:mq 28s linear infinite}.marq span{margin:0 14px}@keyframes mq{to{transform:translateX(-50%)}}
-nav:not(.nss-header-nav):not(.nss-drawer-nav){position:sticky;top:0;z-index:50;background:rgba(0,75,254,.92);backdrop-filter:blur(8px)}
-nav:not(.nss-header-nav):not(.nss-drawer-nav) .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}nav:not(.nss-header-nav):not(.nss-drawer-nav) img{height:46px;width:auto}
+nav:not(.nss-header-nav):not(.nss-drawer-nav):not(.sidebar-nav){position:sticky;top:0;z-index:50;background:rgba(0,75,254,.92);backdrop-filter:blur(8px)}
+nav:not(.nss-header-nav):not(.nss-drawer-nav):not(.sidebar-nav) .wrap{display:flex;align-items:center;justify-content:space-between;height:72px}nav:not(.nss-header-nav):not(.nss-drawer-nav):not(.sidebar-nav) img{height:46px;width:auto}
 .links{display:flex;gap:22px;align-items:center;font-weight:500;font-size:15px}.links a:not(.btn):hover{color:var(--yellow)}
 .btn{display:inline-block;border-radius:99px;padding:13px 28px;font-weight:700;border:2px solid var(--yellow);background:var(--yellow);color:var(--blue);transition:.2s;cursor:pointer;font:700 15px Poppins}
 .btn:hover{transform:scale(1.06)}.btn.o{background:transparent;color:#fff;border-color:#fff}.btn.sm{padding:8px 18px;font-size:14px}
