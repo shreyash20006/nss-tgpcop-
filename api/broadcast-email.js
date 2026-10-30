@@ -22,6 +22,27 @@ module.exports = async (req, res) => {
   const senderEmail = process.env.BREVO_SENDER_EMAIL || 'Media@tgpcop.site';
   const senderName = process.env.BREVO_SENDER_NAME || 'NSS TGPCOP';
 
+  // Optional Supabase JWT Authorization Guard
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+    const anonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+    if (supabaseUrl && anonKey) {
+      try {
+        const { createClient } = require('@supabase/supabase-js');
+        const sb = createClient(supabaseUrl, anonKey);
+        const { data: { user }, error } = await sb.auth.getUser(token);
+        if (error || !user) {
+          return res.status(401).json({ error: 'Unauthorized: Invalid or expired staff session token.' });
+        }
+      } catch (authErr) {
+        // Non-blocking warning if supabase-js is not installed in local serverless environment
+        console.warn('Bearer token check note:', authErr.message);
+      }
+    }
+  }
+
   const {
     subject = '',
     category = 'Event Announcement',

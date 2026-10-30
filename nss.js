@@ -1,6 +1,7 @@
 /**
  * NSS (National Service Scheme) Portal - Core Module
- * TGPCOP - Echo Campus Media Integration
+ * TGPCOP - Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur
+ * Comprehensive Security, RBAC, Student Registry & Admin Operations
  */
 
 var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {});
@@ -36,17 +37,22 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
 
   // Helper to ensure Supabase client is ready
   NSS.getSupabase = async function () {
-    if (window.getSB && window.getSB()) {
-      return window.getSB();
-    }
-    if (window.ready) {
-      await window.ready;
-      return window.getSB();
+    if (typeof window !== 'undefined') {
+      if (window.ready) await window.ready;
+      if (typeof window.getSB === 'function') {
+        const client = window.getSB();
+        if (client) return client;
+      }
+      if (window.supabase && window.__ENV__?.SUPABASE_URL && window.__ENV__?.SUPABASE_ANON_KEY) {
+        return window.supabase.createClient(window.__ENV__.SUPABASE_URL, window.__ENV__.SUPABASE_ANON_KEY);
+      }
     }
     return null;
   };
 
-  // NSS Authentication & Role Check
+  // ==============================================================================
+  // 1. NSS AUTHENTICATION & DATABASE-BACKED RBAC
+  // ==============================================================================
   NSS.Auth = {
     async getCurrentUser() {
       const sb = await NSS.getSupabase();
@@ -60,80 +66,112 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       }
     },
 
-    async checkCoordinatorRole(userId) {
-      // Check local authorization bypass flag
-      if (typeof window !== 'undefined' && (localStorage.getItem('nss_coordinator_authorized') === 'true' || new URLSearchParams(window.location.search).get('admin') === 'true')) {
-        return 'super_admin';
-      }
-
+    /**
+     * Resolves user's database-backed role from Supabase:
+     * Roles: 'super_admin' | 'coordinator' | 'president' | 'faculty' | 'volunteer'
+     * Automatically attempts invitation activation for invited emails (e.g. President)
+     */
+    async getUserRole(userId = null) {
       const sb = await NSS.getSupabase();
-      if (!sb || !userId) return null;
+      if (!sb) return 'volunteer';
       try {
+        const user = userId ? { id: userId } : await this.getCurrentUser();
+        if (!user || !user.id) return 'volunteer';
+
+        // 1. Query assigned role from nss_roles table
         const { data, error } = await sb
           .from('nss_roles')
           .select('role')
-          .eq('user_id', userId)
+          .eq('user_id', user.id)
           .maybeSingle();
-        if (data && data.role) return data.role; // 'super_admin' or 'coordinator'
 
-        // Check if authenticated user's email is an authorized coordinator/super_admin
-        const user = await this.getCurrentUser();
-        if (user && user.email) {
-          const email = user.email.toLowerCase().trim();
-          const authorizedEmails = [
-            'viratkhi9089@gmail.com',
-            'sb108750@gmail.com',
-            'media@tgpcop.site',
-            'shreyash20006@gmail.com',
-            'shreyashbhaisare1@gmail.com'
-          ];
-          if (authorizedEmails.includes(email) || email.endsWith('@tgpcop.site')) {
-            try {
-              await sb.from('nss_roles').upsert({ user_id: userId, role: 'super_admin' }, { onConflict: 'user_id' });
-            } catch (ignore) {}
-            return 'super_admin';
+        if (data && data.role) return data.role;
+
+        // 2. If no role found, trigger server-side invitation activation RPC
+        if (user.email) {
+          try {
+            const { data: activatedRole } = await sb.rpc('nss_check_and_activate_invitation', {
+              p_user_id: user.id,
+              p_email: user.email.toLowerCase().trim()
+            });
+            if (activatedRole && activatedRole !== 'volunteer') {
+              return activatedRole;
+            }
+          } catch (e) {
+            // RPC not deployed yet or non-fatal
           }
         }
 
-        return null;
+        return 'volunteer';
       } catch (err) {
-        console.error('Error checking role:', err);
-        return null;
+        console.error('Error resolving user role:', err);
+        return 'volunteer';
       }
     },
 
-    async requireCoordinator(redirectTo = 'nss-login.html') {
-      // Check for direct admin override or demo flag
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('admin') === 'true' || params.get('demo') === 'true' || localStorage.getItem('nss_coordinator_authorized') === 'true') {
-          const currentUser = await this.getCurrentUser();
-          return {
-            user: currentUser || {
-              id: 'local-coordinator',
-              email: 'coordinator@nss.tgpcop.site',
-              user_metadata: { full_name: 'NSS Lead Coordinator (Authorized)' }
-            },
-            role: 'super_admin'
-          };
-        }
+    /**
+     * Check if user has administrative or coordinator authority
+     */
+    async checkCoordinatorRole(userId) {
+      const role = await this.getUserRole(userId);
+      if (['super_admin', 'coordinator', 'president'].includes(role)) {
+        return role;
       }
+      return null;
+    },
 
+    /**
+     * Staff Auth Guard: enforces least-privilege server-verified role access
+     */
+    async requireStaff(allowedRoles = ['super_admin', 'coordinator', 'president']) {
       const user = await this.getCurrentUser();
       if (!user) {
-        window.location.href = redirectTo;
+        window.location.href = 'login.html';
         return null;
       }
-      const role = await this.checkCoordinatorRole(user.id);
-      if (!role) {
+      const role = await this.getUserRole(user.id);
+      if (!allowedRoles.includes(role)) {
+        return { user, role, authorized: false };
+      }
+      return { user, role, authorized: true };
+    },
+
+    async requireCoordinator(redirectTo = 'login.html') {
+      const res = await this.requireStaff(['super_admin', 'coordinator', 'president']);
+      if (!res) return null;
+      if (!res.authorized) {
         window.location.href = redirectTo + (redirectTo.includes('?') ? '&' : '?') + 'denied=true';
         return null;
       }
-      return { user, role };
+      return { user: res.user, role: res.role };
+    },
+
+    /**
+     * Records Google login activity via secure RPC
+     */
+    async recordLogin() {
+      const sb = await NSS.getSupabase();
+      if (!sb) return;
+      try {
+        const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
+        await sb.rpc('nss_record_login', { p_user_agent: ua });
+      } catch (err) {
+        // Non-blocking log
+      }
+    },
+
+    async signOut() {
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        await sb.auth.signOut();
+      }
+      window.location.href = 'login.html';
     }
   };
 
-  // NSS Applicant Data Access
+  // ==============================================================================
+  // 2. VOLUNTEER APPLICANT DATA ACCESS
+  // ==============================================================================
   NSS.App = {
     async getUserApplication(userId) {
       const sb = await NSS.getSupabase();
@@ -143,310 +181,444 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
           .from('nss_applications')
           .select('*')
           .eq('user_id', userId)
-          .order('submitted_at', { ascending: false })
-          .limit(1)
           .maybeSingle();
-        if (error) {
-          console.warn('Error fetching application:', error);
-          return null;
-        }
+        if (error) throw error;
         return data;
       } catch (err) {
-        console.error('Error in getUserApplication:', err);
+        console.error('Error fetching application:', err);
         return null;
       }
     },
 
-    async checkRollExists(rollNumber) {
+    async checkExistingByRoll(rollNumber) {
       const sb = await NSS.getSupabase();
-      if (!sb) return false;
+      if (!sb || !rollNumber) return null;
       try {
         const { data, error } = await sb
           .from('nss_applications')
-          .select('id')
+          .select('id, full_name, status, roll_number')
           .eq('roll_number', rollNumber.trim().toUpperCase())
           .maybeSingle();
-        if (error) return false;
-        return !!data;
-      } catch (err) {
-        return false;
+        if (error) return null;
+        return data;
+      } catch (e) {
+        return null;
       }
     },
 
-    async submitApplication(formData, photoFile) {
+    async submitApplication(appData) {
       const sb = await NSS.getSupabase();
-      if (!sb) throw new Error('Supabase client unavailable');
-
+      if (!sb) throw new Error('Database client unavailable');
       const user = await NSS.Auth.getCurrentUser();
-      if (!user) throw new Error('You must be logged in to apply.');
+      if (!user) throw new Error('Authentication required before submitting application.');
 
-      let photo_url = null;
-      let photo_path = null;
-
-      // 1. Upload photo if provided
-      if (photoFile) {
-        const ext = photoFile.name.split('.').pop() || 'jpg';
-        const cleanName = photoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        photo_path = `volunteers/${user.id}_${Date.now()}_${cleanName}`;
-
-        const { data: uploadData, error: uploadErr } = await sb.storage
-          .from('nss_photos')
-          .upload(photo_path, photoFile, {
-            cacheControl: '3600',
-            upsert: true
-          });
-
-        if (uploadErr) {
-          console.warn('Photo upload warning:', uploadErr);
-          // Try public or fallback storage path
-        }
-
-        // Get public URL
-        const { data: publicUrlData } = sb.storage.from('nss_photos').getPublicUrl(photo_path);
-        photo_url = publicUrlData?.publicUrl || null;
+      const cleanRoll = String(appData.roll_number || '').trim().toUpperCase();
+      const existing = await this.checkExistingByRoll(cleanRoll);
+      if (existing) {
+        throw new Error(`An application with Roll Number ${cleanRoll} is already registered (${existing.status.toUpperCase()}).`);
       }
 
-      // 2. Insert application record
-      const payload = {
+      const insertPayload = {
         user_id: user.id,
-        full_name: formData.full_name.trim(),
-        roll_number: formData.roll_number.trim().toUpperCase(),
-        prn: formData.prn ? formData.prn.trim() : null,
-        course: formData.course,
-        academic_year: formData.academic_year,
-        division: formData.division ? formData.division.trim() : null,
-        college_email: formData.college_email.trim().toLowerCase(),
-        personal_email: formData.personal_email ? formData.personal_email.trim().toLowerCase() : null,
-        mobile: formData.mobile.trim(),
-        emergency_contact: formData.emergency_contact ? formData.emergency_contact.trim() : null,
-        photo_url: photo_url,
-        photo_path: photo_path,
-        consent: !!formData.consent,
-        status: 'pending'
+        full_name: String(appData.full_name || '').trim(),
+        roll_number: cleanRoll,
+        prn: appData.prn ? String(appData.prn).trim() : null,
+        course: appData.course || 'B.Pharm',
+        academic_year: appData.academic_year || 'FY',
+        division: appData.division ? String(appData.division).trim() : 'A',
+        college_email: String(appData.college_email || user.email || '').trim().toLowerCase(),
+        personal_email: appData.personal_email ? String(appData.personal_email).trim().toLowerCase() : null,
+        mobile: String(appData.mobile || '').trim(),
+        emergency_contact: appData.emergency_contact ? String(appData.emergency_contact).trim() : null,
+        photo_url: appData.photo_url || null,
+        photo_path: appData.photo_path || null,
+        consent: Boolean(appData.consent),
+        status: 'pending',
+        submitted_at: new Date().toISOString()
       };
 
       const { data, error } = await sb
         .from('nss_applications')
-        .insert(payload)
+        .insert(insertPayload)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
-    }
-  };
 
-  // QR Token Verification
-  NSS.QRVerify = async function (token) {
-    const sb = await NSS.getSupabase();
-    if (!sb) {
-      return { result: 'invalid', message: 'Supabase client unavailable' };
-    }
-    const cleanToken = (token || '').trim();
-    if (!cleanToken) {
-      return { result: 'invalid', message: 'No verification token provided' };
-    }
-
-    try {
-      const { data, error } = await sb.rpc('nss_verify_token', { p_token: cleanToken });
-      if (error) {
-        console.warn('RPC verify error:', error);
-        return { result: 'invalid', message: error.message };
+      // Also upsert into centralized nss_students registry
+      try {
+        await sb.from('nss_students').upsert({
+          user_id: user.id,
+          full_name: insertPayload.full_name,
+          roll_number: insertPayload.roll_number,
+          prn: insertPayload.prn,
+          course: insertPayload.course,
+          academic_year: insertPayload.academic_year,
+          division: insertPayload.division,
+          college_email: insertPayload.college_email,
+          google_email: user.email,
+          mobile: insertPayload.mobile,
+          registration_id: data.id,
+          application_status: 'pending',
+          data_source: 'web_registration',
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'roll_number' });
+      } catch (e) {
+        console.warn('Sync to nss_students non-fatal:', e);
       }
+
       return data;
-    } catch (err) {
-      console.error('Verify token failed:', err);
-      return { result: 'invalid', message: 'Verification lookup failed' };
     }
   };
 
-  // QR Verification by Volunteer ID (Public lookup fallback)
-  NSS.verifyByVolunteerId = async function (volunteerId) {
-    const cleanId = (volunteerId || '').trim().toUpperCase();
-    if (!cleanId) return null;
+  // ==============================================================================
+  // 3. CENTRALIZED STUDENT REGISTRY (nss_students)
+  // ==============================================================================
+  NSS.Students = {
+    async loadStudents({ page = 1, limit = 20, search = '', status = 'all', course = 'all', academicYear = 'all' } = {}) {
+      const sb = await NSS.getSupabase();
+      if (!sb) return { students: [], total: 0, page, totalPages: 1 };
 
-    const sb = await NSS.getSupabase();
-    if (sb) {
+      try {
+        let query = sb.from('nss_students').select('*', { count: 'exact' });
+
+        if (status && status !== 'all') {
+          query = query.eq('application_status', status);
+        }
+        if (course && course !== 'all') {
+          query = query.eq('course', course);
+        }
+        if (academicYear && academicYear !== 'all') {
+          query = query.eq('academic_year', academicYear);
+        }
+
+        if (search && search.trim()) {
+          const q = search.trim();
+          query = query.or(`full_name.ilike.%${q}%,roll_number.ilike.%${q}%,prn.ilike.%${q}%,college_email.ilike.%${q}%,google_email.ilike.%${q}%,mobile.ilike.%${q}%`);
+        }
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+        query = query.order('created_at', { ascending: false }).range(from, to);
+
+        const { data, count, error } = await query;
+        if (error) throw error;
+
+        return {
+          students: data || [],
+          total: count || 0,
+          page,
+          totalPages: Math.ceil((count || 0) / limit) || 1
+        };
+      } catch (err) {
+        console.error('Error querying nss_students:', err);
+        return { students: [], total: 0, page, totalPages: 1 };
+      }
+    },
+
+    async getStudentById(studentId) {
+      const sb = await NSS.getSupabase();
+      if (!sb || !studentId) return null;
+      try {
+        const { data, error } = await sb.from('nss_students').select('*').eq('id', studentId).single();
+        if (error) throw error;
+        return data;
+      } catch (e) {
+        return null;
+      }
+    },
+
+    async updateStudent(studentId, fields) {
+      const sb = await NSS.getSupabase();
+      if (!sb || !studentId) throw new Error('Database unavailable');
+      const { data, error } = await sb
+        .from('nss_students')
+        .update({ ...fields, updated_at: new Date().toISOString() })
+        .eq('id', studentId)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    exportStudentsCSV(studentList) {
+      if (!studentList || !studentList.length) return;
+      const headers = ['Full Name', 'Roll Number', 'PRN', 'Course', 'Year', 'Division', 'College Email', 'Google Email', 'Mobile', 'Volunteer Status', 'Volunteer ID', 'Last Login'];
+      const rows = studentList.map(s => [
+        `"${(s.full_name || '').replace(/"/g, '""')}"`,
+        `"${s.roll_number || ''}"`,
+        `"${s.prn || ''}"`,
+        `"${s.course || ''}"`,
+        `"${s.academic_year || ''}"`,
+        `"${s.division || ''}"`,
+        `"${s.college_email || ''}"`,
+        `"${s.google_email || ''}"`,
+        `"${s.mobile || ''}"`,
+        `"${s.application_status || ''}"`,
+        `"${s.volunteer_id || ''}"`,
+        `"${s.last_login_at ? new Date(s.last_login_at).toLocaleString('en-IN') : 'Never'}"`
+      ]);
+      const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NSS_Students_Export_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  // ==============================================================================
+  // 4. LOGIN TRACKING API (nss_login_activity)
+  // ==============================================================================
+  NSS.LoginActivity = {
+    async loadActivity({ page = 1, limit = 20, role = 'all', isRegistered = 'all', search = '' } = {}) {
+      const sb = await NSS.getSupabase();
+      if (!sb) return { logs: [], total: 0, page, totalPages: 1 };
+
+      try {
+        let query = sb.from('nss_login_activity').select('*', { count: 'exact' });
+
+        if (role && role !== 'all') {
+          query = query.eq('role', role);
+        }
+        if (isRegistered !== 'all') {
+          query = query.eq('is_registered', isRegistered === 'true');
+        }
+        if (search && search.trim()) {
+          const q = search.trim();
+          query = query.or(`email.ilike.%${q}%,full_name.ilike.%${q}%,roll_number.ilike.%${q}%`);
+        }
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+        query = query.order('login_at', { ascending: false }).range(from, to);
+
+        const { data, count, error } = await query;
+        if (error) throw error;
+
+        return {
+          logs: data || [],
+          total: count || 0,
+          page,
+          totalPages: Math.ceil((count || 0) / limit) || 1
+        };
+      } catch (err) {
+        console.error('Error fetching login activity:', err);
+        return { logs: [], total: 0, page, totalPages: 1 };
+      }
+    }
+  };
+
+  // ==============================================================================
+  // 5. ROLE INVITATIONS & PRESIDENT ACCESS (RBAC)
+  // ==============================================================================
+  NSS.RoleInvitations = {
+    async listInvitations() {
+      const sb = await NSS.getSupabase();
+      if (!sb) return [];
       try {
         const { data, error } = await sb
-          .from('nss_applications')
-          .select('full_name, volunteer_id, course, academic_year, photo_url, reviewed_at, status')
-          .eq('volunteer_id', cleanId)
-          .eq('status', 'approved')
-          .maybeSingle();
-
-        if (data && !error) {
-          return {
-            result: 'approved',
-            name: data.full_name,
-            volunteer_id: data.volunteer_id,
-            course: data.course,
-            academic_year: data.academic_year,
-            photo_url: data.photo_url || 'assets/nss-logo.png',
-            issued_at: data.reviewed_at
-          };
-        }
+          .from('nss_role_invitations')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        return data || [];
       } catch (err) {
-        console.warn('DB lookup failed:', err);
+        console.error('Error listing invitations:', err);
+        return [];
       }
-    }
+    },
 
-    // Lookup in seeds
-    const seeds = NSS.getSeedVolunteers();
-    const found = seeds.find(s => 
-      (s.volunteer_id && s.volunteer_id.toUpperCase() === cleanId) || 
-      (s.roll_number && s.roll_number.toUpperCase() === cleanId) ||
-      String(s.sr_no) === cleanId
-    );
-
-    if (found) {
-      return {
-        result: 'approved',
-        name: found.full_name,
-        volunteer_id: found.volunteer_id,
-        course: found.course,
-        academic_year: found.academic_year,
-        photo_url: 'assets/nss-logo.png',
-        issued_at: new Date(Date.now() - 30 * 86400000).toISOString()
-      };
-    }
-
-    return null;
-  };
-
-  // Official Enrolled Volunteers Seed Integration
-  NSS.getSeedVolunteers = function () {
-    return window.NSS_VOLUNTEERS_DATA || [];
-  };
-
-  NSS.mergeVolunteers = function (dbList = []) {
-    const seeds = NSS.getSeedVolunteers();
-    const seenRolls = new Set();
-    const seenIds = new Set();
-    const seenEmails = new Set();
-    const result = [];
-
-    // Prioritize DB list
-    if (Array.isArray(dbList)) {
-      for (const item of dbList) {
-        if (!item) continue;
-        if (item.roll_number) seenRolls.add(String(item.roll_number).trim().toUpperCase());
-        if (item.college_email) seenEmails.add(String(item.college_email).trim().toLowerCase());
-        if (item.id) seenIds.add(String(item.id));
-        result.push(item);
-      }
-    }
-
-    // Add seeds that aren't already in DB list
-    for (const s of seeds) {
-      const roll = String(s.roll_number || '').trim().toUpperCase();
-      const email = String(s.college_email || '').trim().toLowerCase();
-      if (roll && seenRolls.has(roll)) continue;
-      if (email && seenEmails.has(email)) continue;
-
-      result.push({
-        id: 'seed-' + s.sr_no,
-        ref_code: s.ref_code,
-        volunteer_id: s.volunteer_id,
-        full_name: s.full_name,
-        parent_name: s.parent_name,
-        roll_number: s.roll_number,
-        prn: s.prn,
-        masked_aadhar: s.masked_aadhar,
-        course: s.course || 'B.Pharm',
-        academic_year: s.academic_year || 'FY',
-        class_label: s.class_label,
-        division: s.division || 'A',
-        college_email: s.college_email,
-        personal_email: s.personal_email,
-        mobile: s.mobile,
-        emergency_contact: s.emergency_contact,
-        photo_url: 'assets/nss-logo.png',
-        status: 'approved',
-        submitted_at: new Date(Date.now() - (50 - s.sr_no) * 86400000).toISOString(),
-        reviewed_at: new Date(Date.now() - (50 - s.sr_no) * 86400000).toISOString(),
-        interests: s.interests,
-        address: s.full_address || s.address,
-        blood_group: s.blood_group
-      });
-    }
-
-    return result;
-  };
-
-  // NSS Admin Operations
-  NSS.Admin = {
-    async loadStats() {
+    async listActiveStaff() {
       const sb = await NSS.getSupabase();
-      let dbData = [];
-      if (sb) {
-        try {
-          const { data } = await sb.from('nss_applications').select('*');
-          if (data && data.length) dbData = data;
-        } catch (e) {
-          console.warn('DB stats query error:', e);
+      if (!sb) return [];
+      try {
+        const { data, error } = await sb
+          .from('nss_roles')
+          .select('id, user_id, role, created_at');
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
+        return [];
+      }
+    },
+
+    async createInvitation({ email, name, role, metadata = {} }) {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Database client unavailable');
+      const cleanEmail = email.trim().toLowerCase();
+      const user = await NSS.Auth.getCurrentUser();
+
+      const { data, error } = await sb
+        .from('nss_role_invitations')
+        .insert({
+          email: cleanEmail,
+          name: name ? name.trim() : null,
+          role,
+          status: 'pending',
+          invited_by: user?.id || null,
+          metadata
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Record audit log
+      try {
+        await sb.from('nss_audit_log').insert({
+          action: 'role_invited',
+          performed_by: user?.id || null,
+          details: `Invited ${cleanEmail} as ${role.toUpperCase()}`
+        });
+      } catch (ignore) {}
+
+      return data;
+    },
+
+    async revokeInvitation(invitationId) {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Database client unavailable');
+      const { error } = await sb
+        .from('nss_role_invitations')
+        .update({ status: 'revoked' })
+        .eq('id', invitationId);
+      if (error) throw error;
+      return true;
+    },
+
+    async revokeStaffRole(userId) {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Database client unavailable');
+      const { error } = await sb
+        .from('nss_roles')
+        .delete()
+        .eq('user_id', userId);
+      if (error) throw error;
+      return true;
+    }
+  };
+
+  // ==============================================================================
+  // 6. NSS ADMIN OPERATIONS (REAL DATABASE METRICS & LIFECYCLE)
+  // ==============================================================================
+  NSS.Admin = {
+    /**
+     * Loads live database statistics from Supabase without mock inflation
+     */
+    async loadLiveStats() {
+      const sb = await NSS.getSupabase();
+      const stats = {
+        totalApplications: 0,
+        pendingCount: 0,
+        approvedCount: 0,
+        rejectedCount: 0,
+        revokedCount: 0,
+        totalStudents: 0,
+        totalDirectory: 0,
+        totalGoogleUsers: 0,
+        activeStaff: 0,
+        registrationsByYear: { 'FY': 0, 'SY': 0, 'TY': 0, 'Fourth Year': 0 },
+        registrationsByCourse: { 'B.Pharm': 0, 'M.Pharm': 0, 'D.Pharm': 0, 'Pharm.D': 0 }
+      };
+
+      if (!sb) return stats;
+
+      try {
+        // 1. Applications query
+        const { data: apps } = await sb.from('nss_applications').select('id, status, course, academic_year');
+        if (apps && apps.length) {
+          stats.totalApplications = apps.length;
+          apps.forEach(a => {
+            if (a.status === 'pending') stats.pendingCount++;
+            if (a.status === 'approved') stats.approvedCount++;
+            if (a.status === 'rejected') stats.rejectedCount++;
+            if (a.status === 'revoked') stats.revokedCount++;
+
+            if (a.academic_year && stats.registrationsByYear[a.academic_year] !== undefined) {
+              stats.registrationsByYear[a.academic_year]++;
+            }
+            if (a.course && stats.registrationsByCourse[a.course] !== undefined) {
+              stats.registrationsByCourse[a.course]++;
+            }
+          });
         }
+
+        // 2. Directory count
+        const { count: dirCount } = await sb.from('nss_volunteer_directory').select('*', { count: 'exact', head: true });
+        stats.totalDirectory = dirCount || 0;
+
+        // 3. Centralized students count
+        const { count: studentCount } = await sb.from('nss_students').select('*', { count: 'exact', head: true });
+        stats.totalStudents = studentCount || 0;
+
+        // 4. Login activity count
+        const { count: loginCount } = await sb.from('nss_login_activity').select('*', { count: 'exact', head: true });
+        stats.totalGoogleUsers = loginCount || 0;
+
+        // 5. Staff roles count
+        const { count: roleCount } = await sb.from('nss_roles').select('*', { count: 'exact', head: true });
+        stats.activeStaff = roleCount || 0;
+
+      } catch (err) {
+        console.warn('Error computing live stats:', err);
       }
 
-      const merged = NSS.mergeVolunteers(dbData);
-      const counts = { total: merged.length, pending: 0, approved: 0, rejected: 0, revoked: 0 };
-      merged.forEach(item => {
-        if (counts[item.status] !== undefined) {
-          counts[item.status]++;
-        }
-      });
-      return counts;
+      return stats;
+    },
+
+    // Backward-compatible alias for existing callers
+    async loadStats() {
+      const live = await this.loadLiveStats();
+      return {
+        total: live.totalApplications,
+        pending: live.pendingCount,
+        approved: live.approvedCount,
+        rejected: live.rejectedCount,
+        revoked: live.revokedCount,
+        ...live
+      };
     },
 
     async loadPending() {
       const sb = await NSS.getSupabase();
-      let dbData = [];
-      if (sb) {
-        try {
-          const { data } = await sb
-            .from('nss_applications')
-            .select('*')
-            .eq('status', 'pending')
-            .order('submitted_at', { ascending: true });
-          if (data && data.length) dbData = data;
-        } catch (e) {
-          console.warn('DB loadPending query error:', e);
-        }
+      if (!sb) return [];
+      try {
+        const { data, error } = await sb
+          .from('nss_applications')
+          .select('*')
+          .eq('status', 'pending')
+          .order('submitted_at', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      } catch (e) {
+        console.error('Error loading pending:', e);
+        return [];
       }
-      return dbData;
     },
 
     async loadAll(statusFilter = 'all', searchQuery = '') {
       const sb = await NSS.getSupabase();
-      let dbData = [];
-      if (sb) {
-        try {
-          const { data } = await sb.from('nss_applications').select('*').order('submitted_at', { ascending: false });
-          if (data && data.length) dbData = data;
-        } catch (e) {
-          console.warn('DB loadAll query error:', e);
+      if (!sb) return [];
+      try {
+        let query = sb.from('nss_applications').select('*').order('submitted_at', { ascending: false });
+        if (statusFilter && statusFilter !== 'all') {
+          query = query.eq('status', statusFilter);
         }
+        if (searchQuery && searchQuery.trim()) {
+          const q = searchQuery.trim();
+          query = query.or(`full_name.ilike.%${q}%,roll_number.ilike.%${q}%,ref_code.ilike.%${q}%,volunteer_id.ilike.%${q}%,college_email.ilike.%${q}%`);
+        }
+        const { data, error } = await query;
+        if (error) throw error;
+        return data || [];
+      } catch (e) {
+        console.error('Error loading all applications:', e);
+        return [];
       }
-
-      let list = NSS.mergeVolunteers(dbData);
-
-      if (statusFilter && statusFilter !== 'all') {
-        list = list.filter(item => item.status === statusFilter);
-      }
-
-      if (searchQuery && searchQuery.trim()) {
-        const q = searchQuery.trim().toLowerCase();
-        list = list.filter(item =>
-          (item.full_name && item.full_name.toLowerCase().includes(q)) ||
-          (item.roll_number && item.roll_number.toLowerCase().includes(q)) ||
-          (item.ref_code && item.ref_code.toLowerCase().includes(q)) ||
-          (item.volunteer_id && item.volunteer_id.toLowerCase().includes(q)) ||
-          (item.college_email && item.college_email.toLowerCase().includes(q)) ||
-          (item.mobile && item.mobile.includes(q))
-        );
-      }
-
-      return list;
     },
 
     async approveApp(appId) {
@@ -454,220 +626,209 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       if (!sb) throw new Error('Supabase client unavailable');
       const { data, error } = await sb.rpc('nss_approve_volunteer', { app_id: appId });
       if (error) throw error;
-      return data; // { volunteer_id, qr_token }
+
+      // Update student table record
+      try {
+        await sb.from('nss_students').update({
+          application_status: 'approved',
+          volunteer_id: data.volunteer_id,
+          approval_date: new Date().toISOString()
+        }).eq('registration_id', appId);
+      } catch (ignore) {}
+
+      return data;
     },
 
     async rejectApp(appId, reason = '') {
       const sb = await NSS.getSupabase();
       if (!sb) throw new Error('Supabase client unavailable');
-      const { error } = await sb.rpc('nss_reject_volunteer', {
-        app_id: appId,
-        reason: reason || 'Application does not meet criteria'
-      });
+      const { data, error } = await sb.rpc('nss_reject_volunteer', { app_id: appId, reason });
       if (error) throw error;
-      return true;
+
+      try {
+        await sb.from('nss_students').update({
+          application_status: 'rejected'
+        }).eq('registration_id', appId);
+      } catch (ignore) {}
+
+      return data;
     },
 
     async revokeCard(appId, reason = '') {
       const sb = await NSS.getSupabase();
       if (!sb) throw new Error('Supabase client unavailable');
-      const { error } = await sb.rpc('nss_revoke_card', {
-        app_id: appId,
-        reason: reason || 'Card revoked by administration'
-      });
+      const { data, error } = await sb.rpc('nss_revoke_card', { app_id: appId, reason });
       if (error) throw error;
-      return true;
+
+      try {
+        await sb.from('nss_students').update({
+          application_status: 'revoked'
+        }).eq('registration_id', appId);
+      } catch (ignore) {}
+
+      return data;
     },
 
     async loadLeadership() {
       const sb = await NSS.getSupabase();
       if (!sb) return [];
-      const { data, error } = await sb
-        .from('nss_leadership')
-        .select('*')
-        .order('display_order', { ascending: true });
-      if (error) {
-        console.warn('Error loading leadership:', error);
+      try {
+        const { data, error } = await sb
+          .from('nss_leadership')
+          .select('*')
+          .order('display_order', { ascending: true });
+        if (error) throw error;
+        return data || [];
+      } catch (err) {
         return [];
       }
-      return data || [];
     },
 
-    async saveLeadership(item, photoFile = null) {
+    async saveLeadership(profile) {
       const sb = await NSS.getSupabase();
-      if (!sb) throw new Error('Supabase client unavailable');
-
-      let photo_url = item.photo_url || null;
-      let photo_path = item.photo_path || null;
-
-      if (photoFile) {
-        const cleanName = photoFile.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-        photo_path = `leadership/${Date.now()}_${cleanName}`;
-        await sb.storage.from('nss_leadership_photos').upload(photo_path, photoFile, { upsert: true });
-        const { data: pData } = sb.storage.from('nss_leadership_photos').getPublicUrl(photo_path);
-        photo_url = pData?.publicUrl || photo_url;
-      }
-
-      const payload = {
-        name: item.name,
-        designation: item.designation,
-        department: item.department || null,
-        bio: item.bio || null,
-        photo_url: photo_url,
-        photo_path: photo_path,
-        display_order: parseInt(item.display_order, 10) || 0,
-        published: !!item.published
-      };
-
-      if (item.id) {
-        const { error } = await sb.from('nss_leadership').update(payload).eq('id', item.id);
-        if (error) throw error;
-      } else {
-        const { error } = await sb.from('nss_leadership').insert(payload);
-        if (error) throw error;
-      }
-      return true;
+      if (!sb) throw new Error('Supabase unavailable');
+      const { data, error } = await sb
+        .from('nss_leadership')
+        .upsert(profile)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
     },
 
     async deleteLeadership(id) {
       const sb = await NSS.getSupabase();
-      if (!sb) throw new Error('Supabase client unavailable');
+      if (!sb) throw new Error('Supabase unavailable');
       const { error } = await sb.from('nss_leadership').delete().eq('id', id);
       if (error) throw error;
       return true;
     },
 
-    async exportApprovedCSV() {
-      const list = await this.loadAll('approved');
-      if (!list || !list.length) {
-        alert('No approved volunteers found to export.');
-        return;
-      }
-
-      const headers = ['Volunteer ID', 'Full Name', 'Roll Number', 'Course', 'Year', 'Division', 'College Email', 'Mobile', 'Blood Group', 'Interests', 'Approved Date'];
-      const rows = list.map(r => [
-        `"${r.volunteer_id || ''}"`,
-        `"${r.full_name || ''}"`,
-        `"${r.roll_number || ''}"`,
-        `"${r.course || ''}"`,
-        `"${r.academic_year || ''}"`,
-        `"${r.division || ''}"`,
-        `"${r.college_email || ''}"`,
-        `"${r.mobile || ''}"`,
-        `"${r.blood_group || ''}"`,
-        `"${(r.interests || '').replace(/"/g, '""')}"`,
-        `"${r.reviewed_at ? new Date(r.reviewed_at).toLocaleDateString('en-IN') : ''}"`
-      ]);
-
-      const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `nss_tgpcop_volunteers_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    exportApprovedCSV() {
+      NSS.Admin.loadAll('approved').then(list => {
+        if (!list || !list.length) {
+          alert('No approved volunteers available to export.');
+          return;
+        }
+        const headers = ['Volunteer ID', 'Ref Code', 'Full Name', 'Roll Number', 'PRN', 'Course', 'Year', 'Division', 'College Email', 'Mobile', 'Approved Date'];
+        const rows = list.map(a => [
+          `"${a.volunteer_id || ''}"`,
+          `"${a.ref_code || ''}"`,
+          `"${(a.full_name || '').replace(/"/g, '""')}"`,
+          `"${a.roll_number || ''}"`,
+          `"${a.prn || ''}"`,
+          `"${a.course || ''}"`,
+          `"${a.academic_year || ''}"`,
+          `"${a.division || ''}"`,
+          `"${a.college_email || ''}"`,
+          `"${a.mobile || ''}"`,
+          `"${a.reviewed_at ? new Date(a.reviewed_at).toLocaleDateString('en-IN') : ''}"`
+        ]);
+        const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `NSS_TGPCOP_Approved_Volunteers_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
     }
   };
 
-  // ==========================================================================
-  // NSS VOLUNTEER DIRECTORY MODULE (STRICT PRIVACY - ONLY FULL NAME + EMAIL)
-  // ==========================================================================
+  // ==============================================================================
+  // 7. VOLUNTEER DIRECTORY API (nss_volunteer_directory)
+  // ==============================================================================
   NSS.Directory = {
     _getLocalStore() {
       try {
-        const stored = localStorage.getItem('nss_directory_store_v1');
+        const stored = localStorage.getItem('nss_volunteer_directory_cache');
         if (stored) return JSON.parse(stored);
       } catch (e) {}
-
-      const seed = (window.NSS_DIRECTORY_SEED && Array.isArray(window.NSS_DIRECTORY_SEED))
+      return (window.NSS_DIRECTORY_SEED && Array.isArray(window.NSS_DIRECTORY_SEED))
         ? window.NSS_DIRECTORY_SEED
         : [];
-      return seed;
     },
 
-    _saveLocalStore(list) {
+    _saveLocalStore(data) {
       try {
-        localStorage.setItem('nss_directory_store_v1', JSON.stringify(list));
+        localStorage.setItem('nss_volunteer_directory_cache', JSON.stringify(data));
       } catch (e) {}
     },
 
     async loadDirectory({ page = 1, limit = 20, search = '', filter = 'all', batch = 'all' } = {}) {
       const sb = await NSS.getSupabase();
-      let list = [];
-      let dbConnected = false;
+      let records = [];
+      let totalCount = 0;
 
       if (sb) {
         try {
-          const { data, error } = await sb
-            .from('nss_volunteer_directory')
-            .select('*')
-            .order('created_at', { ascending: false });
+          let query = sb.from('nss_volunteer_directory').select('*', { count: 'exact' });
+          if (filter === 'with_email') query = query.eq('email_status', 'added');
+          else if (filter === 'pending_email') query = query.eq('email_status', 'pending');
 
-          if (!error && Array.isArray(data) && data.length > 0) {
-            list = data;
-            dbConnected = true;
-            this._saveLocalStore(data);
+          if (batch && batch !== 'all') {
+            query = query.eq('import_batch_id', batch);
+          }
+          if (search && search.trim()) {
+            const q = search.trim();
+            query = query.or(`full_name.ilike.%${q}%,email.ilike.%${q}%`);
+          }
+
+          const from = (page - 1) * limit;
+          const to = from + limit - 1;
+          query = query.order('source_row_number', { ascending: true, nullsFirst: false }).range(from, to);
+
+          const { data, count, error } = await query;
+          if (!error && data && data.length > 0) {
+            records = data;
+            totalCount = count || records.length;
+            this._saveLocalStore(records);
           }
         } catch (e) {
-          console.warn('Supabase directory table fetch error, falling back to local store:', e);
+          console.warn('Supabase directory fetch failed, falling back to local seed:', e);
         }
       }
 
-      if (!dbConnected || list.length === 0) {
-        list = this._getLocalStore();
+      // Fallback to local store if DB unavailable or empty
+      if (!records.length) {
+        let allLocal = this._getLocalStore();
+        if (filter === 'with_email') allLocal = allLocal.filter(r => r.email_status === 'added' || (r.email && r.email.includes('@')));
+        else if (filter === 'pending_email') allLocal = allLocal.filter(r => r.email_status === 'pending' || !r.email);
+
+        if (batch && batch !== 'all') {
+          allLocal = allLocal.filter(r => r.import_batch_id === batch);
+        }
+        if (search && search.trim()) {
+          const q = search.trim().toLowerCase();
+          allLocal = allLocal.filter(r =>
+            (r.full_name && r.full_name.toLowerCase().includes(q)) ||
+            (r.email && r.email.toLowerCase().includes(q))
+          );
+        }
+
+        totalCount = allLocal.length;
+        const from = (page - 1) * limit;
+        records = allLocal.slice(from, from + limit);
       }
 
       // Compute stats
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const stats = {
-        total: list.length,
-        withEmail: list.filter(v => v.email && emailRegex.test(v.email)).length,
-        pendingEmail: list.filter(v => !v.email || !emailRegex.test(v.email)).length
-      };
-
-      // Extract unique batch IDs
-      const batchList = [...new Set(list.map(v => v.import_batch_id).filter(Boolean))];
-
-      // Filter by Search
-      let filtered = [...list];
-      if (search && search.trim()) {
-        const q = search.trim().toLowerCase();
-        filtered = filtered.filter(v =>
-          (v.full_name && v.full_name.toLowerCase().includes(q)) ||
-          (v.email && v.email.toLowerCase().includes(q))
-        );
-      }
-
-      // Filter by Email Status
-      if (filter === 'with_email') {
-        filtered = filtered.filter(v => v.email && emailRegex.test(v.email));
-      } else if (filter === 'pending_email') {
-        filtered = filtered.filter(v => !v.email || !emailRegex.test(v.email));
-      }
-
-      // Filter by Batch
-      if (batch && batch !== 'all') {
-        filtered = filtered.filter(v => v.import_batch_id === batch);
-      }
-
-      // Pagination
-      const totalFiltered = filtered.length;
-      const totalPages = Math.max(1, Math.ceil(totalFiltered / limit));
-      const currentPage = Math.min(Math.max(1, page), totalPages);
-      const startIdx = (currentPage - 1) * limit;
-      const paginatedList = filtered.slice(startIdx, startIdx + limit);
+      const allForStats = this._getLocalStore();
+      const withEmail = allForStats.filter(r => r.email_status === 'added' || (r.email && r.email.includes('@'))).length;
+      const batches = [...new Set(allForStats.map(r => r.import_batch_id).filter(Boolean))];
 
       return {
-        list: paginatedList,
-        total: totalFiltered,
-        page: currentPage,
-        totalPages,
-        limit,
-        stats,
-        batchList,
-        allRecords: list
+        records,
+        total: totalCount,
+        page,
+        totalPages: Math.ceil(totalCount / limit) || 1,
+        batchList: batches,
+        stats: {
+          total: allForStats.length,
+          withEmail,
+          pendingEmail: Math.max(0, allForStats.length - withEmail)
+        }
       };
     },
 
@@ -679,7 +840,6 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       const cleanBatchId = batchId || ('BATCH-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + Math.random().toString(36).substr(2, 4).toUpperCase());
 
       // STRICT PRIVACY: Extract ONLY full_name and source_row_number
-      // All other fields (phone, aadhaar, DOB, address, category, etc.) are strictly discarded
       const recordsToInsert = namesList.map((item, idx) => ({
         full_name: typeof item === 'string' ? item.trim() : (item.name || item.full_name || '').trim(),
         email: null,
@@ -693,32 +853,54 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       const sb = await NSS.getSupabase();
       if (sb) {
         try {
-          await sb
+          const dbRows = recordsToInsert.map(r => ({
+            full_name: r.full_name,
+            email: r.email,
+            email_status: r.email_status,
+            import_batch_id: r.import_batch_id,
+            source_row_number: r.source_row_number,
+            created_at: r.created_at,
+            updated_at: r.updated_at
+          }));
+          const { data, error } = await sb
             .from('nss_volunteer_directory')
-            .upsert(recordsToInsert, { onConflict: 'import_batch_id,source_row_number' });
+            .upsert(dbRows, { onConflict: 'import_batch_id,source_row_number' })
+            .select();
+          if (error) {
+            console.warn('Supabase directory upsert warning:', error);
+          } else if (data && data.length > 0) {
+            data.forEach(dbRow => {
+              const match = recordsToInsert.find(r => r.source_row_number === dbRow.source_row_number);
+              if (match) match.id = dbRow.id;
+            });
+          }
         } catch (e) {
           console.warn('Supabase directory upsert failed, saving to local store:', e);
         }
       }
 
-      // Sync local store
-      const localList = this._getLocalStore();
-      const updatedLocal = [...recordsToInsert.map((r, i) => ({
-        id: 'dir-' + cleanBatchId + '-' + (r.source_row_number || i + 1),
-        ...r
-      })), ...localList];
+      // Ensure each item has an id for local interaction
+      recordsToInsert.forEach((r, i) => {
+        if (!r.id) r.id = 'dir-' + cleanBatchId + '-' + (r.source_row_number || i + 1);
+      });
 
-      this._saveLocalStore(updatedLocal);
+      // Sync local cache
+      const current = this._getLocalStore();
+      const merged = [...recordsToInsert, ...current.filter(c => c.import_batch_id !== cleanBatchId)];
+      this._saveLocalStore(merged);
+
       return {
-        batchId: cleanBatchId,
-        count: recordsToInsert.length
+        success: true,
+        count: recordsToInsert.length,
+        batchId: cleanBatchId
       };
     },
 
-    async saveEmail(id, email) {
-      const cleanEmail = (email || '').trim().toLowerCase();
-      if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
-        throw new Error('Please enter a valid email address (e.g. name@example.com).');
+    async saveEmail(recordId, newEmail) {
+      const email = String(newEmail || '').trim().toLowerCase();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!email || !emailRegex.test(email)) {
+        throw new Error('Please provide a valid email address.');
       }
 
       const sb = await NSS.getSupabase();
@@ -726,135 +908,80 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         try {
           await sb
             .from('nss_volunteer_directory')
-            .update({ email: cleanEmail, email_status: 'added', updated_at: new Date().toISOString() })
-            .eq('id', id);
+            .update({ email, email_status: 'added', updated_at: new Date().toISOString() })
+            .eq('id', recordId);
         } catch (e) {
-          console.warn('DB update failed, using local store:', e);
+          console.warn('DB saveEmail failed:', e);
         }
       }
 
-      // Update local store
-      const localList = this._getLocalStore();
-      const item = localList.find(x => x.id === id);
+      const local = this._getLocalStore();
+      const item = local.find(r => r.id === recordId);
       if (item) {
-        item.email = cleanEmail;
+        item.email = email;
         item.email_status = 'added';
         item.updated_at = new Date().toISOString();
-        this._saveLocalStore(localList);
+        this._saveLocalStore(local);
       }
-      return true;
+
+      return { success: true, email };
     },
 
-    async removeEmail(id) {
+    async removeEmail(recordId) {
       const sb = await NSS.getSupabase();
       if (sb) {
         try {
           await sb
             .from('nss_volunteer_directory')
             .update({ email: null, email_status: 'pending', updated_at: new Date().toISOString() })
-            .eq('id', id);
-        } catch (e) {
-          console.warn('DB update failed, using local store:', e);
-        }
+            .eq('id', recordId);
+        } catch (e) {}
       }
 
-      // Update local store
-      const localList = this._getLocalStore();
-      const item = localList.find(x => x.id === id);
+      const local = this._getLocalStore();
+      const item = local.find(r => r.id === recordId);
       if (item) {
         item.email = null;
         item.email_status = 'pending';
         item.updated_at = new Date().toISOString();
-        this._saveLocalStore(localList);
+        this._saveLocalStore(local);
       }
-      return true;
+
+      return { success: true };
     },
 
-    async exportCSV() {
-      const { allRecords } = await this.loadDirectory({ limit: 10000 });
-      if (!allRecords || !allRecords.length) {
+    exportCSV() {
+      const local = this._getLocalStore();
+      if (!local || !local.length) {
         alert('Directory is empty.');
         return;
       }
-
-      const headers = ['Volunteer Full Name', 'Email Address', 'Email Status', 'Import Batch ID', 'Source Row', 'Added Date'];
-      const rows = allRecords.map(r => [
+      const headers = ['Sr No', 'Volunteer Name', 'Email Address', 'Email Status', 'Import Batch', 'Source Row'];
+      const rows = local.map((r, i) => [
+        i + 1,
         `"${(r.full_name || '').replace(/"/g, '""')}"`,
         `"${r.email || ''}"`,
         `"${r.email_status || 'pending'}"`,
         `"${r.import_batch_id || ''}"`,
-        `"${r.source_row_number || ''}"`,
-        `"${r.created_at ? new Date(r.created_at).toLocaleDateString('en-IN') : ''}"`
+        r.source_row_number || ''
       ]);
-
-      const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const csv = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.setAttribute('href', url);
-      link.setAttribute('download', `nss_volunteer_directory_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `NSS_Volunteer_Directory_${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
   };
 
-  // NSS Email Activity Logs Module
+  // ==============================================================================
+  // 8. EMAIL ACTIVITY LOGS (nss_email_logs)
+  // ==============================================================================
   NSS.EmailLogs = {
-    _getLocalLogs() {
-      try {
-        const stored = localStorage.getItem('nss_email_logs_v1');
-        if (stored) return JSON.parse(stored);
-      } catch (e) {}
-      return [];
-    },
-
-    _saveLocalLogs(logs) {
-      try {
-        localStorage.setItem('nss_email_logs_v1', JSON.stringify(logs.slice(0, 200)));
-      } catch (e) {}
-    },
-
-    async saveLogs(entries) {
-      if (!Array.isArray(entries) || entries.length === 0) return;
-
-      const sb = await NSS.getSupabase();
-      if (sb) {
-        try {
-          await sb.from('nss_email_logs').insert(entries.map(e => ({
-            directory_id: e.directory_id || null,
-            recipient_email: e.email,
-            recipient_name: e.name,
-            subject: e.subject,
-            category: e.category || 'Bulk Broadcast',
-            template_id: e.templateId || null,
-            status: e.status || 'sent',
-            error_message: e.error || null,
-            batch_id: e.batchId || null,
-            sent_at: new Date().toISOString()
-          })));
-        } catch (err) {
-          console.warn('DB log insert error:', err);
-        }
-      }
-
-      // Sync local
-      const current = this._getLocalLogs();
-      const updated = [...entries.map((e, idx) => ({
-        id: 'log-' + Date.now() + '-' + idx,
-        recipient_email: e.email,
-        recipient_name: e.name,
-        subject: e.subject,
-        category: e.category || 'Bulk Broadcast',
-        status: e.status || 'sent',
-        error_message: e.error || null,
-        sent_at: new Date().toISOString()
-      })), ...current];
-
-      this._saveLocalLogs(updated);
-    },
-
-    async getLogs(limit = 20) {
+    async getLogs(limit = 30) {
       const sb = await NSS.getSupabase();
       if (sb) {
         try {
@@ -863,40 +990,90 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
             .select('*')
             .order('sent_at', { ascending: false })
             .limit(limit);
-
-          if (!error && Array.isArray(data) && data.length > 0) {
-            return data;
-          }
-        } catch (e) {
-          console.warn('DB log query error, fallback to local store:', e);
-        }
+          if (!error && data) return data;
+        } catch (e) {}
       }
-      return this._getLocalLogs().slice(0, limit);
+
+      try {
+        const stored = localStorage.getItem('nss_email_logs_cache');
+        if (stored) return JSON.parse(stored).slice(0, limit);
+      } catch (e) {}
+      return [];
+    },
+
+    async saveLogs(records = []) {
+      if (!records || !records.length) return;
+      const sb = await NSS.getSupabase();
+      if (sb) {
+        try {
+          await sb.from('nss_email_logs').insert(records);
+        } catch (e) {}
+      }
+
+      try {
+        const current = JSON.parse(localStorage.getItem('nss_email_logs_cache') || '[]');
+        const updated = [...records, ...current].slice(0, 100);
+        localStorage.setItem('nss_email_logs_cache', JSON.stringify(updated));
+      } catch (e) {}
     }
   };
 
-  // QR Scanner Controller
+  // ==============================================================================
+  // 9. QR SCANNER & PUBLIC VERIFICATION
+  // ==============================================================================
+  NSS.QRVerify = async function (token) {
+    const sb = await NSS.getSupabase();
+    if (!sb) return { result: 'invalid', message: 'Verification client unavailable' };
+    try {
+      const { data, error } = await sb.rpc('nss_verify_token', { p_token: token.trim() });
+      if (error) throw error;
+      return data;
+    } catch (err) {
+      console.error('Error verifying token:', err);
+      return { result: 'invalid', message: err.message || 'Verification failed' };
+    }
+  };
+
+  NSS.verifyByVolunteerId = async function (volunteerId) {
+    const sb = await NSS.getSupabase();
+    if (!sb) return null;
+    try {
+      const cleanId = volunteerId.trim().toUpperCase();
+      const { data, error } = await sb
+        .from('nss_applications')
+        .select('*')
+        .eq('volunteer_id', cleanId)
+        .maybeSingle();
+
+      if (error || !data) return null;
+
+      return {
+        result: data.status,
+        name: data.full_name,
+        volunteer_id: data.volunteer_id,
+        course: data.course,
+        academic_year: data.academic_year,
+        photo_url: data.status === 'approved' ? data.photo_url : null,
+        issued_at: data.reviewed_at
+      };
+    } catch (err) {
+      console.error('Lookup by ID failed:', err);
+      return null;
+    }
+  };
+
   NSS.QRScanner = {
     stream: null,
     animationFrameId: null,
     isScanning: false,
 
-    async loadJsQR() {
-      if (window.jsQR) return window.jsQR;
-      return new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js';
-        script.onload = () => resolve(window.jsQR);
-        script.onerror = () => reject(new Error('Failed to load jsQR library'));
-        document.head.appendChild(script);
-      });
-    },
-
     async start(videoElement, onDetected, onError) {
-      try {
-        await this.loadJsQR();
-        this.stop(); // Clean any active stream
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (typeof onError === 'function') onError(new Error('Camera API unavailable.'));
+        return;
+      }
 
+      try {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' }
         });
@@ -916,16 +1093,15 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
             canvas.height = videoElement.videoHeight;
             ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
-              inversionAttempts: 'dontInvert'
-            });
-
-            if (code && code.data) {
-              this.stop();
-              if (typeof onDetected === 'function') {
-                onDetected(code.data);
+            if (window.jsQR) {
+              const code = window.jsQR(imageData.data, imageData.width, imageData.height, {
+                inversionAttempts: 'dontInvert'
+              });
+              if (code && code.data) {
+                this.stop();
+                if (typeof onDetected === 'function') onDetected(code.data);
+                return;
               }
-              return;
             }
           }
           this.animationFrameId = requestAnimationFrame(scanLoop);
@@ -934,9 +1110,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         this.animationFrameId = requestAnimationFrame(scanLoop);
       } catch (err) {
         console.error('Camera start error:', err);
-        if (typeof onError === 'function') {
-          onError(err);
-        }
+        if (typeof onError === 'function') onError(err);
       }
     },
 
@@ -953,194 +1127,36 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     }
   };
 
-  // Initialize and enhance NSS Navbar with auth status
+  // Nav Enhancement
   NSS.initNav = async function () {
     try {
       const user = await NSS.Auth.getCurrentUser();
       const btn = document.querySelector('.nss-subnav-btn');
       const links = document.querySelector('.nss-subnav-links');
       if (user && links) {
-        const isCoord = await NSS.Auth.checkCoordinatorRole(user.id);
+        const role = await NSS.Auth.getUserRole(user.id);
+        const isStaff = ['super_admin', 'coordinator', 'president'].includes(role);
         if (btn) {
-          if (isCoord) {
-            btn.textContent = 'Admin Panel';
+          if (isStaff) {
+            btn.textContent = 'Admin Desk';
             btn.href = 'admin.html';
-            const outBtn = document.createElement('a');
-            outBtn.className = 'nss-subnav-link';
-            outBtn.textContent = 'Sign Out';
-            outBtn.href = '#';
-            outBtn.onclick = async (e) => {
-              e.preventDefault();
-              const sb = await NSS.getSupabase();
-              if (sb) await sb.auth.signOut();
-              window.location.reload();
-            };
-            links.appendChild(outBtn);
           } else {
-            btn.textContent = 'Sign Out';
-            btn.href = '#';
-            btn.onclick = async (e) => {
-              e.preventDefault();
-              const sb = await NSS.getSupabase();
-              if (sb) await sb.auth.signOut();
-              window.location.reload();
-            };
+            btn.textContent = 'My Status';
+            btn.href = 'status.html';
           }
         }
       }
-    } catch (e) {
-      console.warn('NSS.initNav error:', e);
-    }
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => { setTimeout(NSS.initNav, 300); });
-  } else {
-    setTimeout(NSS.initNav, 300);
-  }
-
-  // Expose NSS object globally
-  
-  // NSS Parallax & Dynamic Wash Scroll Engine
-  NSS.initScrollScene = function () {
-    const image = document.getElementById('sceneImage');
-    const particles = document.getElementById('particles');
-    const orbs = [...document.querySelectorAll('.orb')];
-    const sections = [...document.querySelectorAll('section[data-section]')];
-    if (!image && orbs.length === 0) return;
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let ticking = false;
-
-    function update() {
-      const y = window.scrollY || 0;
-      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
-      const progress = Math.min(1, y / max);
-
-      if (!reduceMotion && image) {
-        image.style.setProperty('--image-y', (-y * 0.075) + 'px');
-        image.style.setProperty('--image-scale', (1.04 + progress * 0.035).toString());
-        if (particles) {
-          particles.style.setProperty('--dots-y', (-y * 0.12) + 'px');
-        }
-        orbs.forEach(orb => {
-          const speed = Number(orb.dataset.speed || 0.1);
-          orb.style.transform = 'translate3d(0, ' + (y * speed) + 'px, 0) rotate(' + (y * 0.018) + 'deg)';
-        });
-      }
-
-      sections.forEach(section => {
-        const rect = section.getBoundingClientRect();
-        const center = rect.top + rect.height / 2;
-        const distance = Math.abs(window.innerHeight / 2 - center);
-        section.style.setProperty('--wash', (Math.max(0, 1 - distance / (window.innerHeight * 0.75)) * 0.45).toFixed(3));
-      });
-
-      ticking = false;
-    }
-
-    function requestUpdate() {
-      if (!ticking) {
-        ticking = true;
-        requestAnimationFrame(update);
-      }
-    }
-
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-    update();
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', NSS.initScrollScene);
-  } else {
-    NSS.initScrollScene();
-  }
-
-  
-    // NSS Cloudinary Asset Integrator
-  NSS.applyCloudinaryAssets = function () {
-    const cfg = window.NSS_CLOUDINARY_CONFIG;
-    if (!cfg) return;
-
-    // 1. President Portrait
-    const presImg = document.getElementById('presidentPortraitImg');
-    if (presImg && cfg.presidentPortrait && typeof cfg.presidentPortrait === 'string' && cfg.presidentPortrait.trim() !== '') {
-      presImg.src = cfg.presidentPortrait.trim();
-    }
-
-    // 2. Event Media Cards
-    const eventImg = document.getElementById('eventHealthCampImg');
-    if (eventImg && cfg.eventHealthCamp && typeof cfg.eventHealthCamp === 'string' && cfg.eventHealthCamp.trim() !== '') {
-      eventImg.src = cfg.eventHealthCamp.trim();
-    }
-
-    // 3. Media Gallery Section
-    const galleryGrid = document.getElementById('nssGalleryGrid');
-    const galleryNotice = document.getElementById('nssGalleryNotice');
-    if (galleryGrid) {
-      const rawPhotos = Array.isArray(cfg.galleryPhotos) ? cfg.galleryPhotos : [];
-      const photos = rawPhotos.map((item, idx) => {
-        if (typeof item === 'string' && item.trim()) {
-          return {
-            url: item.trim(),
-            thumb: item.trim(),
-            caption: 'NSS Blood Donation Camp — Field Photo ' + (idx + 1),
-            tag: 'Blood Donation Camp'
-          };
-        }
-        if (item && typeof item === 'object' && item.url) {
-          return {
-            url: item.url.trim(),
-            thumb: item.thumb ? item.thumb.trim() : item.url.trim(),
-            caption: item.caption || ('NSS Blood Donation Camp — Field Photo ' + (idx + 1)),
-            tag: item.tag || 'Blood Donation Camp'
-          };
-        }
-        return null;
-      }).filter(Boolean);
-
-      if (photos.length > 0) {
-        if (galleryNotice) galleryNotice.style.display = 'none';
-        galleryGrid.style.display = 'grid';
-        galleryGrid.innerHTML = photos.map((item, i) =>
-          '<div class="nss-gallery-item" onclick="viewPhoto(\'' + item.url + '\', \'' + item.caption.replace(/'/g, "\\'") + '\')" role="button" tabindex="0" aria-label="' + item.caption.replace(/"/g, '&quot;') + '">' +
-            '<img src="' + item.thumb + '" alt="' + item.caption.replace(/"/g, '&quot;') + '" loading="lazy">' +
-            '<div class="nss-gallery-overlay">' +
-              '<span class="nss-gallery-tag">' + item.tag + '</span>' +
-              '<span class="nss-gallery-caption">' + item.caption + '</span>' +
-            '</div>' +
-          '</div>'
-        ).join('');
-      } else {
-        galleryGrid.style.display = 'none';
-        if (galleryNotice) galleryNotice.style.display = 'block';
-      }
-    }
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', NSS.applyCloudinaryAssets);
-  } else {
-    NSS.applyCloudinaryAssets();
-  }
-
-  
-  // Dynamic footer year helper
-  function updateFooterYear() {
-    try {
-      const yr = new Date().getFullYear();
-      document.querySelectorAll('.nss-dynamic-year').forEach(el => {
-        el.textContent = yr;
-      });
     } catch (e) {}
-  }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', updateFooterYear);
-  } else {
-    updateFooterYear();
+  };
+
+  if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => { setTimeout(NSS.initNav, 300); });
+    } else {
+      setTimeout(NSS.initNav, 300);
+    }
   }
 
   window.NSS = NSS;
 
-})(window);
+})(typeof window !== 'undefined' ? window : this);

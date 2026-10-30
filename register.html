@@ -176,14 +176,11 @@
             <div class="nss-form-group">
               <label class="nss-form-label" for="courseSelect">Course / Program <span class="req">*</span></label>
               <select id="courseSelect" class="nss-form-select" required>
-                <option value="">— Select Course —</option>
+                <option value="">— Select Pharmacy Program —</option>
                 <option value="B.Pharm">B.Pharm (Bachelor of Pharmacy)</option>
+                <option value="D.Pharm">D.Pharm (Diploma in Pharmacy)</option>
                 <option value="M.Pharm">M.Pharm (Master of Pharmacy)</option>
                 <option value="Pharm.D">Pharm.D (Doctor of Pharmacy)</option>
-                <option value="D.Pharm">D.Pharm (Diploma in Pharmacy)</option>
-                <option value="B.Tech">B.Tech / BE</option>
-                <option value="MBA">MBA</option>
-                <option value="MCA">MCA</option>
               </select>
               <div class="nss-form-error" id="errCourse">Please select your course.</div>
             </div>
@@ -359,10 +356,47 @@
     </div>
   </footer>
 
+  <!-- Review Application Modal -->
+  <div id="reviewModal" style="display:none; position:fixed; inset:0; background:rgba(7,27,73,0.7); z-index:9999; align-items:center; justify-content:center; padding:16px;">
+    <div style="background:#fff; border-radius:16px; max-width:540px; width:100%; box-shadow:0 20px 40px rgba(0,0,0,0.25); overflow:hidden;">
+      <div style="background:linear-gradient(135deg, var(--nss-navy), var(--nss-royal-blue)); color:#fff; padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 style="margin:0; font-size:18px; font-weight:800;">Review Volunteer Application</h3>
+          <p style="margin:2px 0 0; font-size:12px; color:#BFDBFE;">Verify your registration details before final submission.</p>
+        </div>
+        <button type="button" onclick="closeReviewModal()" style="background:none; border:none; color:#fff; font-size:24px; cursor:pointer;">&times;</button>
+      </div>
+      <div style="padding:24px; max-height:70vh; overflow-y:auto; font-size:13px; line-height:1.6;">
+        <div style="display:flex; gap:16px; align-items:center; margin-bottom:18px; padding-bottom:16px; border-bottom:1px solid #E2E8F0;">
+          <img id="reviewPhoto" src="" alt="Applicant Photo" style="width:68px; height:80px; object-fit:cover; border-radius:8px; border:2px solid var(--nss-navy); background:#F1F5F9;">
+          <div>
+            <div id="reviewFullName" style="font-size:16px; font-weight:800; color:var(--nss-navy);"></div>
+            <div style="color:var(--nss-royal-blue); font-weight:600;"><span id="reviewRoll"></span> • <span id="reviewCourse"></span> (<span id="reviewYear"></span>)</div>
+            <div id="reviewPRN" style="color:#64748B; font-size:12px;"></div>
+          </div>
+        </div>
+        <table style="width:100%; border-collapse:collapse; margin-bottom:16px;">
+          <tr><td style="color:#64748B; padding:4px 0; width:140px;">College Email:</td><td id="reviewCollegeEmail" style="font-weight:600; color:var(--nss-navy);"></td></tr>
+          <tr><td style="color:#64748B; padding:4px 0;">Personal Email:</td><td id="reviewPersonalEmail" style="font-weight:600;"></td></tr>
+          <tr><td style="color:#64748B; padding:4px 0;">Mobile Number:</td><td id="reviewMobile" style="font-weight:600;"></td></tr>
+          <tr><td style="color:#64748B; padding:4px 0;">Emergency Contact:</td><td id="reviewEmergency" style="font-weight:600;"></td></tr>
+          <tr><td style="color:#64748B; padding:4px 0;">Division:</td><td id="reviewDivision" style="font-weight:600;"></td></tr>
+        </table>
+        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px; font-size:11.5px; color:#475569;">
+          ✅ <strong>Declaration:</strong> I confirm all provided academic and personal information is accurate, and I commit to fulfilling NSS volunteer community service duties.
+        </div>
+      </div>
+      <div style="padding:16px 24px; background:#F8FAFC; border-top:1px solid #E2E8F0; display:flex; justify-content:space-between; gap:12px;">
+        <button type="button" class="nss-btn nss-btn-outline" onclick="closeReviewModal()">✏️ Edit Details</button>
+        <button type="button" class="nss-btn nss-btn-primary" id="btnConfirmSubmit" onclick="confirmFinalSubmit()">Confirm & Submit Application</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Scripts -->
-  <script src="env.js"></script>
-  <script src="echo.js"></script>
-  <script src="nss.js"></script>
+  <script src="env.js?v=20261030-master-v1"></script>
+  <script src="echo.js?v=20261030-master-v1"></script>
+  <script src="nss.js?v=20261030-master-v1"></script>
   <script>
     let selectedFile = null;
 
@@ -449,6 +483,8 @@
     const submitBtn = document.getElementById('submitBtn');
     const submitAlert = document.getElementById('submitAlert');
 
+    let pendingFormData = null;
+
     function showAlert(msg, isError = true) {
       submitAlert.textContent = msg;
       submitAlert.style.display = 'block';
@@ -456,14 +492,21 @@
       submitAlert.style.color = isError ? 'var(--nss-danger)' : 'var(--nss-success)';
     }
 
+    function closeReviewModal() {
+      const modal = document.getElementById('reviewModal');
+      if (modal) modal.style.display = 'none';
+    }
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
       let hasError = false;
 
       const fullName = document.getElementById('fullName').value.trim();
-      const rollNumber = document.getElementById('rollNumber').value.trim();
+      const rollNumber = document.getElementById('rollNumber').value.trim().toUpperCase();
+      const prn = document.getElementById('prnNumber')?.value.trim() || '';
       const course = document.getElementById('courseSelect').value;
       const year = document.getElementById('academicYear').value;
+      const division = document.getElementById('division')?.value.trim() || '';
       const collegeEmail = document.getElementById('collegeEmail').value.trim();
       const personalEmail = document.getElementById('personalEmail').value.trim();
       const mobile = document.getElementById('mobileNumber').value.trim();
@@ -493,70 +536,98 @@
         return;
       }
 
-      // Check roll number uniqueness
       submitBtn.disabled = true;
       submitBtn.textContent = 'Verifying roll number...';
 
       try {
         const rollExists = await NSS.App.checkRollExists(rollNumber);
         if (rollExists) {
-          showAlert(`Roll Number ${rollNumber.toUpperCase()} is already registered with NSS. Please check your status.`, true);
+          showAlert(`Roll Number ${rollNumber} is already registered with NSS. Please check your application status.`, true);
           submitBtn.disabled = false;
           submitBtn.textContent = 'Submit NSS Registration';
           return;
         }
 
-        submitBtn.textContent = 'Uploading photo & submitting...';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit NSS Registration';
 
-        const data = await NSS.App.submitApplication({
+        pendingFormData = {
           full_name: fullName,
           roll_number: rollNumber,
-          prn: document.getElementById('prnNumber').value,
+          prn: prn,
           course: course,
           academic_year: year,
-          division: document.getElementById('division').value,
+          division: division,
           college_email: collegeEmail,
           personal_email: personalEmail,
           mobile: mobile,
           emergency_contact: emergency,
           consent: consent
-        }, selectedFile);
+        };
+
+        // Populate and open Review Modal
+        document.getElementById('reviewFullName').textContent = fullName;
+        document.getElementById('reviewRoll').textContent = rollNumber;
+        document.getElementById('reviewCourse').textContent = course;
+        document.getElementById('reviewYear').textContent = year;
+        document.getElementById('reviewPRN').textContent = prn ? `PRN: ${prn}` : 'PRN: Not specified';
+        document.getElementById('reviewCollegeEmail').textContent = collegeEmail;
+        document.getElementById('reviewPersonalEmail').textContent = personalEmail || 'None';
+        document.getElementById('reviewMobile').textContent = mobile;
+        document.getElementById('reviewEmergency').textContent = emergency || 'None';
+        document.getElementById('reviewDivision').textContent = division || 'None';
+        if (photoPreview && photoPreview.src) {
+          document.getElementById('reviewPhoto').src = photoPreview.src;
+        }
+
+        document.getElementById('reviewModal').style.display = 'flex';
+      } catch (err) {
+        console.error('Validation error:', err);
+        showAlert(err.message || 'Validation error. Please try again.', true);
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit NSS Registration';
+      }
+    });
+
+    async function confirmFinalSubmit() {
+      if (!pendingFormData) return;
+      const btn = document.getElementById('btnConfirmSubmit');
+      btn.disabled = true;
+      btn.textContent = 'Submitting Application...';
+
+      try {
+        const data = await NSS.App.submitApplication(pendingFormData, selectedFile);
+        closeReviewModal();
 
         // Success!
         document.getElementById('regFormContainer').style.display = 'none';
         document.getElementById('refCodeDisplay').textContent = data.ref_code || 'NSS-REF-SUCCESS';
         document.getElementById('successCard').style.display = 'block';
 
-        // Trigger Brevo Confirmation Email & Contact Sync
+        // Trigger Brevo Confirmation Email
         try {
           fetch('/api/send-registration-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              fullName: fullName,
-              email: collegeEmail,
-              personalEmail: personalEmail,
-              rollNumber: rollNumber,
-              course: course,
-              academicYear: year,
+              fullName: pendingFormData.full_name,
+              email: pendingFormData.college_email,
+              personalEmail: pendingFormData.personal_email,
+              rollNumber: pendingFormData.roll_number,
+              course: pendingFormData.course,
+              academicYear: pendingFormData.academic_year,
               refCode: data.ref_code || 'NSS-REF-SUCCESS'
             })
-          }).then(r => r.json()).then(res => {
-            console.log('[Brevo Email Status]:', res);
-          }).catch(err => {
-            console.warn('[Brevo Email Notice]:', err);
-          });
-        } catch (err) {
-          console.warn('[Brevo Non-blocking Error]:', err);
-        }
+          }).catch(e => {});
+        } catch (ignore) {}
 
       } catch (err) {
         console.error('Submission error:', err);
-        showAlert(err.message || 'An error occurred while submitting your registration. Please try again.', true);
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Submit NSS Registration';
+        alert(err.message || 'An error occurred while submitting your registration. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Confirm & Submit Application';
       }
-    });
+    }
 
     document.addEventListener('DOMContentLoaded', checkAuthAndApp);
     document.addEventListener('echo-auth', checkAuthAndApp);

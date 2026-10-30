@@ -120,33 +120,28 @@
           </button>
 
           <p style="font-size: 12px; color: var(--nss-text-muted); margin-top: 14px; line-height: 1.5;">
-            Use your college or personal Google account. Faculty coordinators will be directed to the Admin Console upon verification.
+            Use your college or personal Google account. Faculty coordinators and President will be directed to the Admin Console upon verification.
           </p>
-          <div style="margin-top: 12px;">
-            <a href="admin.html?admin=true" style="font-size: 12px; color: var(--nss-navy); font-weight: 600; text-decoration: underline;">
-              ⚡ Direct Coordinator Access (Instant Desk Open) &rarr;
-            </a>
-          </div>
         </div>
 
-        <!-- Access Denied Card (If non-coordinator clicks coordinator desk) -->
+        <!-- Access Denied Card (If unauthorized account attempts admin access) -->
         <div id="accessDeniedCard" style="display:none; margin-top: 24px; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: var(--nss-radius-md); padding: 20px; text-align: left;">
-          <div style="font-weight: 700; color: var(--nss-navy); font-size: 15px; margin-bottom: 6px; display:flex; align-items:center; gap:8px;">
-            <span>🛡️</span> Coordinator Access Verification
+          <div style="font-weight: 700; color: #991B1B; font-size: 15px; margin-bottom: 6px; display:flex; align-items:center; gap:8px;">
+            <span>🛡️</span> Access Restricted
           </div>
-          <p style="font-size: 13px; color: var(--nss-text-primary); margin: 0 0 14px; line-height: 1.5;">
-            Signed in as: <strong id="deniedEmail"></strong>. Click below to confirm coordinator credentials and enter the management desk.
+          <p style="font-size: 13px; color: #7F1D1D; margin: 0 0 14px; line-height: 1.5;">
+            Signed in as: <strong id="deniedEmail"></strong>. This account does not have staff, coordinator, or president authorization for the NSS Admin Console.
           </p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button type="button" class="nss-btn nss-btn-sm" style="background:var(--nss-navy); color:#fff;" onclick="authorizeAndEnterAdmin()">
-              ⚡ Enter Coordinator Dashboard
-            </button>
+            <a href="status.html" class="nss-btn nss-btn-sm" style="background:var(--nss-navy); color:#fff; text-decoration:none;">
+              Volunteer Status
+            </a>
+            <a href="register.html" class="nss-btn nss-btn-sm nss-btn-outline" style="text-decoration:none;">
+              New Registration
+            </a>
             <button type="button" class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff;" onclick="signOut()">
               Sign Out
             </button>
-            <a href="status.html" class="nss-btn nss-btn-sm nss-btn-outline">
-              Volunteer Status
-            </a>
           </div>
         </div>
 
@@ -268,11 +263,13 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="cloudinary-config.js"></script>
-  <script src="env.js"></script>
-  <script src="echo.js"></script>
-  <script src="nss.js"></script>
+  <script src="cloudinary-config.js?v=20261030-master-v1"></script>
+  <script src="env.js?v=20261030-master-v1"></script>
+  <script src="echo.js?v=20261030-master-v1"></script>
+  <script src="nss.js?v=20261030-master-v1"></script>
   <script>
+    window.NSS = window.NSS || {};
+
     // Mobile navigation drawer toggle
     const toggleBtn = document.getElementById('nssMenuToggle');
     const closeBtn = document.getElementById('nssDrawerClose');
@@ -294,7 +291,7 @@
     async function handleGoogleSignIn() {
       const btn = document.getElementById('googleBtn');
       const btnText = document.getElementById('googleBtnText');
-      const sb = window.getSB();
+      const sb = window.getSB ? window.getSB() : null;
       if (!sb) {
         alert('Supabase client is initializing. Please wait a moment and try again.');
         return;
@@ -322,12 +319,19 @@
 
     // Evaluate Auth State
     async function evaluateAuth() {
-      await window.ready;
+      if (window.ready) await window.ready;
+      const NSS = window.NSS = window.NSS || {};
+      if (!NSS.Auth || typeof NSS.Auth.getCurrentUser !== 'function') {
+        setTimeout(evaluateAuth, 100);
+        return;
+      }
+
       const user = await NSS.Auth.getCurrentUser();
       const checking = document.getElementById('checkingState');
       const loginAction = document.getElementById('loginAction');
       const deniedCard = document.getElementById('accessDeniedCard');
-      const isCoordReq = new URLSearchParams(window.location.search).get('coordinator') === 'true' || window.location.pathname.includes('nss-login');
+      const urlParams = new URLSearchParams(window.location.search);
+      const isDenied = urlParams.get('denied') === 'true';
 
       if (!user) {
         checking.style.display = 'none';
@@ -339,33 +343,48 @@
       checking.style.display = 'block';
       loginAction.style.display = 'none';
 
-      // Check role in nss_roles table
-      const role = await NSS.Auth.checkCoordinatorRole(user.id);
+      // Record login in nss_login_activity
+      try {
+        await NSS.Auth.recordLogin(user);
+      } catch (e) {}
+
+      // Check role in nss_roles table (Security Definer verified)
+      const role = await NSS.Auth.getUserRole(user.id);
       checking.style.display = 'none';
 
-      if (role === 'super_admin' || role === 'coordinator') {
+      if (['super_admin', 'coordinator', 'president'].includes(role)) {
         window.location.href = 'admin.html';
-      } else if (isCoordReq) {
+        return;
+      }
+
+      if (isDenied) {
         loginAction.style.display = 'none';
         deniedCard.style.display = 'block';
         document.getElementById('deniedEmail').textContent = user.email || 'Current Account';
-      } else {
-        window.location.href = 'status.html';
+        return;
       }
-    }
 
-    function authorizeAndEnterAdmin() {
-      localStorage.setItem('nss_coordinator_authorized', 'true');
-      window.location.href = 'admin.html';
+      // Check if user already submitted volunteer registration
+      try {
+        const app = await NSS.App.getUserApplication(user.id);
+        if (app) {
+          window.location.href = 'status.html';
+          return;
+        }
+      } catch (e) {}
+
+      // New student - send to registration
+      window.location.href = 'register.html';
     }
 
     function signOut() {
-      localStorage.removeItem('nss_coordinator_authorized');
-      const sb = window.getSB();
+      const sb = window.getSB ? window.getSB() : null;
       if (sb) {
         sb.auth.signOut().then(() => {
           window.location.href = 'login.html';
         });
+      } else {
+        window.location.href = 'login.html';
       }
     }
 
