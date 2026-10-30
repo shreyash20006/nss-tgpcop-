@@ -1030,11 +1030,14 @@
     }
 
     function logoutAdmin() {
+      localStorage.removeItem('nss_coordinator_authorized');
       const sb = window.getSB();
       if (sb) {
         sb.auth.signOut().then(() => {
           location.href = 'login.html';
         });
+      } else {
+        location.href = 'login.html';
       }
     }
 

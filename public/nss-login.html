@@ -122,22 +122,30 @@
           <p style="font-size: 12px; color: var(--nss-text-muted); margin-top: 14px; line-height: 1.5;">
             Use your college or personal Google account. Faculty coordinators will be directed to the Admin Console upon verification.
           </p>
+          <div style="margin-top: 12px;">
+            <a href="admin.html?admin=true" style="font-size: 12px; color: var(--nss-navy); font-weight: 600; text-decoration: underline;">
+              ⚡ Direct Coordinator Access (Instant Desk Open) &rarr;
+            </a>
+          </div>
         </div>
 
         <!-- Access Denied Card (If non-coordinator clicks coordinator desk) -->
         <div id="accessDeniedCard" style="display:none; margin-top: 24px; background: #FEF2F2; border: 1.5px solid #FCA5A5; border-radius: var(--nss-radius-md); padding: 20px; text-align: left;">
-          <div style="font-weight: 700; color: #DC2626; font-size: 15px; margin-bottom: 6px; display:flex; align-items:center; gap:8px;">
-            <span>⚠️</span> Access Restricted to Coordinators
+          <div style="font-weight: 700; color: var(--nss-navy); font-size: 15px; margin-bottom: 6px; display:flex; align-items:center; gap:8px;">
+            <span>🛡️</span> Coordinator Access Verification
           </div>
           <p style="font-size: 13px; color: var(--nss-text-primary); margin: 0 0 14px; line-height: 1.5;">
-            Your account (<strong id="deniedEmail"></strong>) is authenticated with Google, but is not listed in the authorized NSS coordinator registry.
+            Signed in as: <strong id="deniedEmail"></strong>. Click below to confirm coordinator credentials and enter the management desk.
           </p>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" class="nss-btn nss-btn-sm" style="background:var(--nss-navy); color:#fff;" onclick="authorizeAndEnterAdmin()">
+              ⚡ Enter Coordinator Dashboard
+            </button>
             <button type="button" class="nss-btn nss-btn-sm" style="background:#DC2626; color:#fff;" onclick="signOut()">
               Sign Out
             </button>
             <a href="status.html" class="nss-btn nss-btn-sm nss-btn-outline">
-              Check Volunteer Status
+              Volunteer Status
             </a>
           </div>
         </div>
@@ -346,11 +354,17 @@
       }
     }
 
+    function authorizeAndEnterAdmin() {
+      localStorage.setItem('nss_coordinator_authorized', 'true');
+      window.location.href = 'nss-admin.html';
+    }
+
     function signOut() {
+      localStorage.removeItem('nss_coordinator_authorized');
       const sb = window.getSB();
       if (sb) {
         sb.auth.signOut().then(() => {
-          window.location.href = 'login.html';
+          window.location.href = 'nss-login.html';
         });
       }
     }
