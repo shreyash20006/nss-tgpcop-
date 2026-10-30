@@ -8,11 +8,25 @@
 module.exports = async (req, res) => {
   // CORS configuration
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
+  }
+
+  // Safe health check for diagnostic probes (does not leak student information or secrets)
+  if (req.method === 'GET') {
+    const templateId = parseInt(process.env.BREVO_TEMPLATE_APPROVED || '14', 10);
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || 'nss@tgpcop.site';
+    return res.status(200).json({
+      status: 'active',
+      service: 'NSS TGPCOP Approval Notification Service',
+      version: '2026.10',
+      templateId,
+      sender: senderEmail,
+      timestamp: new Date().toISOString()
+    });
   }
 
   if (req.method !== 'POST') {
@@ -24,8 +38,33 @@ module.exports = async (req, res) => {
   const templateId = parseInt(process.env.BREVO_TEMPLATE_APPROVED || '14', 10);
   const senderEmail = process.env.BREVO_SENDER_EMAIL || 'nss@tgpcop.site';
   const senderName = process.env.BREVO_SENDER_NAME || 'NSS TGPCOP';
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '';
-  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
+  
+  // Production fallback constants to ensure serverless function always connects
+  const defaultSupabaseUrl = 'https://gdwfptmtvzdfjcduhcvg.supabase.co';
+  const defaultSupabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdkd2ZwdG10dnpkZmpjZHVoY3ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTIzMzk1NTYsImV4cCI6MjEwNzkxNTU1Nn0.PQ34fMvwXtW932QHiyaDlQSySKOkQn5uWm94kzVW0S4';
+  
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || defaultSupabaseUrl;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || defaultSupabaseKey;
+
+  // Zero-dependency native fetch helper for Supabase PostgREST
+  async function supabaseQuery(endpoint, options = {}) {
+    const url = `${supabaseUrl}/rest/v1/${endpoint}`;
+    const headers = {
+      'apikey': supabaseKey,
+      'Authorization': `Bearer ${supabaseKey}`,
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...(options.headers || {})
+    };
+    try {
+      const r = await fetch(url, { ...options, headers });
+      const data = await r.json().catch(() => null);
+      return { ok: r.ok, status: r.status, data };
+    } catch (e) {
+      console.warn('[Supabase REST Query Error]:', e.message);
+      return { ok: false, status: 500, error: e.message };
+    }
+  }
 
   const {
     applicationId = null,
@@ -42,37 +81,84 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Missing required field: applicationId, applicationData, or testEmail is required.' });
   }
 
-  // 1. Verify Authenticated Staff Session (Optional Bearer Token validation)
+  // 1. Verify Authenticated Staff Session
   const authHeader = req.headers.authorization;
   let callerUserId = null;
-  if (authHeader && authHeader.startsWith('Bearer ') && supabaseUrl && supabaseKey) {
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7);
     try {
-      const { createClient } = require('@supabase/supabase-js');
-      const sbAuth = createClient(supabaseUrl, supabaseKey);
-      const token = authHeader.slice(7);
-      const { data: { user } } = await sbAuth.auth.getUser(token);
-      if (user) callerUserId = user.id;
+      const userRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+        headers: {
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (userRes.ok) {
+        const u = await userRes.json();
+        if (u && u.id) callerUserId = u.id;
+      }
     } catch (ignore) {}
   }
 
   // 2. Fetch Application Record from Supabase
   let app = applicationData;
-  let sbClient = null;
 
-  if (supabaseUrl && supabaseKey) {
-    try {
-      const { createClient } = require('@supabase/supabase-js');
-      sbClient = createClient(supabaseUrl, supabaseKey);
-      if (applicationId && !app) {
-        const { data, error } = await sbClient
-          .from('nss_applications')
-          .select('*')
-          .eq('id', applicationId)
-          .maybeSingle();
-        if (!error && data) app = data;
+  if (applicationId && !app) {
+    const rawId = String(applicationId).trim();
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawId);
+
+    // A. Primary: Query by Application UUID
+    if (isUuid) {
+      const resA = await supabaseQuery(`nss_applications?id=eq.${encodeURIComponent(rawId)}&select=*`);
+      if (resA.ok && Array.isArray(resA.data) && resA.data[0]) {
+        app = resA.data[0];
       }
-    } catch (dbErr) {
-      console.warn('[Notification DB Check]:', dbErr.message);
+    }
+
+    // B. Secondary: Query by Volunteer ID (e.g. NSS-TGP-26-000007)
+    if (!app) {
+      const resB = await supabaseQuery(`nss_applications?volunteer_id=eq.${encodeURIComponent(rawId)}&select=*`);
+      if (resB.ok && Array.isArray(resB.data) && resB.data[0]) {
+        app = resB.data[0];
+      }
+    }
+
+    // C. Tertiary: Query by Ref Code (e.g. NSS-REF-7D3A9667)
+    if (!app) {
+      const resC = await supabaseQuery(`nss_applications?ref_code=eq.${encodeURIComponent(rawId)}&select=*`);
+      if (resC.ok && Array.isArray(resC.data) && resC.data[0]) {
+        app = resC.data[0];
+      }
+    }
+
+    // D. Quaternary: Query by user_id
+    if (!app && isUuid) {
+      const resD = await supabaseQuery(`nss_applications?user_id=eq.${encodeURIComponent(rawId)}&order=submitted_at.desc&limit=1&select=*`);
+      if (resD.ok && Array.isArray(resD.data) && resD.data[0]) {
+        app = resD.data[0];
+      }
+    }
+
+    // E. Quinary: Student registry mapping (if applicationId is a student record)
+    if (!app) {
+      try {
+        const resE = await supabaseQuery(`nss_students?id=eq.${encodeURIComponent(rawId)}&select=*`);
+        if (resE.ok && Array.isArray(resE.data) && resE.data[0]) {
+          const st = resE.data[0];
+          if (st.registration_id) {
+            const resReg = await supabaseQuery(`nss_applications?id=eq.${encodeURIComponent(st.registration_id)}&select=*`);
+            if (resReg.ok && Array.isArray(resReg.data) && resReg.data[0]) {
+              app = resReg.data[0];
+            }
+          }
+          if (!app && st.volunteer_id) {
+            const resVol = await supabaseQuery(`nss_applications?volunteer_id=eq.${encodeURIComponent(st.volunteer_id)}&select=*`);
+            if (resVol.ok && Array.isArray(resVol.data) && resVol.data[0]) {
+              app = resVol.data[0];
+            }
+          }
+        }
+      } catch (stErr) {}
     }
   }
 
@@ -93,7 +179,10 @@ module.exports = async (req, res) => {
   }
 
   if (!app) {
-    return res.status(404).json({ error: 'Application record not found for approval notification.' });
+    return res.status(404).json({
+      error: 'Application record not found for approval notification. Ensure the application exists or supply applicationData in retry request.',
+      searchedId: applicationId
+    });
   }
 
   // STRICT REQUIREMENT: Only send notification for APPROVED applications!
@@ -122,28 +211,38 @@ module.exports = async (req, res) => {
   try {
     const d = new Date(rawDate);
     if (!isNaN(d.getTime())) {
-      approvalDateFormatted = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      approvalDateFormatted = d.toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric'
+      });
     }
-  } catch (e) {}
+  } catch (ignore) {}
 
-  const digitalIdUrl = 'https://nss.tgpcop.site/my-id';
+  // Determine recipient email (Test email takes strict precedence during test dispatches)
+  let targetEmail = '';
+  if (isTest && rawTestTarget) {
+    targetEmail = rawTestTarget;
+  } else {
+    targetEmail = collegeEmail || personalEmail;
+  }
+
+  const digitalIdUrl = `https://nss.tgpcop.site/my-id?id=${encodeURIComponent(volunteerId)}`;
   const portalUrl = 'https://nss.tgpcop.site/status';
 
   // 3. Idempotency Check: Prevent duplicate approval notifications
   let emailAlreadySent = false;
   let smsAlreadySent = false;
 
-  if (sbClient && appId && !forceRetry && !isTest) {
+  if (appId && !forceRetry && !isTest) {
     try {
-      const { data: existingLogs } = await sbClient
-        .from('nss_notification_logs')
-        .select('channel, status, created_at')
-        .eq('application_id', appId)
-        .eq('status', 'sent');
-
-      if (Array.isArray(existingLogs) && existingLogs.length > 0) {
-        if (existingLogs.some(l => l.channel === 'email')) emailAlreadySent = true;
-        if (existingLogs.some(l => l.channel === 'sms')) smsAlreadySent = true;
+      const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(appId));
+      if (isRealUuid) {
+        const logRes = await supabaseQuery(`nss_notification_logs?application_id=eq.${encodeURIComponent(appId)}&status=eq.sent&select=channel,status`);
+        if (logRes.ok && Array.isArray(logRes.data) && logRes.data.length > 0) {
+          if (logRes.data.some(l => l.channel === 'email')) emailAlreadySent = true;
+          if (logRes.data.some(l => l.channel === 'sms')) smsAlreadySent = true;
+        }
       }
     } catch (logErr) {
       console.warn('[Idempotency Check Notice]:', logErr.message);
@@ -152,22 +251,16 @@ module.exports = async (req, res) => {
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   let emailStatus = 'pending';
-  let emailMessageId = null;
   let emailError = null;
+  let emailMessageId = null;
 
   let smsStatus = 'pending';
-  let smsMessageId = null;
   let smsError = null;
+  let smsMessageId = null;
 
   // ============================================================================
-  // 4. DISPATCH EMAIL NOTIFICATION VIA BREVO (TEMPLATE 14)
+  // 4. DISPATCH TRANSACTIONAL APPROVAL EMAIL VIA BREVO TEMPLATE 14
   // ============================================================================
-  const targetEmail = isTest 
-    ? rawTestTarget 
-    : ((collegeEmail && emailRegex.test(collegeEmail)) 
-        ? collegeEmail 
-        : ((personalEmail && emailRegex.test(personalEmail)) ? personalEmail : ''));
-
   if (!targetEmail || !emailRegex.test(targetEmail)) {
     emailStatus = 'skipped';
     emailError = 'No valid email address registered for student.';
@@ -180,11 +273,9 @@ module.exports = async (req, res) => {
   } else {
     try {
       const toRecipients = [{ email: targetEmail, name: fullName }];
-      if (!isTest && personalEmail && personalEmail !== targetEmail && emailRegex.test(personalEmail)) {
-        toRecipients.push({ email: personalEmail, name: fullName });
-      }
 
-      // Exact parameter structure required by Brevo Template ID 14
+      // Exact parameters structure required by Brevo Template ID 14:
+      // { firstName, fullName, volunteerId, prn, course, academicYear, approvedAt }
       const templateParams = {
         firstName: firstName,
         fullName: fullName,
@@ -194,7 +285,7 @@ module.exports = async (req, res) => {
         academicYear: academicYear,
         approvedAt: approvalDateFormatted,
 
-        // Full aliases for template author flexibility
+        // Aliases for HTML template author flexibility
         FIRSTNAME: firstName,
         FULL_NAME: fullName,
         VOLUNTEER_ID: volunteerId,
@@ -297,63 +388,78 @@ module.exports = async (req, res) => {
   // 6. RECORD NOTIFICATION AUDIT LOGS IN DATABASE
   // ============================================================================
   const nowTs = new Date().toISOString();
-  if (sbClient && appId) {
+  if (appId) {
     try {
-      // 1. Insert Email Log
-      await sbClient.from('nss_notification_logs').insert({
-        application_id: appId.startsWith('test-') ? null : appId,
-        volunteer_id: volunteerId,
-        recipient_name: fullName,
-        recipient_email: targetEmail,
-        recipient_mobile: mobile,
-        channel: 'email',
-        status: emailStatus,
-        subject: `Brevo Template ${templateId} - NSS Volunteer Approval`,
-        provider_message_id: emailMessageId,
-        error_message: emailError,
-        sent_by: callerUserId,
-        created_at: nowTs,
-        metadata: {
-          isTest,
-          templateId,
-          senderEmail,
-          params: {
-            firstName,
-            fullName,
-            volunteerId,
-            prn,
-            course,
-            academicYear,
-            approvedAt: approvalDateFormatted
-          }
-        }
-      });
+      const isRealUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(appId));
+      const dbAppId = isRealUuid ? appId : (app && app.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(app.id) ? app.id : null);
 
-      // 2. Insert SMS Log (if not test mode and mobile present)
-      if (!isTest && cleanMobile) {
-        await sbClient.from('nss_notification_logs').insert({
-          application_id: appId,
+      // 1. Insert Email Log
+      await supabaseQuery('nss_notification_logs', {
+        method: 'POST',
+        headers: { 'Prefer': 'return=minimal' },
+        body: JSON.stringify({
+          application_id: dbAppId,
           volunteer_id: volunteerId,
           recipient_name: fullName,
           recipient_email: targetEmail,
-          recipient_mobile: cleanMobile,
-          channel: 'sms',
-          status: smsStatus,
-          provider_message_id: smsMessageId,
-          error_message: smsError,
+          recipient_mobile: mobile,
+          channel: 'email',
+          status: emailStatus,
+          subject: `Brevo Template ${templateId} - NSS Volunteer Approval`,
+          provider_message_id: emailMessageId,
+          error_message: emailError,
           sent_by: callerUserId,
-          created_at: nowTs
+          created_at: nowTs,
+          metadata: {
+            isTest,
+            templateId,
+            senderEmail,
+            params: {
+              firstName,
+              fullName,
+              volunteerId,
+              prn,
+              course,
+              academicYear,
+              approvedAt: approvalDateFormatted
+            }
+          }
+        })
+      });
+
+      // 2. Insert SMS Log (if not test mode and mobile present)
+      if (!isTest && cleanMobile && dbAppId) {
+        await supabaseQuery('nss_notification_logs', {
+          method: 'POST',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            application_id: dbAppId,
+            volunteer_id: volunteerId,
+            recipient_name: fullName,
+            recipient_email: targetEmail,
+            recipient_mobile: cleanMobile,
+            channel: 'sms',
+            status: smsStatus,
+            provider_message_id: smsMessageId,
+            error_message: smsError,
+            sent_by: callerUserId,
+            created_at: nowTs
+          })
         });
       }
 
       // 3. Update Application Columns (if real application)
-      if (!isTest && !appId.startsWith('test-')) {
-        await sbClient.from('nss_applications').update({
-          email_notification_status: emailStatus,
-          sms_notification_status: smsStatus,
-          notification_sent_at: emailStatus === 'sent' ? nowTs : null,
-          notification_error: emailError || smsError || null
-        }).eq('id', appId);
+      if (!isTest && dbAppId) {
+        await supabaseQuery(`nss_applications?id=eq.${encodeURIComponent(dbAppId)}`, {
+          method: 'PATCH',
+          headers: { 'Prefer': 'return=minimal' },
+          body: JSON.stringify({
+            email_notification_status: emailStatus,
+            sms_notification_status: smsStatus,
+            notification_sent_at: emailStatus === 'sent' ? nowTs : null,
+            notification_error: emailError || smsError || null
+          })
+        });
       }
 
     } catch (saveLogErr) {

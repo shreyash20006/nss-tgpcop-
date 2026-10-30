@@ -98,10 +98,15 @@ if (fs.existsSync(imagesDir)) {
 
 const apiDir = path.join(rootDir, 'api');
 if (fs.existsSync(apiDir)) {
-  for (const out of [distDir, publicDir]) {
-    const dst = path.join(out, 'api');
-    if (!fs.existsSync(dst)) fs.mkdirSync(dst, { recursive: true });
-    fs.readdirSync(apiDir).forEach(f => fs.copyFileSync(path.join(apiDir, f), path.join(dst, f)));
+  // Only copy to public mirror, leave dist free of static api override so Vercel functions take priority
+  const publicApi = path.join(publicDir, 'api');
+  if (!fs.existsSync(publicApi)) fs.mkdirSync(publicApi, { recursive: true });
+  fs.readdirSync(apiDir).forEach(f => fs.copyFileSync(path.join(apiDir, f), path.join(publicApi, f)));
+
+  // If dist/api was created previously, remove it to prevent static file collision with Vercel Serverless Functions
+  const distApi = path.join(distDir, 'api');
+  if (fs.existsSync(distApi)) {
+    fs.rmSync(distApi, { recursive: true, force: true });
   }
 }
 

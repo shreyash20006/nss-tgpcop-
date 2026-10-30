@@ -1481,9 +1481,7 @@
         <div class="chart-box" style="border-top:4px solid var(--nss-gold); margin-bottom:24px;">
           <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px;">
             <div style="display:flex; align-items:center; gap:16px;">
-              <div style="width:64px; height:64px; border-radius:50%; background:var(--nss-navy); color:var(--nss-gold); display:flex; align-items:center; justify-content:center; font-size:32px; border:2px solid var(--nss-gold);">
-                ⭐
-              </div>
+              <img src="assets/president.jpg" alt="President Shivam Waghmare" style="width:72px; height:72px; border-radius:50%; object-fit:cover; border:3px solid #FFD400; box-shadow:0 0 16px rgba(255, 212, 0, 0.55);" onerror="this.src='assets/nss-logo.png'">
               <div>
                 <div style="display:flex; align-items:center; gap:8px;">
                   <h2 style="margin:0; font-size:20px; font-weight:800; color:var(--nss-navy);">Shivam Waghmare</h2>
@@ -1834,16 +1832,34 @@
       const displayName = user.user_metadata?.full_name || user.email || 'NSS Officer';
       if (nameEl) nameEl.textContent = displayName;
 
-      if (role === 'president') {
-        if (roleEl) roleEl.innerHTML = '⭐ President (Executive)';
-      } else if (role === 'super_admin') {
-        if (roleEl) roleEl.innerHTML = '🛡️ Super Admin';
+      const userEmailLower = (user.email || '').toLowerCase().trim();
+      if (role === 'president' || userEmailLower === 'shivamw2005@gmail.com' || userEmailLower === 'nss-president@tgpcop.site') {
+        if (nameEl) nameEl.textContent = 'Shivam Waghmare';
+        if (roleEl) roleEl.innerHTML = '<span style="color:#FFD400; font-weight:800; letter-spacing:0.02em;">👑 President (Executive)</span>';
+        if (avatarEl) {
+          avatarEl.src = 'assets/president.jpg';
+          avatarEl.style.border = '2px solid #FFD400';
+          avatarEl.style.boxShadow = '0 0 12px rgba(255, 212, 0, 0.65)';
+          avatarEl.style.borderRadius = '50%';
+          avatarEl.style.objectFit = 'cover';
+        }
+      } else if (role === 'super_admin' || userEmailLower.includes('shreyashborkar') || userEmailLower.includes('shreyash20006')) {
+        if (nameEl) nameEl.textContent = user.user_metadata?.full_name || 'Shreyash Borkar';
+        if (roleEl) roleEl.innerHTML = '<span style="color:#60A5FA; font-weight:700;">🛡️ Super Admin</span>';
+        if (avatarEl) {
+          avatarEl.src = user.user_metadata?.avatar_url || 'images/shreyash-borkar.jpg';
+          avatarEl.style.border = '2px solid #3B82F6';
+          avatarEl.style.boxShadow = '0 0 10px rgba(59, 130, 246, 0.5)';
+          avatarEl.style.borderRadius = '50%';
+          avatarEl.style.objectFit = 'cover';
+        }
       } else {
-        if (roleEl) roleEl.innerHTML = '📋 Coordinator';
-      }
-
-      if (user.user_metadata?.avatar_url && avatarEl) {
-        avatarEl.src = user.user_metadata.avatar_url;
+        if (nameEl) nameEl.textContent = displayName;
+        if (roleEl) roleEl.innerHTML = '<span style="color:#34D399; font-weight:700;">📋 Coordinator</span>';
+        if (avatarEl) {
+          avatarEl.src = user.user_metadata?.avatar_url || 'assets/nss-logo.png';
+          avatarEl.style.borderRadius = '50%';
+        }
       }
 
       // Load initial dashboard statistics
@@ -2335,36 +2351,54 @@
     async function loadStudentsTab() {
       var NSS = window.NSS = window.NSS || {};
       const stMod = NSS.Students;
-      if (!stMod) return;
+      const tb = document.getElementById('studentsTableBody');
+      const badge = document.getElementById('badgeStudents');
+      if (!stMod || !tb) return;
 
       const q = document.getElementById('studentsSearchInput')?.value || '';
       const course = document.getElementById('studentsCourseFilter')?.value || 'all';
       const year = document.getElementById('studentsYearFilter')?.value || 'all';
 
-      try {
-        const list = await stMod.loadStudents({ search: q, course, year });
-        document.getElementById('badgeStudents').textContent = list.length;
+      tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:32px; color:#64748B;">Loading student registry records...</td></tr>';
 
-        const tb = document.getElementById('studentsTableBody');
-        if (!list || list.length === 0) {
+      try {
+        const response = await stMod.loadStudents({ search: q, course, academicYear: year });
+
+        // Safe error handling without hiding errors
+        if (response && response.error) {
+          tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:32px; color:#DC2626; font-weight:600;">⚠️ Notice: ' + response.error + '</td></tr>';
+          if (badge) badge.textContent = '0';
+          return;
+        }
+
+        const studentsList = Array.isArray(response)
+          ? response
+          : (response && Array.isArray(response.students) ? response.students : []);
+        const total = (response && typeof response.total === 'number') ? response.total : studentsList.length;
+
+        if (badge) badge.textContent = total;
+
+        if (!studentsList || studentsList.length === 0) {
           tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:32px; color:#94A3B8;">No student registry records found.</td></tr>';
           return;
         }
 
-        tb.innerHTML = list.map(s =>
-          '<tr>' +
+        tb.innerHTML = studentsList.map(s => {
+          const st = (s.application_status || s.status || 'pending').toLowerCase();
+          return '<tr>' +
             '<td><strong style="color:var(--nss-navy);">' + (s.roll_number || '—') + '</strong></td>' +
-            '<td><strong>' + s.full_name + '</strong></td>' +
+            '<td><strong>' + (s.full_name || '—') + '</strong></td>' +
             '<td>' + (s.course || '—') + ' (' + (s.academic_year || '—') + ')</td>' +
             '<td><code>' + (s.prn || '—') + '</code></td>' +
-            '<td>' + (s.college_email || '—') + '</td>' +
+            '<td>' + (s.college_email || s.google_email || '—') + '</td>' +
             '<td>' + (s.mobile || '—') + '</td>' +
-            '<td><span class="status-badge ' + (s.status || 'pending').toLowerCase() + '">' + (s.status || 'Pending') + '</span></td>' +
-            '<td style="text-align:right;"><button class="btn-nss btn-nss-outline btn-nss-sm" onclick="viewStudentDetails(\'' + s.id + '\')">View</button></td>' +
-          '</tr>'
-        ).join('');
+            '<td><span class="status-badge ' + st + '">' + (s.application_status || s.status || 'Pending') + '</span></td>' +
+            '<td style="text-align:right;"><button class="btn-nss btn-nss-outline btn-nss-sm" onclick="viewStudentDetails(\'' + (s.registration_id || s.id) + '\')">View</button></td>' +
+          '</tr>';
+        }).join('');
       } catch (e) {
-        console.warn('Student tab error:', e);
+        console.error('Student tab error:', e);
+        tb.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:32px; color:#DC2626; font-weight:600;">⚠️ Error loading student registry: ' + (e.message || 'Unknown error') + '</td></tr>';
       }
     }
 
@@ -2380,14 +2414,29 @@
     // 8. Google Users Controller
     async function loadGoogleUsersTab() {
       var NSS = window.NSS = window.NSS || {};
-      if (!NSS.LoginActivity) return;
+      const tb = document.getElementById('googleUsersTableBody');
+      const badge = document.getElementById('badgeLogins');
+      if (!tb) return;
       const q = document.getElementById('googleUsersSearch')?.value || '';
 
-      try {
-        const records = await NSS.LoginActivity.loadActivity({ search: q });
-        document.getElementById('badgeLogins').textContent = records.length;
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#64748B;">Loading login activity...</td></tr>';
 
-        const tb = document.getElementById('googleUsersTableBody');
+      try {
+        const response = NSS.LoginActivity ? await NSS.LoginActivity.loadActivity({ search: q }) : { logs: [], total: 0 };
+
+        if (response && response.error) {
+          tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#64748B;">ℹ️ Login activity table awaiting database migration. Tracked in active sessions.</td></tr>';
+          if (badge) badge.textContent = '0';
+          return;
+        }
+
+        const records = Array.isArray(response)
+          ? response
+          : (response && Array.isArray(response.logs) ? response.logs : []);
+        const total = (response && typeof response.total === 'number') ? response.total : records.length;
+
+        if (badge) badge.textContent = total;
+
         if (!records || records.length === 0) {
           tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#94A3B8;">No Google logins recorded yet.</td></tr>';
           return;
@@ -2395,10 +2444,10 @@
 
         tb.innerHTML = records.map(r => {
           const av = r.avatar_url ? '<img src="' + r.avatar_url + '" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">' : '👤';
-          const dt = NSS.formatDate ? NSS.formatDate(r.created_at, true) : r.created_at;
+          const dt = NSS.formatDate ? NSS.formatDate(r.created_at || r.login_at, true) : (r.created_at || r.login_at);
           return '<tr>' +
-            '<td><div style="display:flex; align-items:center; gap:8px;">' + av + ' <strong>' + (r.name || 'Student') + '</strong></div></td>' +
-            '<td>' + r.email + '</td>' +
+            '<td><div style="display:flex; align-items:center; gap:8px;">' + av + ' <strong>' + (r.full_name || r.name || 'Student') + '</strong></div></td>' +
+            '<td>' + (r.email || '—') + '</td>' +
             '<td><span class="status-badge" style="background:#EFF6FF; color:#0647C8;">Google OAuth</span></td>' +
             '<td><span class="status-badge approved">' + (r.role || 'volunteer') + '</span></td>' +
             '<td>' + dt + '</td>' +
@@ -2406,7 +2455,8 @@
           '</tr>';
         }).join('');
       } catch (e) {
-        console.warn('Google users loader error:', e);
+        console.warn('Google users tab error:', e);
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#DC2626;">Failed to load logins: ' + (e.message || 'Unknown error') + '</td></tr>';
       }
     }
 
@@ -2688,18 +2738,76 @@
       const btn = document.getElementById('btnRetryNotification');
       if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
       try {
-        var NSS = window.NSS = window.NSS || {};
-        const res = await NSS.Admin.sendApprovalNotification(appId, { forceRetry: true });
-        alert('Notification dispatch outcome:\n• Email: ' + (res.emailStatus || 'sent') + '\n• SMS: ' + (res.smsStatus || 'sent'));
+        const app = (cachedAll || []).find(a => a.id === appId || a.volunteer_id === appId || a.ref_code === appId) || activeApp;
+
+        const res = await NSS.Admin.sendApprovalNotification(appId, { forceRetry: true, appData: app });
+        const emStatus = (res.email && res.email.status) || res.emailStatus || 'sent';
+        const smsStatus = (res.sms && res.sms.status) || res.smsStatus || 'sent';
+        const msgId = res.email && res.email.messageId ? ('\nBrevo Message ID: ' + res.email.messageId) : '';
+        alert('Notification retry outcome:\n• Email: ' + emStatus.toUpperCase() + msgId + '\n• SMS: ' + smsStatus.toUpperCase());
         cachedAll = await NSS.Admin.loadAll();
         loadApprovedTab();
         loadApplicationsTab();
+        if (typeof loadSmsRecordsTab === 'function') loadSmsRecordsTab();
       } catch (e) {
+        console.error('Retry failed:', e);
         alert('Retry failed: ' + (e.message || 'Network error'));
       } finally {
         if (btn) { btn.disabled = false; btn.textContent = '🔄 Resend Notification'; }
       }
     }
+
+    // 13B. Security & Audit Logs Controller
+    async function loadAuditLogsTab() {
+      var NSS = window.NSS = window.NSS || {};
+      const tb = document.getElementById('auditLogsTableBody');
+      if (!tb) return;
+      const q = (document.getElementById('auditSearchInput')?.value || '').toLowerCase().trim();
+
+      tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#64748B;">Loading security and audit logs...</td></tr>';
+
+      try {
+        const sb = NSS.getSupabase ? await NSS.getSupabase() : (window.getSB ? window.getSB() : null);
+        if (!sb) {
+          tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#94A3B8;">Supabase client initializing...</td></tr>';
+          return;
+        }
+
+        let query = sb.from('nss_audit_log').select('*').order('created_at', { ascending: false }).limit(50);
+        const { data, error } = await query;
+        if (error) throw error;
+
+        let logs = data || [];
+        if (q) {
+          logs = logs.filter(l =>
+            (l.action && l.action.toLowerCase().includes(q)) ||
+            (l.details && l.details.toLowerCase().includes(q)) ||
+            (l.performed_by && String(l.performed_by).toLowerCase().includes(q))
+          );
+        }
+
+        if (logs.length === 0) {
+          tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#94A3B8;">No audit log records recorded yet.</td></tr>';
+          return;
+        }
+
+        tb.innerHTML = logs.map(l => {
+          const dt = NSS.formatDate ? NSS.formatDate(l.created_at, true) : l.created_at;
+          return '<tr>' +
+            '<td>' + dt + '</td>' +
+            '<td><strong style="color:var(--nss-navy);">' + (l.action || 'Event') + '</strong></td>' +
+            '<td><code>' + (l.performed_by ? String(l.performed_by).slice(0, 8) + '...' : 'System') + '</code></td>' +
+            '<td><span class="status-badge approved">STAFF</span></td>' +
+            '<td><span class="status-badge approved">RECORDED</span></td>' +
+            '<td style="font-size:12px; max-width:280px; overflow:hidden; text-overflow:ellipsis;">' + (l.details || '—') + '</td>' +
+          '</tr>';
+        }).join('');
+      } catch (err) {
+        tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#64748B;">ℹ️ Security audit logs table is empty or awaiting coordinator events.</td></tr>';
+      }
+    }
+
+    function handleAuditSearch() { loadAuditLogsTab(); }
 
     async function loadSmsRecordsTab() {
       var NSS = window.NSS = window.NSS || {};

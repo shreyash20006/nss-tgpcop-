@@ -79,8 +79,26 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb) return 'volunteer';
       try {
-        const user = userId ? { id: userId } : await this.getCurrentUser();
+        let user = null;
+        if (userId && typeof userId === 'object' && userId.id) {
+          user = userId;
+        } else if (typeof userId === 'string') {
+          const current = await this.getCurrentUser();
+          user = (current && current.id === userId) ? current : { id: userId, email: current?.email };
+        } else {
+          user = await this.getCurrentUser();
+        }
         if (!user || !user.id) return 'volunteer';
+
+        const emailLower = (user.email || '').toLowerCase().trim();
+
+        // Immediate hardcoded fallback for primary leadership accounts
+        if (emailLower === 'shivamw2005@gmail.com' || emailLower === 'nss-president@tgpcop.site') {
+          return 'president';
+        }
+        if (emailLower === 'shreyashborkar2006@gmail.com' || emailLower === 'shreyashborkar2005@gmail.com' || emailLower === 'shreyash20006@gmail.com') {
+          return 'super_admin';
+        }
 
         // 1. Query assigned role from nss_roles table
         const { data, error } = await sb
@@ -92,11 +110,11 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         if (data && data.role) return data.role;
 
         // 2. If no role found, trigger server-side invitation activation RPC
-        if (user.email) {
+        if (emailLower) {
           try {
             const { data: activatedRole } = await sb.rpc('nss_check_and_activate_invitation', {
               p_user_id: user.id,
-              p_email: user.email.toLowerCase().trim()
+              p_email: emailLower
             });
             if (activatedRole && activatedRole !== 'volunteer') {
               return activatedRole;
@@ -289,7 +307,66 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // 3. CENTRALIZED STUDENT REGISTRY (nss_students)
   // ==============================================================================
   NSS.Students = {
-    async loadStudents({ page = 1, limit = 20, search = '', status = 'all', course = 'all', academicYear = 'all' } = {}) {
+    async loadStudentsFromApplications({ page = 1, limit = 50, search = '', status = 'all', course = 'all', academicYear = 'all' } = {}) {
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
+      if (!sb) return { students: [], total: 0, page: 1, totalPages: 1 };
+
+      try {
+        let query = sb.from('nss_applications').select('*', { count: 'exact' });
+        if (status && status !== 'all') {
+          query = query.eq('status', status);
+        }
+        if (course && course !== 'all') {
+          query = query.eq('course', course);
+        }
+        if (academicYear && academicYear !== 'all') {
+          query = query.eq('academic_year', academicYear);
+        }
+        if (search && search.trim()) {
+          const q = search.trim();
+          query = query.or(`full_name.ilike.%${q}%,roll_number.ilike.%${q}%,prn.ilike.%${q}%,college_email.ilike.%${q}%,mobile.ilike.%${q}%`);
+        }
+
+        const from = (page - 1) * limit;
+        const to = from + limit - 1;
+        query = query.order('submitted_at', { ascending: false }).range(from, to);
+
+        const { data, count, error } = await query;
+        if (error) throw error;
+
+        const mapped = (data || []).map(a => ({
+          id: a.id,
+          user_id: a.user_id,
+          full_name: a.full_name,
+          roll_number: a.roll_number,
+          prn: a.prn,
+          course: a.course,
+          academic_year: a.academic_year,
+          division: a.division,
+          college_email: a.college_email,
+          google_email: a.college_email,
+          mobile: a.mobile,
+          application_status: a.status,
+          volunteer_id: a.volunteer_id,
+          registration_id: a.id,
+          created_at: a.submitted_at
+        }));
+
+        return {
+          students: mapped,
+          total: count || mapped.length,
+          page,
+          totalPages: Math.ceil((count || mapped.length) / limit) || 1
+        };
+      } catch (err) {
+        console.warn('Fallback student query error:', err);
+        return { students: [], total: 0, page: 1, totalPages: 1, error: err.message };
+      }
+    },
+
+    async loadStudents({ page = 1, limit = 50, search = '', status = 'all', course = 'all', academicYear = 'all' } = {}) {
       const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
         ? await window.NSS.getSupabase()
         : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
@@ -318,7 +395,9 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         query = query.order('created_at', { ascending: false }).range(from, to);
 
         const { data, count, error } = await query;
-        if (error) throw error;
+        if (error) {
+          return await this.loadStudentsFromApplications({ page, limit, search, status, course, academicYear });
+        }
 
         return {
           students: data || [],
@@ -327,8 +406,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
           totalPages: Math.ceil((count || 0) / limit) || 1
         };
       } catch (err) {
-        console.error('Error querying nss_students:', err);
-        return { students: [], total: 0, page, totalPages: 1 };
+        return await this.loadStudentsFromApplications({ page, limit, search, status, course, academicYear });
       }
     },
 
@@ -338,12 +416,31 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
       if (!sb || !studentId) return null;
       try {
-        const { data, error } = await sb.from('nss_students').select('*').eq('id', studentId).single();
-        if (error) throw error;
-        return data;
-      } catch (e) {
-        return null;
-      }
+        const { data, error } = await sb.from('nss_students').select('*').eq('id', studentId).maybeSingle();
+        if (!error && data) return data;
+      } catch (e) {}
+
+      try {
+        const { data: a } = await sb.from('nss_applications').select('*').eq('id', studentId).maybeSingle();
+        if (a) {
+          return {
+            id: a.id,
+            user_id: a.user_id,
+            full_name: a.full_name,
+            roll_number: a.roll_number,
+            prn: a.prn,
+            course: a.course,
+            academic_year: a.academic_year,
+            division: a.division,
+            college_email: a.college_email,
+            mobile: a.mobile,
+            application_status: a.status,
+            volunteer_id: a.volunteer_id,
+            registration_id: a.id
+          };
+        }
+      } catch (e) {}
+      return null;
     },
 
     async updateStudent(studentId, fields) {
@@ -592,20 +689,40 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         }
 
         // 2. Directory count
-        const { count: dirCount } = await sb.from('nss_volunteer_directory').select('*', { count: 'exact', head: true });
-        stats.totalDirectory = dirCount || 0;
+        try {
+          const { count: dirCount } = await sb.from('nss_volunteer_directory').select('*', { count: 'exact', head: true });
+          stats.totalDirectory = dirCount || 0;
+        } catch (e) {}
 
-        // 3. Centralized students count
-        const { count: studentCount } = await sb.from('nss_students').select('*', { count: 'exact', head: true });
-        stats.totalStudents = studentCount || 0;
+        // 3. Centralized students count (with fallback to total applications)
+        try {
+          const { count: studentCount, error: stErr } = await sb.from('nss_students').select('*', { count: 'exact', head: true });
+          if (!stErr && typeof studentCount === 'number') {
+            stats.totalStudents = studentCount;
+          } else {
+            stats.totalStudents = stats.totalApplications;
+          }
+        } catch (e) {
+          stats.totalStudents = stats.totalApplications;
+        }
 
         // 4. Login activity count
-        const { count: loginCount } = await sb.from('nss_login_activity').select('*', { count: 'exact', head: true });
-        stats.totalGoogleUsers = loginCount || 0;
+        try {
+          const { count: loginCount, error: logErr } = await sb.from('nss_login_activity').select('*', { count: 'exact', head: true });
+          if (!logErr && typeof loginCount === 'number') {
+            stats.totalGoogleUsers = loginCount;
+          } else {
+            stats.totalGoogleUsers = 0;
+          }
+        } catch (e) {
+          stats.totalGoogleUsers = 0;
+        }
 
         // 5. Staff roles count
-        const { count: roleCount } = await sb.from('nss_roles').select('*', { count: 'exact', head: true });
-        stats.activeStaff = roleCount || 0;
+        try {
+          const { count: roleCount } = await sb.from('nss_roles').select('*', { count: 'exact', head: true });
+          stats.activeStaff = roleCount || 0;
+        } catch (e) {}
 
       } catch (err) {
         console.warn('Error computing live stats:', err);
@@ -713,7 +830,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       };
     },
 
-    async sendApprovalNotification(appId, { forceRetry = false } = {}) {
+    async sendApprovalNotification(appId, { forceRetry = false, appData = null } = {}) {
       const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
         ? await window.NSS.getSupabase()
         : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
@@ -733,7 +850,8 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         headers,
         body: JSON.stringify({
           applicationId: appId,
-          forceRetry
+          forceRetry,
+          applicationData: appData
         })
       });
 
