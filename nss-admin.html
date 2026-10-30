@@ -13,6 +13,15 @@
   <link rel="stylesheet" href="nss.css">
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="volunteers-data.js?v=20261030-v8"></script>
+  <script src="directory-seed-data.js?v=20261030-v8"></script>
+  <script src="cloudinary-config.js?v=20261030-v8"></script>
+  <script src="env.js?v=20261030-v8"></script>
+  <script src="echo.js?v=20261030-v8"></script>
+  <script src="nss.js?v=20261030-v8"></script>
+  <script>
+    var NSS = window.NSS = window.NSS || {};
+  </script>
 </head>
 <body class="nss-page">
 
@@ -999,23 +1008,21 @@
     </div>
   </footer>
 
-  <!-- Scripts with cache busters -->
-  <script src="volunteers-data.js?v=20261030-v5"></script>
-  <script src="directory-seed-data.js?v=20261030-v5"></script>
-  <script src="cloudinary-config.js?v=20261030-v5"></script>
-  <script src="env.js?v=20261030-v5"></script>
-  <script src="echo.js?v=20261030-v5"></script>
-  <script src="nss.js?v=20261030-v5"></script>
   <script>
-    const NSS = window.NSS = window.NSS || {};
+    var NSS = window.NSS = window.NSS || {};
     let activeApp = null;
     let cachedPending = [];
     let cachedAll = [];
 
     // Auth Guard
     async function initAdminAuth() {
-      await window.ready;
-      const res = await NSS.Auth.requireCoordinator('login.html?coordinator=true');
+      if (window.ready) await window.ready;
+      const auth = (window.NSS && window.NSS.Auth) || (typeof NSS !== 'undefined' && NSS.Auth);
+      if (!auth || typeof auth.requireCoordinator !== 'function') {
+        setTimeout(initAdminAuth, 100);
+        return;
+      }
+      const res = await auth.requireCoordinator('login.html?coordinator=true');
       if (!res) return;
 
       const { user, role } = res;
@@ -1073,7 +1080,12 @@
     // Load Stats & Pending
     async function loadDashboard() {
       try {
-        const stats = await NSS.Admin.loadStats();
+        const adminMod = (window.NSS && window.NSS.Admin) || (typeof NSS !== 'undefined' && NSS.Admin);
+        if (!adminMod) {
+          setTimeout(loadDashboard, 100);
+          return;
+        }
+        const stats = await adminMod.loadStats();
         document.getElementById('statTotal').textContent = stats.total;
         document.getElementById('statPending').textContent = stats.pending;
         document.getElementById('statApproved').textContent = stats.approved;
@@ -1081,18 +1093,21 @@
         document.getElementById('statRevoked').textContent = stats.revoked;
         document.getElementById('pendingBadge').textContent = stats.pending;
 
-        const pending = await NSS.Admin.loadPending();
+        const pending = await adminMod.loadPending();
         cachedPending = pending;
         renderPendingTable(pending);
 
         // Preload all applications & compute broadcast deliverable recipients
-        cachedAll = await NSS.Admin.loadAll();
+        cachedAll = await adminMod.loadAll();
         updateBroadcastRecipients();
 
         // Preload directory count for tab badge
-        const dirData = await NSS.Directory.loadDirectory({ limit: 1 });
-        const dirBadge = document.getElementById('directoryBadge');
-        if (dirBadge) dirBadge.textContent = dirData.stats.total;
+        const dirMod = (window.NSS && window.NSS.Directory) || (typeof NSS !== 'undefined' && NSS.Directory);
+        if (dirMod) {
+          const dirData = await dirMod.loadDirectory({ limit: 1 });
+          const dirBadge = document.getElementById('directoryBadge');
+          if (dirBadge && dirData && dirData.stats) dirBadge.textContent = dirData.stats.total;
+        }
       } catch (e) {
         console.error('Error loading dashboard:', e);
       }
@@ -1127,9 +1142,14 @@
 
     // All Tab
     async function loadAllTab() {
-      const status = document.getElementById('allStatusFilter').value;
-      const query = document.getElementById('allSearchInput').value;
-      const list = await NSS.Admin.loadAll(status, query);
+      const status = document.getElementById('allStatusFilter')?.value || 'all';
+      const query = document.getElementById('allSearchInput')?.value || '';
+      const adminMod = (window.NSS && window.NSS.Admin) || (typeof NSS !== 'undefined' && NSS.Admin);
+      if (!adminMod) {
+        setTimeout(loadAllTab, 100);
+        return;
+      }
+      const list = await adminMod.loadAll(status, query);
       cachedAll = list;
       renderAllTable(list);
     }
@@ -1337,7 +1357,9 @@
     }
 
     function stopScanner() {
-      NSS.QRScanner.stop();
+      if (window.NSS && window.NSS.QRScanner && typeof window.NSS.QRScanner.stop === 'function') {
+        window.NSS.QRScanner.stop();
+      }
       if (btnStart) btnStart.style.display = 'inline-flex';
       if (btnStop) btnStop.style.display = 'none';
     }
@@ -1471,7 +1493,12 @@
 
     // Leadership Tab
     async function loadLeadershipTab() {
-      const list = await NSS.Admin.loadLeadership();
+      const adminMod = (window.NSS && window.NSS.Admin) || (typeof NSS !== 'undefined' && NSS.Admin);
+      if (!adminMod) {
+        setTimeout(loadLeadershipTab, 100);
+        return;
+      }
+      const list = await adminMod.loadLeadership();
       const tb = document.getElementById('leadershipTableBody');
       if (!list || !list.length) {
         tb.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:32px; color:var(--nss-text-muted);">No leadership profiles configured yet. Click "+ Add New Leader" to create one.</td></tr>`;
@@ -1572,7 +1599,13 @@
       directoryPageLimit = limitVal;
 
       try {
-        const res = await NSS.Directory.loadDirectory({
+        const dirMod = (window.NSS && window.NSS.Directory) || (typeof NSS !== 'undefined' && NSS.Directory);
+        if (!dirMod || typeof dirMod.loadDirectory !== 'function') {
+          setTimeout(loadDirectoryTab, 100);
+          return;
+        }
+
+        const res = await dirMod.loadDirectory({
           page: currentDirectoryPage,
           limit: directoryPageLimit,
           search,

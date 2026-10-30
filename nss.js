@@ -3,10 +3,12 @@
  * TGPCOP - Echo Campus Media Integration
  */
 
+var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {});
+
 (function (window) {
   'use strict';
 
-  const NSS = window.NSS = window.NSS || {};
+  var NSS = window.NSS = window.NSS || {};
 
   // Status Badge Helper
   NSS.renderStatusBadge = function (status) {
