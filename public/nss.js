@@ -6,7 +6,7 @@
 (function (window) {
   'use strict';
 
-  const NSS = {};
+  const NSS = window.NSS = window.NSS || {};
 
   // Status Badge Helper
   NSS.renderStatusBadge = function (status) {

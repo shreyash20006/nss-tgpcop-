@@ -999,14 +999,15 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
-  <script src="volunteers-data.js"></script>
-  <script src="directory-seed-data.js"></script>
-  <script src="cloudinary-config.js"></script>
-  <script src="env.js"></script>
-  <script src="echo.js"></script>
-  <script src="nss.js"></script>
+  <!-- Scripts with cache busters -->
+  <script src="volunteers-data.js?v=20261030-v5"></script>
+  <script src="directory-seed-data.js?v=20261030-v5"></script>
+  <script src="cloudinary-config.js?v=20261030-v5"></script>
+  <script src="env.js?v=20261030-v5"></script>
+  <script src="echo.js?v=20261030-v5"></script>
+  <script src="nss.js?v=20261030-v5"></script>
   <script>
+    const NSS = window.NSS = window.NSS || {};
     let activeApp = null;
     let cachedPending = [];
     let cachedAll = [];
@@ -1936,7 +1937,11 @@
       btn.textContent = 'Importing...';
 
       try {
-        const res = await NSS.Directory.importNames(stagedExcelNames, stagedBatchId);
+        const dir = (window.NSS && window.NSS.Directory) || (typeof NSS !== 'undefined' && NSS.Directory);
+        if (!dir || typeof dir.importNames !== 'function') {
+          throw new Error('NSS Directory module is not fully loaded. Please hard refresh the page with Ctrl+F5 or Shift+Reload.');
+        }
+        const res = await dir.importNames(stagedExcelNames, stagedBatchId);
         alert(`Successfully imported ${res.count} volunteer names to Directory!\nImport Batch ID: ${res.batchId}`);
         closeExcelImportModal();
         loadDirectoryTab();
