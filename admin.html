@@ -30,7 +30,7 @@
   <script src="cloudinary-config.js?v=20261031-v5"></script>
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v11"></script>
+  <script src="nss.js?v=20261031-v12"></script>
 
   <style>
     :root {
@@ -1231,8 +1231,9 @@
            ==================================================================== -->
       <section id="tab-approved" class="admin-content-pane">
         <div class="section-toolbar">
-          <div style="font-size:13px; font-weight:700; color:var(--nss-navy);">
-            Official Enrolled Volunteer Members (Digital Credentials Issued)
+          <div style="display:flex; align-items:center; gap:12px; font-size:13px; font-weight:700; color:var(--nss-navy);">
+            <span style="display:inline-grid; place-items:center; min-width:48px; height:42px; padding:0 12px; border-radius:12px; background:#DCFCE7; color:#166534; font-size:20px;" id="approvedCountDisplay">0</span>
+            <span>volunteers approved so far</span>
           </div>
           <button type="button" class="btn-nss btn-nss-outline" onclick="exportApprovedCSV()">
             📥 Export CSV
@@ -1256,7 +1257,7 @@
                 </tr>
               </thead>
               <tbody id="approvedAppsTableBody">
-                <tr><td colspan="8" style="text-align:center; padding:32px; color:#94A3B8;">Loading approved members...</td></tr>
+                <tr><td colspan="9" style="text-align:center; padding:32px; color:#94A3B8;">Loading approved members...</td></tr>
               </tbody>
             </table>
           </div>
@@ -2664,7 +2665,11 @@
         cachedAll = await NSS.Admin.loadAll();
       }
       const approved = cachedAll.filter(a => a.status === 'approved');
-      document.getElementById('badgeApproved').textContent = approved.length;
+      let approvedCount = approved.length;
+      try { approvedCount = await NSS.Admin.countApprovedApplications(); } catch (e) { console.warn('Exact approved count unavailable; showing loaded total.', e); }
+      document.getElementById('badgeApproved').textContent = approvedCount;
+      const countDisplay = document.getElementById('approvedCountDisplay');
+      if (countDisplay) countDisplay.textContent = approvedCount;
 
       const tb = document.getElementById('approvedAppsTableBody');
       if (!approved || approved.length === 0) {

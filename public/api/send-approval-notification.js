@@ -100,8 +100,22 @@ module.exports = async (req, res) => {
     } catch (ignore) {}
   }
 
+  let callerIsStaff = false;
+  if (callerUserId) {
+    const roleRes = await supabaseQuery(`nss_roles?user_id=eq.${encodeURIComponent(callerUserId)}&select=user_id&limit=1`);
+    callerIsStaff = roleRes.ok && Array.isArray(roleRes.data) && roleRes.data.length > 0;
+  }
+
+  if (!callerUserId && !isTest) {
+    return res.status(401).json({ error: 'Sign in before requesting an approval notification.' });
+  }
+  if (isTest && !callerIsStaff) {
+    return res.status(403).json({ error: 'Only NSS staff can send test notifications.' });
+  }
+
   // 2. Fetch Application Record from Supabase
-  let app = applicationData;
+  // Never trust client-supplied application fields when an ID is available.
+  let app = applicationId ? null : applicationData;
 
   if (applicationId && !app) {
     const rawId = String(applicationId).trim();
@@ -183,6 +197,10 @@ module.exports = async (req, res) => {
       error: 'Application record not found for approval notification. Ensure the application exists or supply applicationData in retry request.',
       searchedId: applicationId
     });
+  }
+
+  if (!isTest && !callerIsStaff && app.user_id !== callerUserId) {
+    return res.status(403).json({ error: 'You can only request a notification for your own volunteer application.' });
   }
 
   // STRICT REQUIREMENT: Only send notification for APPROVED applications!

@@ -391,9 +391,33 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         throw error;
       }
 
+      // A student can only auto-approve the application they just submitted.
+      // The database RPC still validates ownership and issues the real ID/QR credentials.
+      let approval;
+      const { data: approvalData, error: approvalError } = await sb.rpc('nss_approve_volunteer', { app_id: data.id });
+      if (approvalError) {
+        // A network interruption may happen after Postgres committed the approval.
+        const { data: persisted, error: verifyError } = await sb
+          .from('nss_applications')
+          .select('status, volunteer_id, reviewed_at')
+          .eq('id', data.id)
+          .maybeSingle();
+        if (verifyError || persisted?.status !== 'approved') {
+          console.error('Automatic volunteer approval failed:', approvalError);
+          throw new Error(`Your registration was received, but automatic approval could not finish. Keep reference ${data.ref_code || data.id} and contact the NSS office.`);
+        }
+        approval = persisted;
+      } else {
+        approval = approvalData;
+      }
+
+      data.status = 'approved';
+      data.volunteer_id = approval?.volunteer_id || data.volunteer_id;
+      data.reviewed_at = approval?.reviewed_at || new Date().toISOString();
+
       // Also upsert into centralized nss_students registry
       try {
-        await sb.from('nss_students').upsert({
+        const { error: studentSyncError } = await sb.from('nss_students').upsert({
           user_id: user.id,
           full_name: insertPayload.full_name,
           roll_number: insertPayload.roll_number,
@@ -405,12 +429,22 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
           google_email: user.email,
           mobile: insertPayload.mobile,
           registration_id: data.id,
-          application_status: 'pending',
+          application_status: 'approved',
+          volunteer_id: data.volunteer_id,
+          approval_date: data.reviewed_at,
           data_source: 'web_registration',
           updated_at: new Date().toISOString()
         }, { onConflict: 'roll_number' });
+        if (studentSyncError) throw studentSyncError;
       } catch (e) {
         console.warn('Sync to nss_students non-fatal:', e);
+      }
+
+      // Email/SMS delivery is best effort; it must not undo an issued volunteer ID.
+      try {
+        await NSS.Admin.sendApprovalNotification(data.id, { forceRetry: false });
+      } catch (e) {
+        console.warn('Auto-approval notice could not be sent:', e);
       }
 
       return data;
@@ -923,6 +957,19 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // 6. NSS ADMIN OPERATIONS (REAL DATABASE METRICS & LIFECYCLE)
   // ==============================================================================
   NSS.Admin = {
+    async countApprovedApplications() {
+      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
+        ? await window.NSS.getSupabase()
+        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
+      if (!sb) throw new Error('Supabase client unavailable');
+      const { count, error } = await sb
+        .from('nss_applications')
+        .select('id', { count: 'exact', head: true })
+        .eq('status', 'approved');
+      if (error) throw error;
+      return count || 0;
+    },
+
     /**
      * Loads live database statistics from Supabase without mock inflation
      */

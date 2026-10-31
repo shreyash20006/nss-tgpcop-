@@ -206,15 +206,21 @@ DECLARE
     v_token_hash TEXT;
     v_year TEXT;
     v_app public.nss_applications;
+    v_is_coordinator BOOLEAN;
 BEGIN
-    -- Verify caller is authorized coordinator
-    IF NOT EXISTS (SELECT 1 FROM public.nss_roles WHERE user_id = auth.uid()) THEN
-        RAISE EXCEPTION 'Unauthorized: only NSS coordinators can approve volunteers';
+    IF auth.uid() IS NULL THEN
+        RAISE EXCEPTION 'Authentication required';
     END IF;
 
     SELECT * INTO v_app FROM public.nss_applications WHERE id = app_id AND status = 'pending';
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Application not found or is not in pending status';
+    END IF;
+
+    -- Coordinators may approve any application; applicants may approve only their own.
+    SELECT EXISTS (SELECT 1 FROM public.nss_roles WHERE user_id = auth.uid()) INTO v_is_coordinator;
+    IF NOT v_is_coordinator AND v_app.user_id IS DISTINCT FROM auth.uid() THEN
+        RAISE EXCEPTION 'Unauthorized: applicants can only approve their own application';
     END IF;
 
     -- Concurrency-safe sequential Volunteer ID format: NSS-TGP-26-000001
@@ -232,12 +238,17 @@ BEGIN
         volunteer_id = v_volunteer_id,
         qr_token_hash = v_token_hash,
         reviewed_at = NOW(),
-        reviewed_by = auth.uid()
+        reviewed_by = CASE WHEN v_is_coordinator THEN auth.uid() ELSE NULL END
     WHERE id = app_id;
 
     -- Record audit log
     INSERT INTO public.nss_audit_log (application_id, action, performed_by, details)
-    VALUES (app_id, 'approved', auth.uid(), 'Assigned Volunteer ID: ' || v_volunteer_id);
+    VALUES (
+        app_id,
+        'approved',
+        auth.uid(),
+        CASE WHEN v_is_coordinator THEN 'Coordinator approved. ' ELSE 'Self-service auto-approval. ' END || 'Assigned Volunteer ID: ' || v_volunteer_id
+    );
 
     RETURN jsonb_build_object(
         'success', true,

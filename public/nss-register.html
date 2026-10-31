@@ -133,19 +133,24 @@
       <!-- Success Screen -->
       <div id="successCard" class="nss-form-card" style="display:none; text-align:center; padding: 48px 24px;">
         <div style="font-size: 54px; margin-bottom: 14px;">🎉</div>
-        <h2 style="font-size: 36px; margin-bottom: 8px;">Registration Submitted!</h2>
+        <h2 style="font-size: 36px; margin-bottom: 8px;">You're approved. Welcome to NSS!</h2>
         <p style="color: var(--nss-text-muted); margin-bottom: 24px;">
-          Your application has been received and is currently under coordinator review.
+          Your volunteer registration is approved automatically and your NSS credentials are ready.
         </p>
+        <div style="background:#ECFDF5; border:1px solid #A7F3D0; border-radius:var(--nss-radius-md); padding:16px; max-width:400px; margin:0 auto 18px;">
+          <div style="font-size:12px; color:#047857; text-transform:uppercase; letter-spacing:.05em;">Your Volunteer ID</div>
+          <div id="volunteerIdDisplay" style="font-size:24px; font-weight:800; color:#065F46; margin-top:4px; letter-spacing:.04em;"></div>
+        </div>
         <div style="background: #F8FAFC; border: 2px dashed var(--nss-accent); border-radius: var(--nss-radius-md); padding: 20px; max-width: 400px; margin: 0 auto 28px;">
           <div style="font-size: 12px; color: var(--nss-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Your Reference Code</div>
           <div id="refCodeDisplay" style="font-size: 24px; font-weight: 700; color: var(--nss-navy); margin-top: 4px; letter-spacing: 0.05em;"></div>
         </div>
         <p style="font-size: 14px; color: var(--nss-text-muted); margin-bottom: 28px;">
-          Please save your Reference Code. Once approved by the NSS Program Officer, your official Volunteer ID and Digital QR Card will be issued.
+          Keep your Reference Code for support. Your Digital ID Card is available now.
         </p>
         <div style="display:flex; gap:14px; justify-content:center; flex-wrap:wrap;">
-          <a href="nss-status.html" class="nss-btn nss-btn-primary">Check Status</a>
+          <a href="profile.html" class="nss-btn nss-btn-primary">Open My Profile</a>
+          <a href="my-id.html" class="nss-btn nss-btn-outline">View Digital ID</a>
           <a href="nss.html" class="nss-btn nss-btn-outline">Back to NSS Home</a>
         </div>
       </div>
@@ -398,7 +403,7 @@
   <!-- Scripts -->
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v11"></script>
+  <script src="nss.js?v=20261031-v12"></script>
   <script>
     let selectedFile = null;
 
@@ -605,6 +610,7 @@
         // Success!
         document.getElementById('regFormContainer').style.display = 'none';
         document.getElementById('refCodeDisplay').textContent = data.ref_code || 'NSS-REF-SUCCESS';
+        document.getElementById('volunteerIdDisplay').textContent = data.volunteer_id || 'Issued';
         document.getElementById('successCard').style.display = 'block';
 
         // Trigger Brevo Confirmation Email
