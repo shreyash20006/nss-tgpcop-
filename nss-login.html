@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="nss.css?v=20261031-v8">
+  <link rel="stylesheet" href="nss.css?v=20261101-v13">
 </head>
 <body class="nss-page">
 
@@ -81,6 +81,18 @@
        ====================================================================== -->
     <main class="nss-auth-section">
     <div class="nss-auth-container">
+      <aside class="nss-login-story" aria-label="NSS volunteer portal">
+        <div class="nss-login-orbit nss-login-orbit-one"></div>
+        <div class="nss-login-orbit nss-login-orbit-two"></div>
+        <div class="nss-login-story-content">
+          <span class="nss-login-kicker">NATIONAL SERVICE SCHEME · TGPCOP</span>
+          <div class="nss-login-mark">NSS<span>+</span></div>
+          <h2>Make every hour<br>of service count.</h2>
+          <p>One secure sign in for your volunteer profile, event memories and NSS credentials.</p>
+          <div class="nss-login-story-foot"><span class="nss-login-live-dot"></span> Serve · Learn · Lead</div>
+        </div>
+        <div class="nss-login-glow" aria-hidden="true"></div>
+      </aside>
       
       <div class="nss-auth-card">
         
@@ -313,7 +325,7 @@
   <script src="cloudinary-config.js?v=20261031-v5"></script>
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v12"></script>
+  <script src="nss.js?v=20261101-v13"></script>
   <script>
     window.NSS = window.NSS || {};
 
@@ -365,7 +377,10 @@
     }
 
     // Evaluate Auth State
-    async function evaluateAuth() {
+    let authEvaluationPromise = null;
+    let recordedLoginUserId = null;
+
+    async function runAuthEvaluation() {
       if (window.ready) await window.ready;
       const NSS = window.NSS = window.NSS || {};
       if (!NSS.Auth || typeof NSS.Auth.getCurrentUser !== 'function') {
@@ -391,9 +406,14 @@
       loginAction.style.display = 'none';
 
       // Record login in nss_login_activity
-      try {
-        await NSS.Auth.recordLogin(user);
-      } catch (e) {}
+      if (recordedLoginUserId !== user.id) {
+        try {
+          await NSS.Auth.recordLogin(user);
+          recordedLoginUserId = user.id;
+        } catch (e) {
+          console.warn('Signed in, but login activity could not sync:', e);
+        }
+      }
 
       // Check role in nss_roles table (Security Definer verified)
       const role = await NSS.Auth.getUserRole(user.id);
@@ -422,6 +442,12 @@
 
       // New student - send to registration
       window.location.href = 'register.html';
+    }
+
+    function evaluateAuth() {
+      if (authEvaluationPromise) return authEvaluationPromise;
+      authEvaluationPromise = runAuthEvaluation().finally(() => { authEvaluationPromise = null; });
+      return authEvaluationPromise;
     }
 
     

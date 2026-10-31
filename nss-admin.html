@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261031-v8">
+  <link rel="stylesheet" href="nss.css?v=20261101-v13">
 
   <!-- Early Global NSS Definition -->
   <script>
@@ -30,7 +30,7 @@
   <script src="cloudinary-config.js?v=20261031-v5"></script>
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v12"></script>
+  <script src="nss.js?v=20261101-v13"></script>
 
   <style>
     :root {
@@ -2510,8 +2510,9 @@
         const response = NSS.LoginActivity ? await NSS.LoginActivity.loadActivity({ search: q }) : { logs: [], total: 0 };
 
         if (response && response.error) {
-          tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#64748B;">ℹ️ Login activity table awaiting database migration. Tracked in active sessions.</td></tr>';
-          if (badge) badge.textContent = '0';
+          tb.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:32px; color:#B42318;">Login activity could not sync. Apply the latest Supabase migration and refresh.</td></tr>';
+          if (badge) badge.textContent = 'N/A';
+          console.error('Login activity query failed:', response.error);
           return;
         }
 

@@ -3346,9 +3346,59 @@ body.nss-page::before {
 
 .nss-auth-container {
   width: 100%;
-  max-width: 500px;
+  max-width: 1080px;
   margin: 0 auto;
   box-sizing: border-box;
+  display: grid;
+  grid-template-columns: minmax(0, .92fr) minmax(0, 1fr);
+  align-items: stretch;
+  perspective: 1200px;
+  filter: drop-shadow(0 26px 48px rgba(7, 27, 73, .16));
+  animation: nss-login-enter .7s cubic-bezier(.2,.8,.2,1) both;
+}
+
+.nss-login-story {
+  min-height: 590px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  padding: 54px 42px;
+  color: #fff;
+  border-radius: 28px 0 0 28px;
+  isolation: isolate;
+  background: radial-gradient(circle at 75% 25%, rgba(76, 151, 255, .58), transparent 28%), linear-gradient(145deg, #071b49 4%, #0647c8 62%, #0e75e9);
+  transform: rotateY(2deg);
+  transform-origin: right center;
+}
+.nss-login-story-content { position: relative; z-index: 2; max-width: 370px; }
+.nss-login-kicker { display: block; font-size: 10px; font-weight: 800; letter-spacing: .16em; color: #b9d8ff; }
+.nss-login-mark { width: 76px; height: 76px; display: grid; place-items: center; margin: 34px 0 28px; border: 1px solid rgba(255,255,255,.65); border-radius: 24px; background: linear-gradient(145deg,rgba(255,255,255,.22),rgba(255,255,255,.06)); box-shadow: inset 0 1px rgba(255,255,255,.45), 0 18px 38px rgba(1,15,55,.28); font-size: 22px; font-weight: 900; transform: rotate(-7deg); backdrop-filter: blur(12px); }
+.nss-login-mark span { color: #ffd84d; }
+.nss-login-story h2 { margin: 0; color: white; font-size: clamp(32px, 3.8vw, 48px); line-height: 1.08; letter-spacing: -.045em; }
+.nss-login-story p { max-width: 340px; color: #d4e6ff; font-size: 14px; line-height: 1.8; margin: 20px 0 38px; }
+.nss-login-story-foot { display: flex; align-items: center; gap: 10px; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.nss-login-live-dot { width: 8px; height: 8px; border-radius: 50%; background: #ffcf36; box-shadow: 0 0 0 5px rgba(255,207,54,.15), 0 0 18px #ffcf36; }
+.nss-login-orbit { position: absolute; z-index: -1; width: 390px; height: 390px; border: 1px solid rgba(255,255,255,.19); border-radius: 50%; right: -125px; top: -80px; animation: nss-login-float 9s ease-in-out infinite; }
+.nss-login-orbit::after { content: ''; position: absolute; width: 12px; height: 12px; border-radius: 50%; top: 56px; left: 76px; background: #ffd84d; box-shadow: 0 0 24px #ffd84d; }
+.nss-login-orbit-two { width: 290px; height: 290px; right: -70px; top: -30px; border-style: dashed; animation-duration: 15s; animation-direction: reverse; }
+.nss-login-glow { position: absolute; z-index: -1; width: 230px; height: 230px; left: -80px; bottom: -110px; border-radius: 50%; background: rgba(112,190,255,.25); filter: blur(5px); }
+.nss-auth-card { border-radius: 0 28px 28px 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; box-shadow: none; }
+@keyframes nss-login-enter { from { opacity: 0; transform: translateY(18px) rotateX(2deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
+@keyframes nss-login-float { 50% { transform: translate3d(0,14px,0) rotate(10deg); } }
+
+@media (max-width: 760px) {
+  .nss-auth-container { max-width: 520px; grid-template-columns: 1fr; filter: drop-shadow(0 18px 32px rgba(7,27,73,.14)); }
+  .nss-login-story { min-height: auto; padding: 28px 26px 25px; border-radius: 22px 22px 0 0; transform: none; }
+  .nss-login-mark { width: 48px; height: 48px; margin: 18px 0 14px; border-radius: 15px; font-size: 16px; }
+  .nss-login-story h2 { font-size: 30px; }
+  .nss-login-story p { margin: 10px 0 16px; font-size: 12px; line-height: 1.6; }
+  .nss-login-orbit { width: 230px; height: 230px; right: -95px; top: -80px; }
+  .nss-login-orbit-two { width: 180px; height: 180px; }
+  .nss-auth-card { border-radius: 0 0 22px 22px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .nss-auth-container, .nss-login-orbit { animation: none !important; }
 }
 
 .nss-auth-card {
@@ -3944,3 +3994,9 @@ body.nss-page:not(.nss-admin-body) textarea:focus-visible {
 body.nss-page:not(.nss-admin-body) button:disabled,
 body.nss-page:not(.nss-admin-body) input:disabled { cursor:not-allowed; opacity:.62; }
 .nss-maintenance-screen { font-family:Poppins,Arial,sans-serif; }
+
+/* Keep the split login panel shape after the shared auth-card skin above. */
+.nss-auth-container > .nss-auth-card { border-radius: 0 28px 28px 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; box-shadow: none; }
+@media (max-width: 760px) {
+  .nss-auth-container > .nss-auth-card { border-radius: 0 0 22px 22px; }
+}

@@ -172,16 +172,45 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     /**
      * Records Google login activity via secure RPC
      */
-    async recordLogin() {
+    async recordLogin(user = null) {
       const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
         ? await window.NSS.getSupabase()
         : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
-      if (!sb) return;
+      if (!sb) throw new Error('Supabase is unavailable; login activity was not recorded.');
       try {
         const ua = typeof navigator !== 'undefined' ? navigator.userAgent : '';
-        await sb.rpc('nss_record_login', { p_user_agent: ua });
+        const { data, error } = await sb.rpc('nss_record_login', { p_user_agent: ua });
+        if (error) {
+          // Keep sign-in tracking functional during rollout if the RPC migration has
+          // not reached the project yet. RLS still restricts this insert to this user.
+          if (!['PGRST202', '42883'].includes(error.code)) throw error;
+          const currentUser = user || await this.getCurrentUser();
+          if (!currentUser?.id) throw new Error('Signed-in user could not be verified for login tracking.');
+          const role = await this.getUserRole(currentUser.id);
+          let application = null;
+          try { application = await NSS.App.getUserApplication(currentUser.id); } catch (_) {}
+          const metadata = currentUser.user_metadata || {};
+          const { error: insertError } = await sb.from('nss_login_activity').insert({
+            user_id: currentUser.id,
+            email: currentUser.email || '',
+            full_name: metadata.full_name || metadata.name || currentUser.email || 'NSS Volunteer',
+            avatar_url: metadata.avatar_url || metadata.picture || null,
+            role,
+            is_registered: Boolean(application),
+            roll_number: application?.roll_number || null,
+            course: application?.course || null,
+            academic_year: application?.academic_year || null,
+            user_agent: ua
+          });
+          if (insertError) throw insertError;
+          return { success: true, tracked: 'authenticated_insert' };
+        }
+        if (error) throw error;
+        if (data?.success === false) throw new Error(data.error || 'Login activity was rejected.');
+        return data;
       } catch (err) {
-        // Non-blocking log
+        console.error('Could not sync Google login activity:', err);
+        throw err;
       }
     },
 
@@ -817,7 +846,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
         ? await window.NSS.getSupabase()
         : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
-      if (!sb) return { logs: [], total: 0, page, totalPages: 1 };
+      if (!sb) return { logs: [], total: 0, page, totalPages: 1, error: 'Supabase client is unavailable.' };
 
       try {
         let query = sb.from('nss_login_activity').select('*', { count: 'exact' });
@@ -848,7 +877,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         };
       } catch (err) {
         console.error('Error fetching login activity:', err);
-        return { logs: [], total: 0, page, totalPages: 1 };
+        return { logs: [], total: 0, page, totalPages: 1, error: err.message || 'Could not load login activity.' };
       }
     }
   };
