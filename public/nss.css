@@ -4000,37 +4000,3 @@ body.nss-page:not(.nss-admin-body) input:disabled { cursor:not-allowed; opacity:
 @media (max-width: 760px) {
   .nss-auth-container > .nss-auth-card { border-radius: 0 0 22px 22px; }
 }
-
-/* Text-only service story in place of the photo gallery. */
-.nss-homepage .nss-gallery-story {
-  position: relative;
-  overflow: hidden;
-  padding-block: clamp(76px, 10vw, 132px);
-  color: #fff;
-  background: radial-gradient(circle at 16% 78%, rgba(20, 99, 218, .38), transparent 31%), linear-gradient(132deg, #06163A, #0B3BC4 58%, #071B49);
-  isolation: isolate;
-}
-.nss-homepage .nss-gallery-story::before,
-.nss-homepage .nss-gallery-story::after {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  border: 1px solid rgba(255,255,255,.12);
-  border-radius: 50%;
-  pointer-events: none;
-}
-.nss-homepage .nss-gallery-story::before { width: 470px; height: 470px; top: -310px; right: -75px; }
-.nss-homepage .nss-gallery-story::after { width: 340px; height: 340px; top: -245px; right: -12px; border-style: dashed; }
-.nss-homepage .nss-gallery-story .nss-gallery-story-header { position: relative; z-index: 1; max-width: 810px; margin: 0 auto 48px; text-align: center; }
-.nss-homepage .nss-gallery-story .nss-eyebrow { color: #FFD400; }
-.nss-homepage .nss-gallery-story .nss-section-title { color: #fff !important; font-size: clamp(36px, 6.4vw, 76px); line-height: 1.08; letter-spacing: -.055em; }
-.nss-homepage .nss-gallery-story .nss-section-title span { color: #FFD400; }
-.nss-homepage .nss-gallery-story .nss-section-subtitle { max-width: 680px; margin: 18px auto 0; color: #D1DDEF; }
-.nss-homepage .nss-gallery-marquee { width: 100vw; margin-left: calc(50% - 50vw); overflow: hidden; padding: 12px 0 18px; border-top: 1px solid rgba(255,255,255,.17); border-bottom: 1px solid rgba(255,255,255,.17); transform: rotate(-1.4deg); }
-.nss-homepage .nss-gallery-marquee-track { display: flex; width: max-content; animation: nss-gallery-marquee 34s linear infinite; }
-.nss-homepage .nss-gallery-marquee-track span { flex: none; padding-right: .2em; color: transparent; font-size: clamp(48px, 11vw, 150px); font-weight: 800; letter-spacing: .035em; line-height: 1.08; white-space: nowrap; -webkit-text-stroke: 1.4px rgba(255,255,255,.68); }
-.nss-homepage .nss-gallery-marquee-track i { color: #FFD400; font-style: normal; -webkit-text-stroke: 0; }
-@keyframes nss-gallery-marquee { to { transform: translateX(-50%); } }
-.nss-homepage .nss-gallery-story-note { display: flex; justify-content: center; align-items: center; gap: 11px; margin: 38px auto 0; color: #D1DDEF; font-size: 12px; font-weight: 600; letter-spacing: .1em; text-align: center; text-transform: uppercase; }
-.nss-homepage .nss-gallery-story-note span { width: 8px; height: 8px; flex: 0 0 8px; border-radius: 50%; background: #FFD400; box-shadow: 0 0 16px rgba(255,212,0,.75); }
-@media (prefers-reduced-motion: reduce) { .nss-homepage .nss-gallery-marquee-track { animation: none; } }
