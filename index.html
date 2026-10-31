@@ -286,29 +286,24 @@
     </section>
 
     <!-- ======================================================================
-         7. PHOTO GALLERY (CONNECTED TO CLOUDINARY CONFIG)
+         7. SERVICE MOMENTS (TEXT-ONLY GALLERY STORY)
          ====================================================================== -->
-    <section class="nss-section bg-white" id="gallery">
+    <section class="nss-section nss-gallery-story" id="gallery">
       <div class="nss-container">
-        <div class="nss-section-header">
-          <div class="nss-eyebrow">Field Documentation</div>
-          <h2 class="nss-section-title">Photo Gallery</h2>
+        <div class="nss-section-header nss-gallery-story-header">
+          <div class="nss-eyebrow">Field Documentation · TGPCOP</div>
+          <h2 class="nss-section-title">Moments of service,<br><span>shared with you.</span></h2>
           <p class="nss-section-subtitle">
-            Visual documentation of community drives, health camps, and campus initiatives.
+            Camps, rallies, plantations and celebrations — stories of service, compassion and change will be shared here.
           </p>
         </div>
-
-        <!-- Populated from the verified photo list in cloudinary-config.js. -->
-        <div class="nss-gallery-grid" id="nssGalleryGrid" aria-label="NSS event photographs"></div>
-
-        <!-- Intentional Empty State (Displayed when real photos are pending) -->
-        <div class="nss-empty-notice" id="nssGalleryNotice" style="display:none;">
-          <div class="nss-empty-icon">📷</div>
-          <h3>Official Event Photos Coming Soon</h3>
-          <p>
-            Verified photographic coverage of campus healthcare drives, rural camps, and environmental initiatives is being curated and will be published shortly.
-          </p>
+        <div class="nss-gallery-marquee" aria-hidden="true">
+          <div class="nss-gallery-marquee-track">
+            <span>SERVICE <i>·</i> COMPASSION <i>·</i> CHANGE <i>·</i></span>
+            <span>SERVICE <i>·</i> COMPASSION <i>·</i> CHANGE <i>·</i></span>
+          </div>
         </div>
+        <p class="nss-gallery-story-note"><span></span> One community. Many moments. A shared purpose.</p>
       </div>
     </section>
 
@@ -559,95 +554,6 @@
       }), { rootMargin: '-25% 0px -62% 0px' });
       navBySection.forEach((_, id) => { const section = document.getElementById(id); if (section) sectionObserver.observe(section); });
     }
-
-    // Accessible gallery from the configured real event photographs.
-    const galleryPhotos = (window.NSS_CLOUDINARY_CONFIG?.galleryPhotos || []).filter(photo => photo?.url && photo?.thumb);
-    const galleryGrid = document.getElementById('nssGalleryGrid');
-    const galleryNotice = document.getElementById('nssGalleryNotice');
-    let galleryIndex = 0;
-    let galleryDialog = null;
-    let previousFocus = null;
-    let touchStartX = null;
-    const paintGallery = () => {
-      if (!galleryGrid || !galleryNotice) return;
-      if (!galleryPhotos.length) { galleryNotice.style.display = 'block'; return; }
-      galleryNotice.style.display = 'none';
-      galleryPhotos.forEach((photo, index) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'nss-gallery-item';
-        button.setAttribute('aria-label', `Open photo ${index + 1}: ${photo.caption || photo.tag || 'NSS event photo'}`);
-        const image = document.createElement('img');
-        image.src = photo.thumb;
-        image.alt = photo.caption || 'NSS TGPCOP event photograph';
-        image.loading = 'lazy';
-        image.decoding = 'async';
-        image.addEventListener('error', () => {
-          button.remove();
-          if (!galleryGrid.children.length) {
-            galleryNotice.style.display = 'block';
-            galleryNotice.querySelector('h3').textContent = 'Photos temporarily unavailable';
-            galleryNotice.querySelector('p').textContent = 'The event gallery could not load right now. Please try again later.';
-          }
-        }, { once: true });
-        const caption = document.createElement('span');
-        caption.className = 'nss-gallery-caption';
-        caption.textContent = photo.caption || photo.tag || 'NSS TGPCOP';
-        button.append(image, caption);
-        button.addEventListener('click', () => openGalleryPhoto(index));
-        galleryGrid.appendChild(button);
-      });
-    };
-    const openGalleryPhoto = index => {
-      if (!galleryPhotos.length) return;
-      galleryIndex = (index + galleryPhotos.length) % galleryPhotos.length;
-      if (!galleryDialog) {
-        galleryDialog = document.createElement('div');
-        galleryDialog.className = 'nss-lightbox-modern';
-        galleryDialog.setAttribute('role', 'dialog');
-        galleryDialog.setAttribute('aria-modal', 'true');
-        galleryDialog.setAttribute('aria-label', 'NSS photo gallery');
-        galleryDialog.innerHTML = '<figure><button type="button" class="nss-lightbox-close-modern" aria-label="Close photo viewer">×</button><button type="button" class="nss-lightbox-prev" aria-label="Previous photo">‹</button><img alt=""><button type="button" class="nss-lightbox-next" aria-label="Next photo">›</button><figcaption></figcaption></figure>';
-        galleryDialog.addEventListener('click', event => { if (event.target === galleryDialog) closeGalleryPhoto(); });
-        galleryDialog.querySelector('.nss-lightbox-close-modern').addEventListener('click', closeGalleryPhoto);
-        galleryDialog.querySelector('.nss-lightbox-prev').addEventListener('click', () => openGalleryPhoto(galleryIndex - 1));
-        galleryDialog.querySelector('.nss-lightbox-next').addEventListener('click', () => openGalleryPhoto(galleryIndex + 1));
-        galleryDialog.addEventListener('touchstart', event => { touchStartX = event.changedTouches[0].clientX; }, { passive: true });
-        galleryDialog.addEventListener('touchend', event => {
-          if (touchStartX === null) return;
-          const delta = event.changedTouches[0].clientX - touchStartX;
-          if (Math.abs(delta) > 45) openGalleryPhoto(galleryIndex + (delta < 0 ? 1 : -1));
-          touchStartX = null;
-        }, { passive: true });
-        document.body.appendChild(galleryDialog);
-      }
-      const photo = galleryPhotos[galleryIndex];
-      galleryDialog.querySelector('img').src = photo.url;
-      galleryDialog.querySelector('img').alt = photo.caption || 'NSS TGPCOP event photograph';
-      galleryDialog.querySelector('figcaption').textContent = `${photo.caption || photo.tag || 'NSS TGPCOP'} · ${galleryIndex + 1} / ${galleryPhotos.length}`;
-      if (!galleryDialog.classList.contains('is-open')) previousFocus = document.activeElement;
-      galleryDialog.classList.add('is-open');
-      document.body.style.overflow = 'hidden';
-      galleryDialog.querySelector('.nss-lightbox-close-modern').focus();
-    };
-    const closeGalleryPhoto = () => {
-      if (!galleryDialog) return;
-      galleryDialog.classList.remove('is-open');
-      document.body.style.overflow = '';
-      previousFocus?.focus?.();
-    };
-    paintGallery();
-    document.addEventListener('keydown', event => {
-      if (!galleryDialog?.classList.contains('is-open')) return;
-      if (event.key === 'Escape') closeGalleryPhoto();
-      if (event.key === 'ArrowLeft') openGalleryPhoto(galleryIndex - 1);
-      if (event.key === 'ArrowRight') openGalleryPhoto(galleryIndex + 1);
-      if (event.key === 'Tab') {
-        const controls = [...galleryDialog.querySelectorAll('button')];
-        if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls[controls.length - 1].focus(); }
-        else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) { event.preventDefault(); controls[0].focus(); }
-      }
-    });
 
     // Scroll progress drives every visual layer so the story reverses naturally.
     (() => {
