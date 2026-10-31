@@ -64,8 +64,6 @@ body.nss-page .marq,
 
 html {
   scroll-behavior: smooth;
-  overflow-x: hidden;
-  max-width: 100%;
 }
 
 body.nss-page {
@@ -76,8 +74,6 @@ body.nss-page {
   background: var(--nss-off-white) !important;
   background-image: none !important;
   line-height: 1.6;
-  overflow-x: hidden;
-  max-width: 100%;
   width: 100%;
   position: relative;
   -webkit-font-smoothing: antialiased;
@@ -118,6 +114,14 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+body.nss-page :where(p, h1, h2, h3, h4, label, td, th) {
+  overflow-wrap: anywhere;
+}
+
+body.nss-page :where(input, select, textarea, button) {
+  max-width: 100%;
 }
 
 /* ==========================================================================
@@ -336,13 +340,22 @@ img {
     padding: 0 14px;
     gap: 8px;
   }
+  .nss-header-brand {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .nss-header-actions {
+    gap: 6px;
+  }
   .nss-header-logo {
     height: 38px;
     width: 38px;
   }
   .nss-brand-name {
-    font-size: 19px;
+    font-size: clamp(16px, 5.5vw, 19px);
   }
+  .nss-btn-join { display: none; }
+  .nss-menu-toggle { width: 38px; height: 38px; }
   .nss-btn-join {
     padding: 7px 14px;
     font-size: 12px;
@@ -729,7 +742,7 @@ img {
    ========================================================================== */
 .nss-grid-3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 28px;
 }
 
@@ -782,8 +795,12 @@ img {
    ========================================================================== */
 .nss-activities-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
   gap: 26px;
+}
+
+@media (max-width: 768px) {
+  .nss-activities-grid { grid-template-columns: minmax(0, 1fr); }
 }
 
 .nss-activity-card {
@@ -1240,7 +1257,7 @@ img {
    ========================================================================== */
 .nss-impact-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 22px;
 }
 
@@ -1579,6 +1596,8 @@ img {
 .nss-form-input,
 .nss-form-select {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   padding: 12px 14px;
   border: 1.5px solid var(--nss-border);
   border-radius: var(--nss-radius-sm);
@@ -1932,7 +1951,7 @@ img {
 /* Modern Minimalist Stats Grid */
 .nss-stats-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 28px;
 }
@@ -2133,6 +2152,7 @@ img {
   position: relative;
   flex: 1;
   max-width: 400px;
+  min-width: 0;
 }
 
 .nss-search-icon {
@@ -2930,7 +2950,7 @@ img {
 
 .nss-form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
@@ -3342,6 +3362,17 @@ body.nss-page::before {
   position: relative;
   z-index: 1;
   box-sizing: border-box;
+  min-width: 0;
+}
+
+.nss-auth-section > *,
+.nss-auth-container > *,
+.nss-form-card,
+.nss-status-card,
+.nss-portal-card,
+.profile-panel {
+  min-width: 0;
+  max-width: 100%;
 }
 
 .nss-auth-container {
@@ -3355,6 +3386,7 @@ body.nss-page::before {
   perspective: 1200px;
   filter: drop-shadow(0 26px 48px rgba(7, 27, 73, .16));
   animation: nss-login-enter .7s cubic-bezier(.2,.8,.2,1) both;
+  min-width: 0;
 }
 
 .nss-login-story {
@@ -3383,7 +3415,7 @@ body.nss-page::before {
 .nss-login-orbit::after { content: ''; position: absolute; width: 12px; height: 12px; border-radius: 50%; top: 56px; left: 76px; background: #ffd84d; box-shadow: 0 0 24px #ffd84d; }
 .nss-login-orbit-two { width: 290px; height: 290px; right: -70px; top: -30px; border-style: dashed; animation-duration: 15s; animation-direction: reverse; }
 .nss-login-glow { position: absolute; z-index: -1; width: 230px; height: 230px; left: -80px; bottom: -110px; border-radius: 50%; background: rgba(112,190,255,.25); filter: blur(5px); }
-.nss-auth-card { border-radius: 0 28px 28px 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; box-shadow: none; }
+.nss-auth-card { width: 100%; min-width: 0; border-radius: 0 28px 28px 0; align-self: stretch; display: flex; flex-direction: column; justify-content: center; box-shadow: none; }
 @keyframes nss-login-enter { from { opacity: 0; transform: translateY(18px) rotateX(2deg); } to { opacity: 1; transform: translateY(0) rotateX(0); } }
 @keyframes nss-login-float { 50% { transform: translate3d(0,14px,0) rotate(10deg); } }
 
@@ -3421,6 +3453,12 @@ body.nss-page::before {
     padding: 28px 18px 24px;
     border-radius: 18px;
   }
+}
+
+@media (max-width: 360px) {
+  .nss-auth-card { padding: 22px 16px 20px; }
+  .nss-auth-title { font-size: clamp(21px, 7vw, 26px); }
+  .nss-auth-divider-text { padding-inline: 8px; font-size: 9px; }
 }
 
 .nss-auth-emblem {
@@ -3471,6 +3509,8 @@ body.nss-page::before {
 
 .nss-btn-google-auth {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   height: 48px;
   display: flex;
   align-items: center;
@@ -3523,13 +3563,17 @@ body.nss-page::before {
 }
 
 .nss-otp-input-group {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   width: 100%;
+  min-width: 0;
 }
 
 .nss-otp-input {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 46px;
   padding: 0 14px;
   border: 1.5px solid #CBD5E1;
@@ -3549,6 +3593,7 @@ body.nss-page::before {
 }
 
 .nss-otp-btn-send {
+  min-width: 0;
   height: 46px;
   background: var(--nss-royal-blue);
   color: #FFFFFF;
@@ -3573,6 +3618,7 @@ body.nss-page::before {
 }
 
 .nss-otp-btn-verify {
+  min-width: 0;
   height: 46px;
   background: #16A34A;
   color: #FFFFFF;
@@ -3597,7 +3643,9 @@ body.nss-page::before {
 }
 
 .nss-otp-code-input {
-  flex: 1;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
   height: 46px;
   padding: 0 14px;
   border: 1.5px solid #CBD5E1;
@@ -3619,6 +3667,12 @@ body.nss-page::before {
   box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
 }
 
+@media (max-width: 360px) {
+  .nss-otp-input-group { grid-template-columns: minmax(0, 1fr); }
+  .nss-otp-btn-send,
+  .nss-otp-btn-verify { width: 100%; }
+}
+
 .nss-quick-service-link {
   padding: 12px 16px;
   background: #F8FAFC;
@@ -3632,6 +3686,13 @@ body.nss-page::before {
   color: var(--nss-navy);
   text-decoration: none;
   transition: all 0.2s ease;
+  min-width: 0;
+  gap: 10px;
+}
+
+.nss-quick-service-link > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .nss-quick-service-link:hover {

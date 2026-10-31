@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261101-v13">
+  <link rel="stylesheet" href="nss.css?v=20261101-v14">
 
   <!-- Early Global NSS Definition -->
   <script>
@@ -30,7 +30,7 @@
   <script src="cloudinary-config.js?v=20261031-v5"></script>
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261101-v13"></script>
+  <script src="nss.js?v=20261101-v14"></script>
 
   <style>
     :root {
@@ -885,6 +885,24 @@
           </div>
         </div>
 
+        <div class="chart-box" style="margin:0 0 24px;">
+          <h3>Verified NSS Camps, Drives & Service Hours</h3>
+          <p style="color:#64748B; margin:0 0 16px;">Add completed activities with the actual number of volunteers and hours served per volunteer. Public totals use completed records only.</p>
+          <form id="impactActivityForm" onsubmit="saveImpactActivity(event)" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; align-items:end;">
+            <label>Activity name<input id="impactActivityTitle" required maxlength="160" minlength="2" placeholder="Blood donation drive" style="display:block;width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;"></label>
+            <label>Date<input id="impactActivityDate" type="date" required style="display:block;width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;"></label>
+            <label>Volunteers participated<input id="impactVolunteerCount" type="number" min="0" step="1" required style="display:block;width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;"></label>
+            <label>Hours per volunteer<input id="impactHoursPerVolunteer" type="number" min="0" step="0.25" required style="display:block;width:100%;padding:10px;border:1px solid #CBD5E1;border-radius:8px;"></label>
+            <label style="display:flex;align-items:center;gap:8px;padding:10px 0;"><input id="impactActivityCompleted" type="checkbox" checked> Completed activity</label>
+            <button id="impactActivitySubmit" type="submit" class="btn-nss btn-nss-primary">Add activity</button>
+          </form>
+          <p id="impactActivityStatus" role="status" style="min-height:20px;color:#64748B;"></p>
+          <div class="table-responsive"><table class="nss-data-table">
+            <thead><tr><th>Activity</th><th>Date</th><th>Volunteers</th><th>Hours each</th><th>Status</th><th></th></tr></thead>
+            <tbody id="impactActivitiesBody"><tr><td colspan="6" style="text-align:center;padding:18px;color:#64748B;">Loading activity records…</td></tr></tbody>
+          </table></div>
+        </div>
+
         <!-- SVG Live Visual Charts -->
         <div class="charts-grid">
           
@@ -1162,6 +1180,8 @@
            ==================================================================== -->
       <section id="tab-applications" class="admin-content-pane">
         <div class="section-toolbar">
+          <span id="applicationLiveStatus" role="status" style="font-size:12px;color:#64748B;">Live updates start after staff verification</span>
+          <button type="button" class="btn-nss btn-nss-outline btn-nss-sm" onclick="refreshApplicationLists()">Refresh registrations</button>
           <div class="toolbar-search-box">
             <input type="text" id="appSearchInput" placeholder="🔍 Search applicant by name, roll no, or email..." oninput="handleAppSearch()">
           </div>
@@ -1915,6 +1935,93 @@
       // Load initial dashboard statistics
       loadOverviewTab();
       loadMaintenanceSetting();
+      loadImpactActivityRecords();
+      startNssApplicationLiveUpdates();
+    }
+
+    let nssApplicationsChannel = null;
+
+    async function startNssApplicationLiveUpdates() {
+      const status = document.getElementById('applicationLiveStatus');
+      try {
+        const sb = await NSS.getSupabase();
+        if (!sb || !sb.channel) throw new Error('Realtime is unavailable');
+        nssApplicationsChannel = sb.channel('nss-admin-application-feed')
+          .on('postgres_changes', { event: '*', schema: 'public', table: 'nss_applications' }, async () => {
+            cachedAll = null;
+            await Promise.all([loadApplicationsTab(), loadPendingTab(), loadApprovedTab(), loadRejectedTab(), loadOverviewTab()]);
+          })
+          .subscribe((state) => {
+            if (!status) return;
+            status.textContent = state === 'SUBSCRIBED' ? '● Live updates on' :
+              (['CHANNEL_ERROR', 'TIMED_OUT', 'CLOSED'].includes(state) ? 'Live updates unavailable — use Refresh' : 'Connecting live updates…');
+            status.style.color = state === 'SUBSCRIBED' ? '#15803D' : '#64748B';
+          });
+      } catch (error) {
+        if (status) status.textContent = 'Live updates unavailable — use Refresh';
+        console.warn('NSS application realtime is unavailable:', error);
+      }
+    }
+
+    async function refreshApplicationLists() {
+      cachedAll = null;
+      await Promise.all([loadApplicationsTab(), loadPendingTab(), loadApprovedTab(), loadRejectedTab(), loadOverviewTab()]);
+    }
+
+    async function loadImpactActivityRecords() {
+      const body = document.getElementById('impactActivitiesBody');
+      const status = document.getElementById('impactActivityStatus');
+      if (!body || !NSS.Impact) return;
+      try {
+        const activities = await NSS.Impact.loadActivities();
+        body.replaceChildren();
+        if (!activities.length) {
+          const row = body.insertRow(); const cell = row.insertCell(); cell.colSpan = 6;
+          cell.textContent = 'No activity records yet. Add verified completed activities above.';
+          return;
+        }
+        activities.forEach(activity => {
+          const row = body.insertRow();
+          [activity.title, NSS.formatDate(activity.activity_date), activity.volunteer_count, activity.hours_per_volunteer, activity.completed ? 'Completed' : 'Planned']
+            .forEach(value => { row.insertCell().textContent = String(value ?? '—'); });
+          const actions = row.insertCell(); const remove = document.createElement('button');
+          remove.type = 'button'; remove.className = 'btn-nss btn-nss-outline btn-nss-sm'; remove.textContent = 'Delete';
+          remove.addEventListener('click', () => deleteImpactActivity(activity.id)); actions.appendChild(remove);
+        });
+      } catch (error) {
+        body.replaceChildren();
+        const row = body.insertRow(); const cell = row.insertCell(); cell.colSpan = 6;
+        cell.textContent = 'Impact activity setup is required. Run nss-impact-live.sql in the NSS Supabase project.';
+        if (status) status.textContent = error.message || 'Could not load activity data.';
+      }
+    }
+
+    async function saveImpactActivity(event) {
+      event.preventDefault();
+      const button = document.getElementById('impactActivitySubmit'); const status = document.getElementById('impactActivityStatus');
+      button.disabled = true;
+      try {
+        await NSS.Impact.addActivity({
+          title: document.getElementById('impactActivityTitle').value.trim(),
+          activity_date: document.getElementById('impactActivityDate').value,
+          volunteer_count: Number(document.getElementById('impactVolunteerCount').value),
+          hours_per_volunteer: Number(document.getElementById('impactHoursPerVolunteer').value),
+          completed: document.getElementById('impactActivityCompleted').checked,
+          created_by: cachedCurrentUser.id
+        });
+        event.target.reset(); document.getElementById('impactActivityCompleted').checked = true;
+        status.textContent = 'Activity saved. Public totals will reflect completed records.';
+        await loadImpactActivityRecords();
+      } catch (error) {
+        status.textContent = error.message || 'Could not save activity.';
+      } finally { button.disabled = false; }
+    }
+
+    async function deleteImpactActivity(id) {
+      if (!confirm('Delete this activity record? Public totals will be recalculated.')) return;
+      const status = document.getElementById('impactActivityStatus');
+      try { await NSS.Impact.removeActivity(id); status.textContent = 'Activity removed.'; await loadImpactActivityRecords(); }
+      catch (error) { status.textContent = error.message || 'Could not delete activity.'; }
     }
 
     async function loadMaintenanceSetting() {

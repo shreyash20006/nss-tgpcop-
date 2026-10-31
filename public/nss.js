@@ -1351,6 +1351,50 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
     }
   };
 
+  // Public impact counters are returned as aggregate values only; the database
+  // RPC never returns student rows or other personally identifiable data.
+  NSS.Impact = {
+    async loadPublicStats() {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Supabase client unavailable');
+      const { data, error } = await sb.rpc('nss_public_impact_stats');
+      if (error) throw error;
+      const stats = Array.isArray(data) ? data[0] : data;
+      if (!stats) throw new Error('Impact statistics are not available');
+      return {
+        activeVolunteers: Number(stats.active_volunteers) || 0,
+        campsAndDrives: Number(stats.camps_and_drives) || 0,
+        serviceHours: Number(stats.service_hours) || 0
+      };
+    },
+
+    async loadActivities() {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Supabase client unavailable');
+      const { data, error } = await sb.from('nss_impact_activities')
+        .select('id, title, activity_date, volunteer_count, hours_per_volunteer, completed')
+        .order('activity_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+
+    async addActivity(activity) {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Supabase client unavailable');
+      const { data, error } = await sb.from('nss_impact_activities')
+        .insert(activity).select('id').single();
+      if (error) throw error;
+      return data;
+    },
+
+    async removeActivity(id) {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Supabase client unavailable');
+      const { error } = await sb.from('nss_impact_activities').delete().eq('id', id);
+      if (error) throw error;
+    }
+  };
+
   // ==============================================================================
   // 7. VOLUNTEER DIRECTORY API (nss_volunteer_directory)
   // ==============================================================================
