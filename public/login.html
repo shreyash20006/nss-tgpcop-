@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <link rel="stylesheet" href="nss.css?v=20261031-v5">
+  <link rel="stylesheet" href="nss.css?v=20261031-v6">
 </head>
 <body class="nss-page">
 
@@ -79,22 +79,22 @@
   <!-- ======================================================================
        2. LOGIN SCREEN
        ====================================================================== -->
-  <main class="nss-section" style="min-height: 75vh; display: flex; align-items: center; padding: 48px 20px;">
-    <div class="nss-container" style="max-width: 520px; margin: 0 auto; width: 100%;">
+    <main class="nss-auth-section">
+    <div class="nss-auth-container">
       
-      <div class="nss-card" style="padding: 44px 34px; text-align: center; border-top: 4px solid var(--nss-navy); box-shadow: var(--nss-shadow-card); background: #FFFFFF; border-radius: var(--nss-radius-card);">
+      <div class="nss-auth-card">
         
         <!-- Official NSS Emblem -->
-        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" style="height: 84px; width: 84px; object-fit: contain; margin: 0 auto 18px;" onerror="this.src='echo_logo_white_transparent.png'">
+        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-auth-emblem" onerror="this.src='echo_logo_white_transparent.png'">
         
-        <div style="display:inline-block; font-size: 11px; font-weight: 700; color: var(--nss-royal-blue); background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 999px; padding: 4px 14px; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px;">
+        <div class="nss-auth-badge">
           ★ NSS TGPCOP GATEWAY ★
         </div>
 
-        <h1 style="font-size: 26px; font-weight: 800; color: var(--nss-navy); margin: 0 0 8px; letter-spacing: -0.01em;">
+        <h1 class="nss-auth-title">
           Welcome to NSS TGPCOP
         </h1>
-        <p style="font-size: 14px; color: var(--nss-text-muted); margin: 0 auto 28px; line-height: 1.5; max-width: 420px;">
+        <p class="nss-auth-sub">
           Sign in securely to continue to your volunteer application, digital credentials, or coordinator administration desk.
         </p>
 
@@ -108,9 +108,9 @@
 
         <!-- Login Action Button Box -->
         <div id="loginAction">
-          <button type="button" class="nss-btn-google" id="googleBtn" onclick="handleGoogleSignIn()">
+          <button type="button" class="nss-btn-google-auth" id="googleBtn" onclick="handleGoogleSignIn()">
             <!-- Official Multicolor Google "G" SVG -->
-            <svg class="nss-google-icon" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true">
+            <svg class="nss-google-icon" width="20" height="20" viewBox="0 0 48 48" aria-hidden="true" style="flex-shrink:0;">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
               <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
               <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
@@ -125,8 +125,8 @@
           </p>
         
           <!-- Divider: OR EMAIL OTP -->
-          <div style="margin: 26px 0 20px; border-top: 1px solid var(--nss-border); position: relative; text-align: center;">
-            <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #FFFFFF; padding: 0 14px; font-size: 11px; font-weight: 800; color: var(--nss-navy); text-transform: uppercase; letter-spacing: 0.08em;">
+          <div class="nss-auth-divider">
+            <span class="nss-auth-divider-text">
               OR SIGN IN WITH EMAIL OTP
             </span>
           </div>
@@ -135,12 +135,12 @@
           <div id="emailOtpSection" style="text-align: left; margin-top: 20px;">
             <!-- Step 1: Input Email -->
             <div id="otpStepEmail">
-              <label style="display:block; font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:6px;">
+              <label style="display:block; font-size:12.5px; font-weight:700; color:var(--nss-navy); margin-bottom:8px;">
                 Enter Email Address (College / Personal)
               </label>
-              <div style="display:flex; gap:8px;">
-                <input type="email" id="otpEmailInput" placeholder="name@tgpcop.site or personal@gmail.com" style="flex:1; padding:11px 14px; border:1px solid var(--nss-border); border-radius:8px; font-size:14px; font-family:inherit;" onkeydown="if(event.key==='Enter') sendEmailOtp()">
-                <button type="button" id="btnSendOtp" class="nss-btn" onclick="sendEmailOtp()" style="background:var(--nss-royal-blue); color:#FFFFFF; padding:11px 20px; font-size:13px; font-weight:700; white-space:nowrap; border-radius:8px; border:none; cursor:pointer;">
+              <div class="nss-otp-input-group">
+                <input type="email" id="otpEmailInput" class="nss-otp-input" placeholder="name@tgpcop.site or personal@gmail.com" onkeydown="if(event.key==='Enter') sendEmailOtp()">
+                <button type="button" id="btnSendOtp" class="nss-otp-btn-send" onclick="sendEmailOtp()">
                   Send OTP
                 </button>
               </div>
@@ -148,7 +148,7 @@
             </div>
 
             <!-- Step 2: Input 6-Digit OTP Code -->
-            <div id="otpStepCode" style="display:none; margin-top:14px; background:#F8FAFC; border:1.5px solid #BFDBFE; border-radius:10px; padding:18px;">
+            <div id="otpStepCode" style="display:none; margin-top:14px; background:#F8FAFC; border:1.5px solid #BFDBFE; border-radius:12px; padding:18px;">
               <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <label style="font-size:12.5px; font-weight:700; color:var(--nss-navy);">
                   Enter 6-Digit Verification Code
@@ -160,9 +160,9 @@
               <p style="font-size:12px; color:#64748B; margin:0 0 12px; line-height:1.4;">
                 A one-time verification code has been dispatched to <strong id="otpSentToEmail" style="color:var(--nss-navy);"></strong>. Check your inbox or spam folder.
               </p>
-              <div style="display:flex; gap:8px;">
-                <input type="text" id="otpCodeInput" maxlength="8" placeholder="123456" style="flex:1; padding:11px 14px; border:1px solid var(--nss-border); border-radius:8px; font-size:16px; font-weight:800; letter-spacing:0.25em; text-align:center; font-family:monospace;" onkeydown="if(event.key==='Enter') verifyEmailOtp()">
-                <button type="button" id="btnVerifyOtp" class="nss-btn" onclick="verifyEmailOtp()" style="background:#16A34A; color:#FFFFFF; padding:11px 22px; font-size:13px; font-weight:700; white-space:nowrap; border-radius:8px; border:none; cursor:pointer;">
+              <div class="nss-otp-input-group">
+                <input type="text" id="otpCodeInput" class="nss-otp-code-input" maxlength="8" placeholder="123456" onkeydown="if(event.key==='Enter') verifyEmailOtp()">
+                <button type="button" id="btnVerifyOtp" class="nss-otp-btn-verify" onclick="verifyEmailOtp()">
                   Verify & Sign In
                 </button>
               </div>
@@ -193,29 +193,29 @@
         </div>
 
         <!-- Divider -->
-        <div style="margin: 32px 0 24px; border-top: 1px solid var(--nss-border); position: relative;">
-          <span style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; padding: 0 12px; font-size: 11px; font-weight: 700; color: var(--nss-text-muted); text-transform: uppercase; letter-spacing: 0.08em;">
+        <div class="nss-auth-divider" style="margin-top: 32px;">
+          <span class="nss-auth-divider-text">
             Quick Services
           </span>
         </div>
 
         <!-- Quick Links Grid -->
-        <div style="display: flex; flex-direction: column; gap: 10px; text-align: left; font-size: 13px;">
-          <a href="register.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+        <div style="display: flex; flex-direction: column; gap: 10px; text-align: left;">
+          <a href="register.html" class="nss-quick-service-link">
             <span>📝 New Volunteer Registration</span>
-            <span style="color: var(--nss-royal-blue);">Apply Now ➔</span>
+            <span style="color: var(--nss-royal-blue); font-weight:700;">Apply Now ➔</span>
           </a>
-          <a href="status.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+          <a href="status.html" class="nss-quick-service-link">
             <span>📋 Application Status Tracker</span>
-            <span style="color: var(--nss-royal-blue);">Check ➔</span>
+            <span style="color: var(--nss-royal-blue); font-weight:700;">Check ➔</span>
           </a>
-          <a href="my-id.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+          <a href="my-id.html" class="nss-quick-service-link">
             <span>🪪 Official Digital Volunteer ID</span>
-            <span style="color: var(--nss-royal-blue);">Download ➔</span>
+            <span style="color: var(--nss-royal-blue); font-weight:700;">Download ➔</span>
           </a>
-          <a href="verify.html" style="padding: 10px 14px; background: #F8FAFC; border-radius: 8px; border: 1px solid var(--nss-border); display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: var(--nss-navy);">
+          <a href="verify.html" class="nss-quick-service-link">
             <span>🔍 Scan & Verify NSS QR Token</span>
-            <span style="color: var(--nss-royal-blue);">Verify ➔</span>
+            <span style="color: var(--nss-royal-blue); font-weight:700;">Verify ➔</span>
           </a>
         </div>
 

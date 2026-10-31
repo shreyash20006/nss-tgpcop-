@@ -64,6 +64,8 @@ body.nss-page .marq,
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body.nss-page {
@@ -75,6 +77,9 @@ body.nss-page {
   background-image: none !important;
   line-height: 1.6;
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -123,23 +128,29 @@ img {
   top: 0;
   left: 0;
   right: 0;
+  width: 100%;
   z-index: 1000;
-  background-color: rgba(7, 27, 73, 0.96);
+  background-color: rgba(7, 27, 73, 0.98);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: var(--nss-shadow-header);
+  box-sizing: border-box;
+  overflow: visible;
   transition: background-color 0.2s ease, padding 0.2s ease;
 }
 
 .nss-header-wrap {
-  width: min(var(--nss-container), 94%);
+  width: 100%;
+  max-width: var(--nss-container);
   margin: 0 auto;
   height: 72px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
+  gap: 16px;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .nss-header-brand {
@@ -147,18 +158,22 @@ img {
   align-items: center;
   gap: 12px;
   text-decoration: none;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .nss-header-logo {
   height: 44px;
-  width: auto;
+  width: 44px;
   object-fit: contain;
+  flex-shrink: 0;
   filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
 }
 
 .nss-header-identity {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .nss-brand-name {
@@ -166,7 +181,8 @@ img {
   font-size: 22px;
   color: var(--nss-white);
   letter-spacing: 0.05em;
-  line-height: 1;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .nss-brand-name b {
@@ -176,26 +192,31 @@ img {
 
 .nss-brand-sub {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   font-weight: 500;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Desktop Navigation */
 .nss-header-nav {
   display: flex;
   align-items: center;
-  gap: 22px;
+  gap: clamp(10px, 1.4vw, 22px);
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .nss-nav-item {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.88);
   font-size: 14px;
   font-weight: 500;
   padding: 6px 2px;
   position: relative;
   text-decoration: none;
+  white-space: nowrap;
   transition: color 0.18s ease;
 }
 
@@ -223,7 +244,8 @@ img {
 .nss-header-actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  flex-shrink: 0;
 }
 
 .nss-btn-join {
@@ -238,6 +260,8 @@ img {
   border-radius: var(--nss-radius-full);
   text-decoration: none;
   box-shadow: 0 4px 12px rgba(255, 212, 0, 0.3);
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: transform 0.18s ease, background-color 0.18s ease;
 }
 
@@ -258,6 +282,8 @@ img {
   border-radius: var(--nss-radius-full);
   border: 1px solid rgba(255, 255, 255, 0.3);
   text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: all 0.18s ease;
 }
 
@@ -277,6 +303,7 @@ img {
   border: none;
   cursor: pointer;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .nss-menu-toggle span {
@@ -286,6 +313,44 @@ img {
   background-color: var(--nss-white);
   border-radius: 2px;
   transition: all 0.25s ease;
+}
+
+@media (max-width: 1240px) {
+  .nss-brand-sub {
+    display: none;
+  }
+}
+
+@media (max-width: 1080px) {
+  .nss-header-nav {
+    display: none !important;
+  }
+  .nss-menu-toggle {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .nss-header-wrap {
+    height: 62px;
+    padding: 0 14px;
+    gap: 8px;
+  }
+  .nss-header-logo {
+    height: 38px;
+    width: 38px;
+  }
+  .nss-brand-name {
+    font-size: 19px;
+  }
+  .nss-btn-join {
+    padding: 7px 14px;
+    font-size: 12px;
+  }
+  .nss-btn-login {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
 }
 
 /* Mobile Drawer */
@@ -3244,9 +3309,17 @@ body.nss-page .nss-act-action {
 
 /* Light pages (login, status, my-id, verify, admin): soft watermark */
 body.nss-page::before {
-  content: ""; position: fixed; z-index: -1; pointer-events: none;
-  width: min(110vmin, 760px); aspect-ratio: 1; right: -24vmin; bottom: -26vmin;
-  background: var(--nss-wheel-blue) center / contain no-repeat; opacity: 0.05;
+  content: "";
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  width: min(75vmin, 520px);
+  aspect-ratio: 1;
+  right: -6vmin;
+  bottom: -8vmin;
+  background: var(--nss-wheel-blue) center / contain no-repeat;
+  opacity: 0.035;
+  clip-path: circle(50% at 50% 50%);
 }
 
 @media (max-width: 600px) {
@@ -3254,4 +3327,265 @@ body.nss-page::before {
 }
 @media (prefers-reduced-motion: reduce) {
   .nss-bg::after, .nss-hero-bg::after, .nss-reg-hero::after, .nss-cta-wrap::after { animation: none; }
+}
+
+/* ==========================================================================
+   MODERN INSTITUTIONAL AUTH / LOGIN PAGE
+   ========================================================================== */
+.nss-auth-section {
+  min-height: calc(100vh - 144px);
+  min-height: calc(100svh - 144px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 20px;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+.nss-auth-container {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.nss-auth-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  border: 1px solid var(--nss-border);
+  border-top: 5px solid var(--nss-royal-blue);
+  box-shadow: 0 20px 50px -10px rgba(7, 27, 73, 0.12), 0 0 1px 1px rgba(7, 27, 73, 0.04);
+  padding: 42px 34px 34px;
+  text-align: center;
+  position: relative;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .nss-auth-section {
+    padding: 24px 14px;
+  }
+  .nss-auth-card {
+    padding: 28px 18px 24px;
+    border-radius: 18px;
+  }
+}
+
+.nss-auth-emblem {
+  height: 80px;
+  width: 80px;
+  object-fit: contain;
+  margin: 0 auto 16px;
+  display: block;
+  filter: drop-shadow(0 4px 10px rgba(6, 71, 200, 0.18));
+  transition: transform 0.25s ease;
+}
+.nss-auth-emblem:hover {
+  transform: scale(1.05);
+}
+
+.nss-auth-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--nss-royal-blue);
+  background: #EEF4FF;
+  border: 1px solid #C7D9FE;
+  border-radius: 999px;
+  padding: 4px 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.nss-auth-title {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--nss-navy);
+  margin: 0 0 8px;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+.nss-auth-sub {
+  font-size: 13.5px;
+  color: var(--nss-text-muted);
+  margin: 0 auto 24px;
+  line-height: 1.5;
+  max-width: 420px;
+}
+
+.nss-btn-google-auth {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #FFFFFF;
+  color: #1E293B;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+}
+
+.nss-btn-google-auth:hover {
+  background: #F8FAFC;
+  border-color: #94A3B8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
+}
+
+.nss-btn-google-auth:active {
+  transform: translateY(0);
+}
+
+.nss-auth-divider {
+  margin: 26px 0 20px;
+  border-top: 1px solid var(--nss-border);
+  position: relative;
+  text-align: center;
+}
+
+.nss-auth-divider-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #FFFFFF;
+  padding: 0 14px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--nss-navy);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.nss-otp-input-group {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.nss-otp-input {
+  flex: 1;
+  height: 46px;
+  padding: 0 14px;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--nss-navy);
+  background: #FFFFFF;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nss-otp-input:focus {
+  border-color: var(--nss-royal-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(6, 71, 200, 0.12);
+}
+
+.nss-otp-btn-send {
+  height: 46px;
+  background: var(--nss-royal-blue);
+  color: #FFFFFF;
+  padding: 0 20px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  white-space: nowrap;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nss-otp-btn-send:hover {
+  background: var(--nss-royal-blue-hover);
+  transform: translateY(-1px);
+}
+
+.nss-otp-btn-verify {
+  height: 46px;
+  background: #16A34A;
+  color: #FFFFFF;
+  padding: 0 22px;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-family: inherit;
+  white-space: nowrap;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nss-otp-btn-verify:hover {
+  background: #15803D;
+  transform: translateY(-1px);
+}
+
+.nss-otp-code-input {
+  flex: 1;
+  height: 46px;
+  padding: 0 14px;
+  border: 1.5px solid #CBD5E1;
+  border-radius: 10px;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-align: center;
+  font-family: monospace, monospace;
+  color: var(--nss-navy);
+  background: #FFFFFF;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nss-otp-code-input:focus {
+  border-color: #16A34A;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.nss-quick-service-link {
+  padding: 12px 16px;
+  background: #F8FAFC;
+  border-radius: 10px;
+  border: 1px solid var(--nss-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--nss-navy);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.nss-quick-service-link:hover {
+  background: #EFF6FF;
+  border-color: #BFDBFE;
+  transform: translateX(3px);
 }
