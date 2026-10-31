@@ -83,7 +83,8 @@ section{padding:90px 22px 70px;--sh:linear-gradient(rgba(6,22,58,.7),rgba(6,22,5
  .cards{grid-template-columns:repeat(2,minmax(0,1fr))}.dots{display:none}}
  @media(max-width:430px){.nav{padding-inline:10px;gap:8px}.brand{gap:8px;min-width:0;font-size:15px}.brand svg{width:34px;height:34px;flex:none}.navr{gap:6px;flex:none}.navr .pill{height:36px;padding-inline:10px;font-size:11px}.cards{grid-template-columns:1fr;gap:12px}.card{padding:22px 18px}.tag{font-size:17px}.eye{font-size:10px;letter-spacing:.12em;gap:8px}.seal{width:min(56vw,180px)}.stats{gap:22px}.stats b{font-size:34px}}
 @media(prefers-reduced-motion:reduce){.seal svg,.seam .d{animation:none}.c,.ln>span,.card,.rule,.tag{transition:none!important;transform:none!important;clip-path:none!important}}
-</style></head><body>
+</style>  <link rel="stylesheet" href="gallery.css?v=20261101-v1">
+</head><body>
 <header class="nav"><a class="brand" href="#top"><svg width="40" height="40" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#2A2A7A"/><circle cx="50" cy="50" r="30" fill="#E8470F"/><g stroke="#fff" stroke-width="3"><path d="M50 22v56M22 50h56M30 30l40 40M70 30L30 70"/></g></svg><span>NSS <b>TGPCOP</b><small>Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</small></span></a>
 <ul><li><a href="#top" class="on">Home</a></li><li><a href="#about">About NSS</a></li><li><a href="#acts">Activities</a></li><li><a href="#gal">Gallery</a></li><li><a href="#team">Team</a></li><li><a href="#join">Contact</a></li></ul>
 <div class="navr"><a class="pill" href="register.html">Join NSS</a><a class="pill ghost" href="login.html">Volunteer Login</a></div></header>
@@ -116,9 +117,36 @@ section{padding:90px 22px 70px;--sh:linear-gradient(rgba(6,22,58,.7),rgba(6,22,5
 
 <div class="seam"><svg viewBox="0 0 1440 220" preserveAspectRatio="none"><path class="f" d="M0 90C240 160 480 40 720 100S1210 160 1440 110V220H0Z"/><path class="l" d="M0 90C240 160 480 40 720 100S1210 160 1440 110"/><path class="d" d="M0 105C240 175 480 55 720 115S1210 175 1440 125"/></svg></div>
 
-<section id="gal" style="min-height:max(78vh,520px);--sh:linear-gradient(rgba(6,22,58,.5),rgba(6,22,58,.8))"><div class="bg" data-p=".2" style="background-position:50% 50%;transform:scaleY(-1)"></div>
-<div class="in-c copy" data-r id="team"><h2 data-ln>Moments of service,</h2><h2 data-ln>shared with you.</h2><div class="rule"></div><p data-ln>Camps, rallies, plantations and celebrations – photos aur stories jaldi yahan aayengi.</p></div>
-<div class="marq" data-m>SERVICE · COMPASSION · CHANGE · SERVICE · COMPASSION · CHANGE · SERVICE</div></section>
+<section id="gal" class="nss-gallery-section" aria-labelledby="nssGalleryTitle">
+  <div class="bg" data-p=".12" style="background-position:50% 50%;transform:scaleY(-1)"></div>
+  <div class="in-c" data-r>
+    <header class="nss-gallery-heading">
+      <p class="nss-gallery-kicker">NSS TGPCOP · Photo archive</p>
+      <h2 id="nssGalleryTitle">Moments of service, shared with you.</h2>
+      <p>Real photographs from NSS TGPCOP. Select a photo to view it full screen.</p>
+      <div class="rule"></div>
+    </header>
+    <div class="nss-gallery-grid" data-nss-gallery aria-label="NSS TGPCOP event photographs"></div>
+  </div>
+  <div class="marq" data-m aria-hidden="true">SERVICE · COMPASSION · CHANGE · SERVICE · COMPASSION · CHANGE · SERVICE</div>
+</section>
+<section id="team" class="nss-team-section" aria-labelledby="nssTeamTitle">
+  <div class="in-c" data-r>
+    <header class="nss-team-heading">
+      <p class="nss-team-kicker">NSS TGPCOP · Leadership</p>
+      <h2 id="nssTeamTitle">Meet the team.</h2>
+    </header>
+    <article class="nss-team-card">
+      <img src="assets/president.jpg" alt="Shivam Waghmare, President of NSS TGPCOP" loading="lazy" decoding="async">
+      <div class="nss-team-copy">
+        <p class="nss-team-kicker">President</p>
+        <h3>Shivam Waghmare</h3>
+        <p class="nss-team-role">President, NSS TGPCOP</p>
+        <p class="nss-team-note">Leading the NSS TGPCOP student community in service and campus outreach.</p>
+      </div>
+    </article>
+  </div>
+</section>
 
 <div class="seam"><svg viewBox="0 0 1440 220" preserveAspectRatio="none"><path class="f" d="M0 110C280 30 500 180 760 100S1200 50 1440 120V220H0Z"/><path class="l" d="M0 110C280 30 500 180 760 100S1200 50 1440 120"/><path class="d" d="M0 125C280 45 500 195 760 115S1200 65 1440 135"/></svg></div>
 
@@ -180,4 +208,5 @@ if(!document.hidden)requestAnimationFrame(frame)};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){last=lastPaint=performance.now();requestAnimationFrame(frame)}});
 requestAnimationFrame(frame);
 })();
-</script></body></html>
+</script><script src="gallery.js?v=20261101-v1" defer></script>
+</body></html>

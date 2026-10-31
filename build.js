@@ -65,6 +65,8 @@ const staticFiles = [
   'nss-admin.html',
   'nss.css',
   'nss.js',
+  'gallery.css',
+  'gallery.js',
   'echo.css',
   'echo.js',
   'scrollfx.css',
