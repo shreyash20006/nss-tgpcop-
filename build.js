@@ -67,6 +67,8 @@ const staticFiles = [
   'nss.js',
   'echo.css',
   'echo.js',
+  'scrollfx.css',
+  'scrollfx.js',
   'env.js',
   'volunteers-data.js',
   'directory-seed-data.js',

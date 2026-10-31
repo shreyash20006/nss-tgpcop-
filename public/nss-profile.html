@@ -27,6 +27,7 @@
     .profile-file{max-width:100%;font-size:13px}
     @media(max-width:760px){.profile-layout{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}.profile-panel{padding:18px}}
   </style>
+<link rel="stylesheet" href="scrollfx.css">
 </head>
 <body class="nss-page">
   <header class="nss-header" id="top">
@@ -248,5 +249,6 @@
     document.addEventListener('DOMContentLoaded', loadProfilePage);
     document.addEventListener('echo-auth', () => { if (!profileLoaded) loadProfilePage(); });
   </script>
+<script src="scrollfx.js" defer></script>
 </body>
 </html>
