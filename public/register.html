@@ -168,9 +168,10 @@
 
           <div class="nss-form-row">
             <div class="nss-form-group">
-              <label class="nss-form-label" for="prnNumber">Permanent Registration No. (PRN)</label>
-              <input type="text" id="prnNumber" class="nss-form-input" placeholder="Optional (e.g. 2023016400...)">
-              <div class="nss-form-hint">University PRN if available.</div>
+              <label class="nss-form-label" for="prnNumber">Permanent Registration No. (PRN) <span class="req">*</span></label>
+              <input type="text" id="prnNumber" class="nss-form-input" placeholder="Enter your university PRN" required autocomplete="off">
+              <div class="nss-form-error" id="errPRN">Please enter your university PRN.</div>
+              <div class="nss-form-hint">Your university PRN is required to register as an NSS volunteer.</div>
             </div>
 
             <div class="nss-form-group">
@@ -396,7 +397,7 @@
   <!-- Scripts -->
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v8"></script>
+  <script src="nss.js?v=20261031-v9"></script>
   <script>
     let selectedFile = null;
 
@@ -503,7 +504,7 @@
 
       const fullName = document.getElementById('fullName').value.trim();
       const rollNumber = document.getElementById('rollNumber').value.trim().toUpperCase();
-      const prn = document.getElementById('prnNumber')?.value.trim() || '';
+      const prn = document.getElementById('prnNumber').value.trim();
       const course = document.getElementById('courseSelect').value;
       const year = document.getElementById('academicYear').value;
       const division = document.getElementById('division')?.value.trim() || '';
@@ -522,6 +523,7 @@
 
       setErr('errFullName', !!fullName);
       setErr('errRollNumber', !!rollNumber);
+      setErr('errPRN', !!prn);
       setErr('errCourse', !!course);
       setErr('errYear', !!year);
       setErr('errCollegeEmail', /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(collegeEmail));
@@ -570,7 +572,7 @@
         document.getElementById('reviewRoll').textContent = rollNumber;
         document.getElementById('reviewCourse').textContent = course;
         document.getElementById('reviewYear').textContent = year;
-        document.getElementById('reviewPRN').textContent = prn ? `PRN: ${prn}` : 'PRN: Not specified';
+        document.getElementById('reviewPRN').textContent = `PRN: ${prn}`;
         document.getElementById('reviewCollegeEmail').textContent = collegeEmail;
         document.getElementById('reviewPersonalEmail').textContent = personalEmail || 'None';
         document.getElementById('reviewMobile').textContent = mobile;

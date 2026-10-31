@@ -292,6 +292,10 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       if (!user) throw new Error('Authentication required before submitting application.');
 
       const cleanRoll = this.normalizeRollNumber(String(appData.roll_number || ''));
+      const cleanPrn = String(appData.prn || '').trim();
+      if (!cleanPrn) {
+        throw new Error('University PRN is required to submit an NSS application.');
+      }
       const existing = await this.checkExistingByRoll(cleanRoll);
       if (existing) {
         throw new Error(`An application with Roll Number ${cleanRoll} is already registered (${existing.status.toUpperCase()}).`);
@@ -301,7 +305,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         user_id: user.id,
         full_name: String(appData.full_name || '').trim(),
         roll_number: cleanRoll,
-        prn: appData.prn ? String(appData.prn).trim() : null,
+        prn: cleanPrn,
         course: appData.course || 'B.Pharm',
         academic_year: appData.academic_year || 'FY',
         division: appData.division ? String(appData.division).trim() : 'A',
