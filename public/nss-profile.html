@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Manage your NSS TGPCOP volunteer profile and event photos.">
+  <title>My Profile | NSS TGPCOP</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Bowlby+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="echo.css">
+  <link rel="stylesheet" href="nss.css?v=20261031-v7">
+  <style>
+    .profile-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.75fr);gap:22px;align-items:start}
+    .profile-panel{background:#fff;border:1px solid #e2e8f0;border-radius:18px;padding:24px;box-shadow:0 12px 32px rgba(15,35,64,.07)}
+    .profile-panel h3{margin:0 0 8px;color:#0c2340}
+    .profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .profile-avatar-row{display:flex;align-items:center;gap:16px;margin:0 0 22px}
+    .profile-avatar{width:92px;height:92px;border-radius:50%;object-fit:cover;border:3px solid #e2e8f0;background:#f1f5f9}
+    .profile-events{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;margin-top:18px}
+    .profile-event{overflow:hidden;border:1px solid #e2e8f0;border-radius:12px;background:#fff}
+    .profile-event img{display:block;width:100%;height:155px;object-fit:cover;background:#f1f5f9}
+    .profile-event p{margin:0;padding:10px 12px;color:#334155;font-size:13px;overflow-wrap:anywhere}
+    .profile-message{min-height:22px;margin:12px 0 0;font-size:13px;color:#166534}
+    .profile-message.error{color:#b91c1c}
+    .profile-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .profile-file{max-width:100%;font-size:13px}
+    @media(max-width:760px){.profile-layout{grid-template-columns:1fr}.profile-grid{grid-template-columns:1fr}.profile-panel{padding:18px}}
+  </style>
+</head>
+<body class="nss-page">
+  <header class="nss-header" id="top">
+    <div class="nss-header-wrap">
+      <a href="index.html" class="nss-header-brand" aria-label="NSS TGPCOP Home">
+        <img src="assets/nss-logo.png" alt="National Service Scheme Emblem" class="nss-header-logo" onerror="this.src='echo_logo_white_transparent.png'">
+        <div class="nss-header-identity"><span class="nss-brand-name">NSS <b>TGPCOP</b></span><span class="nss-brand-sub">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</span></div>
+      </a>
+      <nav class="nss-header-nav" aria-label="Main Navigation">
+        <a href="index.html" class="nss-nav-item">Home</a><a href="index.html#activities" class="nss-nav-item">Activities</a><a href="index.html#events" class="nss-nav-item">Events</a><a href="status.html" class="nss-nav-item">Application Status</a>
+      </nav>
+      <div class="nss-header-actions"><a href="status.html" class="nss-btn-join">My Status</a><a href="login.html" class="nss-btn-login">Login</a><button class="nss-menu-toggle" id="nssMenuToggle" aria-label="Toggle Navigation Menu"><span></span><span></span><span></span></button></div>
+    </div>
+  </header>
+
+  <main class="nss-section bg-offwhite">
+    <div class="nss-container">
+      <div class="nss-section-header">
+        <div class="nss-eyebrow">Volunteer Portal</div>
+        <h1 class="nss-section-title">My NSS Profile</h1>
+        <p class="nss-section-subtitle">Update your name, university PRN and mobile number, change your profile photo, and keep photos from NSS events together.</p>
+      </div>
+
+      <div id="profileLoading" class="profile-panel" style="text-align:center;">Loading your profile…</div>
+      <div id="profileAuth" class="profile-panel" style="display:none;text-align:center;max-width:560px;margin:0 auto;">
+        <h3>Sign in to manage your profile</h3><p>Use the Google account connected to your NSS registration.</p>
+        <button type="button" class="nss-btn-google" onclick="signInForProfile()">Continue with Google</button>
+      </div>
+      <div id="profileContent" style="display:none;">
+        <div class="profile-layout">
+          <section class="profile-panel" aria-labelledby="profileDetailsTitle">
+            <h3 id="profileDetailsTitle">Profile details</h3>
+            <p style="margin-top:0;color:#64748b;font-size:13px;">PRN is required. Add a 10-digit mobile number if you want it on your profile.</p>
+            <div class="profile-avatar-row">
+              <img id="profileAvatar" class="profile-avatar" src="assets/nss-logo.png" alt="Your profile photo">
+              <div>
+                <label class="nss-form-label" for="profilePhotoFile">Profile photo</label>
+                <input class="profile-file" type="file" id="profilePhotoFile" accept="image/jpeg,image/png,image/webp">
+                <div class="nss-form-hint">JPG, PNG or WebP, up to 5 MB.</div>
+                <button type="button" id="uploadProfilePhoto" class="nss-btn nss-btn-outline" style="margin-top:8px;">Change photo</button>
+              </div>
+            </div>
+            <form id="profileForm" novalidate>
+              <div class="profile-grid">
+                <div class="nss-form-group">
+                  <label class="nss-form-label" for="profileName">Full name <span class="req">*</span></label>
+                  <input class="nss-form-input" id="profileName" type="text" maxlength="120" required autocomplete="name">
+                </div>
+                <div class="nss-form-group">
+                  <label class="nss-form-label" for="profilePrn">University PRN <span class="req">*</span></label>
+                  <input class="nss-form-input" id="profilePrn" type="text" maxlength="50" required autocomplete="off">
+                </div>
+                <div class="nss-form-group">
+                  <label class="nss-form-label" for="profileMobile">Mobile number</label>
+                  <input class="nss-form-input" id="profileMobile" type="tel" inputmode="numeric" maxlength="10" pattern="[0-9]{10}" autocomplete="tel" placeholder="10-digit mobile number">
+                </div>
+                <div class="nss-form-group">
+                  <label class="nss-form-label" for="profileEmail">Signed-in email</label>
+                  <input class="nss-form-input" id="profileEmail" type="email" readonly>
+                </div>
+              </div>
+              <div class="profile-actions" style="margin-top:18px;">
+                <button type="submit" id="saveProfile" class="nss-btn nss-btn-primary">Save profile</button>
+                <a href="status.html" class="nss-btn nss-btn-outline">Application status</a>
+              </div>
+            </form>
+            <p id="profileMessage" class="profile-message" role="status" aria-live="polite"></p>
+          </section>
+
+          <section class="profile-panel" aria-labelledby="eventPhotosTitle">
+            <h3 id="eventPhotosTitle">NSS event photos</h3>
+            <p style="margin-top:0;color:#64748b;font-size:13px;">Add photos from NSS activities and events. They appear in your profile gallery.</p>
+            <form id="eventPhotoForm">
+              <div class="nss-form-group">
+                <label class="nss-form-label" for="eventPhotoFile">Choose an event photo</label>
+                <input class="profile-file" type="file" id="eventPhotoFile" accept="image/jpeg,image/png,image/webp" required>
+              </div>
+              <div class="nss-form-group" style="margin-top:14px;">
+                <label class="nss-form-label" for="eventPhotoCaption">Caption (optional)</label>
+                <input class="nss-form-input" id="eventPhotoCaption" type="text" maxlength="180" placeholder="Event name or a short note">
+              </div>
+              <button type="submit" id="uploadEventPhoto" class="nss-btn nss-btn-primary" style="margin-top:14px;">Add event photo</button>
+            </form>
+            <p id="eventPhotoMessage" class="profile-message" role="status" aria-live="polite"></p>
+          </section>
+        </div>
+        <section class="profile-panel" style="margin-top:22px;" aria-labelledby="myEventGalleryTitle">
+          <h3 id="myEventGalleryTitle">My event gallery</h3>
+          <div id="profileEvents" class="profile-events"></div>
+          <p id="emptyEvents" style="display:none;color:#64748b;">You haven't added an event photo yet.</p>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <footer class="nss-footer"><div class="nss-container"><div class="nss-footer-bottom"><div class="nss-footer-copy">© <span class="nss-dynamic-year">2026</span> National Service Scheme — TGPCOP Unit.</div><div class="nss-footer-credit">Website &amp; Media by <a href="https://www.instagram.com/echo.tgpcop/" target="_blank" rel="noopener noreferrer" class="nss-credit-link">ECHO.TGPCOP Media</a></div></div></div></footer>
+
+  <script src="env.js?v=20261031-v7"></script>
+  <script src="echo.js?v=20261031-v5"></script>
+  <script src="nss.js?v=20261031-v10"></script>
+  <script>
+    let profileLoaded = false;
+    const setProfileMessage = (id, message, isError = false) => {
+      const el = document.getElementById(id);
+      el.textContent = message || '';
+      el.classList.toggle('error', isError);
+    };
+
+    async function signInForProfile() {
+      const sb = window.getSB ? window.getSB() : null;
+      if (!sb) { alert('Sign-in is still initializing. Please try again in a moment.'); return; }
+      const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.href } });
+      if (error) alert(error.message || 'Could not start Google sign-in.');
+    }
+
+    async function renderEventPhotos() {
+      const list = await NSS.Profile.listEventPhotos();
+      const host = document.getElementById('profileEvents');
+      host.replaceChildren();
+      document.getElementById('emptyEvents').style.display = list.length ? 'none' : 'block';
+      list.forEach(photo => {
+        const card = document.createElement('article');
+        card.className = 'profile-event';
+        const image = document.createElement('img');
+        image.src = photo.photoUrl;
+        image.alt = photo.caption || 'NSS event photo';
+        image.loading = 'lazy';
+        const caption = document.createElement('p');
+        caption.textContent = photo.caption || new Date(photo.created_at).toLocaleDateString('en-IN');
+        card.append(image, caption);
+        host.append(card);
+      });
+    }
+
+    async function loadProfilePage() {
+      await window.ready;
+      const user = await NSS.Auth.getCurrentUser();
+      document.getElementById('profileLoading').style.display = 'none';
+      if (!user) {
+        document.getElementById('profileAuth').style.display = 'block';
+        document.getElementById('profileContent').style.display = 'none';
+        profileLoaded = false;
+        return;
+      }
+      try {
+        const { profile, photoUrl, email } = await NSS.Profile.load();
+        document.getElementById('profileAuth').style.display = 'none';
+        document.getElementById('profileContent').style.display = 'block';
+        document.getElementById('profileName').value = profile.full_name || '';
+        document.getElementById('profilePrn').value = profile.prn || '';
+        document.getElementById('profileMobile').value = profile.mobile || '';
+        document.getElementById('profileEmail').value = email;
+        document.getElementById('profileAvatar').src = photoUrl || 'assets/nss-logo.png';
+        await renderEventPhotos();
+        profileLoaded = true;
+      } catch (error) {
+        console.error('Could not load NSS profile:', error);
+        document.getElementById('profileContent').style.display = 'block';
+        setProfileMessage('profileMessage', error.message || 'Profile could not be loaded. Apply the profile SQL, then refresh.', true);
+      }
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const button = document.getElementById('saveProfile');
+      button.disabled = true;
+      setProfileMessage('profileMessage', 'Saving…');
+      try {
+        await NSS.Profile.save({
+          full_name: document.getElementById('profileName').value,
+          prn: document.getElementById('profilePrn').value,
+          mobile: document.getElementById('profileMobile').value
+        });
+        setProfileMessage('profileMessage', 'Profile saved.');
+        await loadProfilePage();
+      } catch (error) {
+        setProfileMessage('profileMessage', error.message || 'Could not save your profile.', true);
+      } finally { button.disabled = false; }
+    });
+
+    document.getElementById('uploadProfilePhoto').addEventListener('click', async () => {
+      const file = document.getElementById('profilePhotoFile').files[0];
+      if (!file) { setProfileMessage('profileMessage', 'Choose a profile photo first.', true); return; }
+      const button = document.getElementById('uploadProfilePhoto');
+      button.disabled = true;
+      setProfileMessage('profileMessage', 'Uploading photo…');
+      try {
+        await NSS.Profile.save({
+          full_name: document.getElementById('profileName').value,
+          prn: document.getElementById('profilePrn').value,
+          mobile: document.getElementById('profileMobile').value
+        });
+        const result = await NSS.Profile.uploadProfilePhoto(file);
+        document.getElementById('profileAvatar').src = result.photoUrl;
+        document.getElementById('profilePhotoFile').value = '';
+        setProfileMessage('profileMessage', 'Profile photo updated.');
+      } catch (error) {
+        setProfileMessage('profileMessage', error.message || 'Could not update your photo.', true);
+      } finally { button.disabled = false; }
+    });
+
+    document.getElementById('eventPhotoForm').addEventListener('submit', async event => {
+      event.preventDefault();
+      const file = document.getElementById('eventPhotoFile').files[0];
+      if (!file) return;
+      const button = document.getElementById('uploadEventPhoto');
+      button.disabled = true;
+      setProfileMessage('eventPhotoMessage', 'Uploading event photo…');
+      try {
+        await NSS.Profile.uploadEventPhoto(file, document.getElementById('eventPhotoCaption').value);
+        document.getElementById('eventPhotoForm').reset();
+        await renderEventPhotos();
+        setProfileMessage('eventPhotoMessage', 'Event photo added to your gallery.');
+      } catch (error) {
+        setProfileMessage('eventPhotoMessage', error.message || 'Could not add this event photo.', true);
+      } finally { button.disabled = false; }
+    });
+
+    document.addEventListener('DOMContentLoaded', loadProfilePage);
+    document.addEventListener('echo-auth', () => { if (!profileLoaded) loadProfilePage(); });
+  </script>
+</body>
+</html>

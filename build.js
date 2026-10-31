@@ -51,6 +51,8 @@ const staticFiles = [
   'nss-status.html',
   'my-id.html',
   'nss-my-id.html',
+  'profile.html',
+  'nss-profile.html',
   'verify.html',
   'nss-verify.html',
   'admin.html',

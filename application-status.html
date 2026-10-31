@@ -77,6 +77,7 @@
       <div class="nss-section-header">
         <h2>Volunteer Application Status</h2>
         <p>Track your enrollment status, coordinator review notes, and access your digital credentials.</p>
+        <a href="profile.html" class="nss-btn nss-btn-outline" style="margin-top:12px;">Manage My Profile &amp; Event Photos</a>
       </div>
 
       <!-- Auth Required State -->
@@ -139,6 +140,10 @@
           <div class="nss-detail-row">
             <span class="nss-detail-label">Roll Number</span>
             <span class="nss-detail-val" id="valRoll">—</span>
+          </div>
+          <div class="nss-detail-row">
+            <span class="nss-detail-label">University PRN</span>
+            <span class="nss-detail-val" id="valPrn">—</span>
           </div>
           <div class="nss-detail-row">
             <span class="nss-detail-label">Course & Year</span>
@@ -258,7 +263,7 @@
   <!-- Scripts -->
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v9"></script>
+  <script src="nss.js?v=20261031-v10"></script>
   <script>
     async function initStatus() {
       await window.ready;
@@ -291,11 +296,14 @@
         document.getElementById('appRefCode').textContent = app.ref_code || '';
         document.getElementById('appStatusBadge').innerHTML = NSS.renderStatusBadge(app.status);
 
-        document.getElementById('valName').textContent = app.full_name;
+        let profile = null;
+        try { profile = (await NSS.Profile.load()).profile; } catch (profileError) { console.warn('Profile overlay unavailable:', profileError); }
+        document.getElementById('valName').textContent = profile?.full_name || app.full_name;
         document.getElementById('valRoll').textContent = app.roll_number;
+        document.getElementById('valPrn').textContent = profile?.prn || app.prn || '—';
         document.getElementById('valCourseYear').textContent = `${app.course} (${app.academic_year})`;
         document.getElementById('valEmail').textContent = app.college_email;
-        document.getElementById('valMobile').textContent = app.mobile;
+        document.getElementById('valMobile').textContent = profile?.mobile || app.mobile || '—';
         document.getElementById('valSubmitted').textContent = NSS.formatDate(app.submitted_at, true);
 
         const banner = document.getElementById('statusAlertBanner');

@@ -360,7 +360,181 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   };
 
   // ==============================================================================
-  // 3. CENTRALIZED STUDENT REGISTRY (nss_students)
+  // 3. VOLUNTEER SELF-SERVICE PROFILE & PRIVATE EVENT PHOTOS
+  // ==============================================================================
+  NSS.Profile = {
+    bucket: 'nss-profile-media',
+    maxPhotoBytes: 5 * 1024 * 1024,
+
+    async getContext() {
+      const sb = await NSS.getSupabase();
+      const user = await NSS.Auth.getCurrentUser();
+      if (!sb || !user) throw new Error('Please sign in to manage your profile.');
+      return { sb, user };
+    },
+
+    validateImage(file) {
+      const supportedTypes = {
+        'image/jpeg': 'jpg',
+        'image/png': 'png',
+        'image/webp': 'webp'
+      };
+      if (!file || !supportedTypes[file.type]) {
+        throw new Error('Choose a JPG, PNG, or WebP image.');
+      }
+      if (file.size > this.maxPhotoBytes) {
+        throw new Error('Each image must be 5 MB or smaller.');
+      }
+      return supportedTypes[file.type];
+    },
+
+    makePhotoPath(userId, section, extension) {
+      const id = window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      return `${userId}/${section}/${id}.${extension}`;
+    },
+
+    async load() {
+      const { sb, user } = await this.getContext();
+      const { data: existing, error } = await sb
+        .from('nss_student_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+
+      const application = await NSS.App.getUserApplication(user.id);
+      const profile = existing || {
+        user_id: user.id,
+        full_name: application?.full_name || user.user_metadata?.full_name || '',
+        prn: application?.prn || '',
+        mobile: application?.mobile || null,
+        profile_photo_path: null
+      };
+
+      let photoUrl = application?.photo_url || user.user_metadata?.avatar_url || '';
+      if (profile.profile_photo_path) {
+        const { data: signed, error: signError } = await sb.storage
+          .from(this.bucket)
+          .createSignedUrl(profile.profile_photo_path, 3600);
+        if (signError) throw signError;
+        photoUrl = signed.signedUrl;
+      }
+      return { profile, photoUrl, email: user.email || '', application };
+    },
+
+    async save(fields) {
+      const { sb, user } = await this.getContext();
+      const fullName = String(fields.full_name || '').trim();
+      const prn = String(fields.prn || '').trim();
+      const mobile = String(fields.mobile || '').trim();
+      if (!fullName) throw new Error('Full name is required.');
+      if (!prn) throw new Error('PRN is required. Add your university PRN before saving.');
+      if (mobile && !/^\d{10}$/.test(mobile)) throw new Error('Enter a valid 10-digit mobile number.');
+
+      const current = await this.load();
+      const { data, error } = await sb
+        .from('nss_student_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: fullName,
+          prn,
+          mobile: mobile || null,
+          profile_photo_path: current.profile.profile_photo_path || null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' })
+        .select('*')
+        .single();
+      if (error) throw error;
+      return data;
+    },
+
+    async uploadProfilePhoto(file) {
+      const extension = this.validateImage(file);
+      const { sb, user } = await this.getContext();
+      const current = await this.load();
+      if (!current.profile.full_name.trim() || !current.profile.prn.trim()) {
+        throw new Error('Save your name and university PRN before uploading a profile photo.');
+      }
+      const path = this.makePhotoPath(user.id, 'profile', extension);
+      const { error: uploadError } = await sb.storage.from(this.bucket).upload(path, file, {
+        contentType: file.type,
+        cacheControl: '3600',
+        upsert: false
+      });
+      if (uploadError) throw uploadError;
+
+      const { data: updated, error: updateError } = await sb
+        .from('nss_student_profiles')
+        .upsert({
+          user_id: user.id,
+          full_name: current.profile.full_name || user.user_metadata?.full_name || '',
+          prn: current.profile.prn || '',
+          mobile: current.profile.mobile || null,
+          profile_photo_path: path,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id' })
+        .select('*')
+        .single();
+      if (updateError) {
+        await sb.storage.from(this.bucket).remove([path]);
+        throw updateError;
+      }
+
+      if (current.profile.profile_photo_path && current.profile.profile_photo_path !== path) {
+        const { error: removeError } = await sb.storage.from(this.bucket).remove([current.profile.profile_photo_path]);
+        if (removeError) console.warn('Old profile image cleanup failed:', removeError);
+      }
+      const { data: signed, error: signError } = await sb.storage.from(this.bucket).createSignedUrl(path, 3600);
+      if (signError) throw signError;
+      return { profile: updated, photoUrl: signed.signedUrl };
+    },
+
+    async uploadEventPhoto(file, caption = '') {
+      const extension = this.validateImage(file);
+      const cleanCaption = String(caption || '').trim().slice(0, 180);
+      const { sb, user } = await this.getContext();
+      const path = this.makePhotoPath(user.id, 'events', extension);
+      const { error: uploadError } = await sb.storage.from(this.bucket).upload(path, file, {
+        contentType: file.type,
+        cacheControl: '3600',
+        upsert: false
+      });
+      if (uploadError) throw uploadError;
+
+      const { data, error } = await sb
+        .from('nss_profile_event_photos')
+        .insert({ user_id: user.id, photo_path: path, caption: cleanCaption || null })
+        .select('*')
+        .single();
+      if (error) {
+        await sb.storage.from(this.bucket).remove([path]);
+        throw error;
+      }
+      const { data: signed, error: signError } = await sb.storage.from(this.bucket).createSignedUrl(path, 3600);
+      if (signError) throw signError;
+      return { ...data, photoUrl: signed.signedUrl };
+    },
+
+    async listEventPhotos() {
+      const { sb, user } = await this.getContext();
+      const { data, error } = await sb
+        .from('nss_profile_event_photos')
+        .select('id, photo_path, caption, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      return Promise.all((data || []).map(async photo => {
+        const { data: signed, error: signError } = await sb.storage
+          .from(this.bucket)
+          .createSignedUrl(photo.photo_path, 3600);
+        if (signError) throw signError;
+        return { ...photo, photoUrl: signed.signedUrl };
+      }));
+    }
+  };
+
+  // ==============================================================================
+  // 4. CENTRALIZED STUDENT REGISTRY (nss_students)
   // ==============================================================================
   NSS.Students = {
     async loadStudentsFromApplications({ page = 1, limit = 50, search = '', status = 'all', course = 'all', academicYear = 'all' } = {}) {

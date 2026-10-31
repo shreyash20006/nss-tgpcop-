@@ -80,6 +80,7 @@
       <div class="nss-section-header">
         <h2>Digital NSS Volunteer ID</h2>
         <p>Your official verifiable credential as an active National Service Scheme volunteer at TGPCOP.</p>
+        <a href="profile.html" class="nss-btn nss-btn-outline" style="margin-top:12px;">Manage My Profile &amp; Event Photos</a>
       </div>
 
       <!-- Auth Prompt -->
@@ -275,7 +276,7 @@
   <!-- Scripts -->
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v9"></script>
+  <script src="nss.js?v=20261031-v10"></script>
   <script>
     let currentApp = null;
 
@@ -308,17 +309,20 @@
           return;
         }
 
+        let profile = null;
+        try { profile = await NSS.Profile.load(); } catch (profileError) { console.warn('Profile photo unavailable:', profileError); }
+
         // Render approved/revoked card
         idWrapper.style.display = 'flex';
-        document.getElementById('cardName').textContent = app.full_name;
+        document.getElementById('cardName').textContent = profile?.profile.full_name || app.full_name;
         document.getElementById('cardVolId').textContent = app.volunteer_id || 'NSS-VOLUNTEER';
         document.getElementById('cardCourse').textContent = app.course;
         document.getElementById('cardYear').textContent = app.academic_year;
         document.getElementById('cardRoll').textContent = app.roll_number;
         document.getElementById('cardDate').textContent = NSS.formatDate(app.reviewed_at || app.submitted_at);
 
-        if (app.photo_url) {
-          document.getElementById('cardPhoto').src = app.photo_url;
+        if (profile?.photoUrl || app.photo_url) {
+          document.getElementById('cardPhoto').src = profile?.photoUrl || app.photo_url;
         }
 
         // Revocation state
