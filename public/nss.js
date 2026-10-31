@@ -199,6 +199,64 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   // ==============================================================================
   // 2. VOLUNTEER APPLICANT DATA ACCESS
   // ==============================================================================
+  NSS.Maintenance = {
+    async getSetting() {
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Supabase is unavailable.');
+      const { data, error } = await sb.from('nss_site_settings')
+        .select('maintenance_enabled, maintenance_message').eq('id', 1).maybeSingle();
+      if (error) throw error;
+      return data || { maintenance_enabled: false, maintenance_message: '' };
+    },
+    async setSetting(enabled, message = '') {
+      const user = await NSS.Auth.getCurrentUser();
+      if (!user) throw new Error('Sign in with an authorized staff account.');
+      const role = await NSS.Auth.getUserRole(user.id);
+      if (!['super_admin', 'coordinator', 'president', 'faculty'].includes(role)) {
+        throw new Error('Only authorized NSS staff can change maintenance mode.');
+      }
+      const sb = await NSS.getSupabase();
+      if (!sb) throw new Error('Supabase is unavailable.');
+      const cleanMessage = String(message || '').trim().slice(0, 500);
+      const { data, error } = await sb.from('nss_site_settings').update({
+        maintenance_enabled: Boolean(enabled),
+        maintenance_message: cleanMessage || 'The NSS portal is temporarily under maintenance. Please check back soon.',
+        updated_at: new Date().toISOString(),
+        updated_by: user.id
+      }).eq('id', 1).select('maintenance_enabled, maintenance_message').single();
+      if (error) throw error;
+      return data;
+    },
+    async applyToPage() {
+      const path = (window.location.pathname || '/').replace(/\/+$/, '') || '/';
+      if (/\/(nss-)?(admin|login)(\.html)?$/i.test(path)) return;
+      try {
+        const setting = await this.getSetting();
+        if (!setting.maintenance_enabled || !document.body) return;
+        const overlay = document.createElement('main');
+        overlay.className = 'nss-maintenance-screen';
+        overlay.setAttribute('role', 'status');
+        overlay.innerHTML = '<div class="nss-maintenance-card"><div class="nss-maintenance-mark" aria-hidden="true">NSS</div><p class="nss-maintenance-kicker">TGPCOP · National Service Scheme</p><h1>We’ll be back soon</h1><p class="nss-maintenance-copy"></p><p class="nss-maintenance-foot">The staff portal remains available for authorized administrators.</p></div>';
+        overlay.querySelector('.nss-maintenance-copy').textContent = setting.maintenance_message || 'The NSS portal is temporarily under maintenance. Please check back soon.';
+        const style = document.createElement('style');
+        style.textContent = '.nss-maintenance-screen{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 15% 15%,#1b3d65 0,#0c2340 42%,#07172b 100%);color:#fff;font-family:Poppins,Arial,sans-serif}.nss-maintenance-card{width:min(100%,560px);padding:clamp(28px,6vw,54px);border:1px solid rgba(255,255,255,.14);border-radius:24px;background:rgba(255,255,255,.07);box-shadow:0 24px 70px rgba(0,0,0,.28);text-align:center;backdrop-filter:blur(12px)}.nss-maintenance-mark{display:inline-grid;place-items:center;width:66px;height:66px;border-radius:20px;background:#ffd400;color:#0c2340;font-weight:900;font-size:19px}.nss-maintenance-kicker{margin:22px 0 8px;color:#ffd400;font-size:12px;font-weight:700;letter-spacing:.13em;text-transform:uppercase}.nss-maintenance-card h1{margin:0;font-size:clamp(30px,7vw,44px);line-height:1.12}.nss-maintenance-copy{margin:16px auto 0;max-width:440px;color:#e2e8f0;line-height:1.7}.nss-maintenance-foot{margin:28px 0 0;color:#a9bbd0;font-size:12px}';
+        document.head.appendChild(style);
+        document.body.appendChild(overlay);
+      } catch (error) {
+        console.warn('Maintenance status could not be loaded:', error);
+      }
+    }
+  };
+
+  if (typeof document !== 'undefined') {
+    const runMaintenanceGate = () => NSS.Maintenance.applyToPage();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', runMaintenanceGate, { once: true });
+    } else {
+      runMaintenanceGate();
+    }
+  }
+
   NSS.App = {
     async getUserApplication(userId) {
       const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')

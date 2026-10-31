@@ -9,7 +9,10 @@ function getEnv() {
   const envVars = {
     SUPABASE_URL: process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || '',
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || '',
-    CLOUDINARY_LOGO_URL: process.env.CLOUDINARY_LOGO_URL || process.env.VITE_CLOUDINARY_LOGO_URL || ''
+    CLOUDINARY_LOGO_URL: process.env.CLOUDINARY_LOGO_URL || process.env.VITE_CLOUDINARY_LOGO_URL || '',
+    BREVO_TEMPLATE_APPROVED: process.env.BREVO_TEMPLATE_APPROVED || '14',
+    BREVO_SENDER_EMAIL: process.env.BREVO_SENDER_EMAIL || 'nss@tgpcop.site',
+    BREVO_SENDER_NAME: process.env.BREVO_SENDER_NAME || 'NSS TGPCOP'
   };
 
   const envFile = path.join(rootDir, '.env');
@@ -19,7 +22,10 @@ function getEnv() {
       const trimmed = line.trim();
       if (!trimmed || trimmed.startsWith('#')) continue;
       const [k, ...v] = trimmed.split('=');
-      if (k) envVars[k.trim()] = v.join('=').trim().replace(/^["']|["']$/g, '');
+      const key = k ? k.trim() : '';
+      if (Object.prototype.hasOwnProperty.call(envVars, key)) {
+        envVars[key] = v.join('=').trim().replace(/^["']|["']$/g, '');
+      }
     }
   }
   return envVars;

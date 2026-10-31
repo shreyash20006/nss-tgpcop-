@@ -11,13 +11,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261031-v7">
+  <link rel="stylesheet" href="nss.css?v=20261031-v8">
 </head>
-<body class="nss-page">
+<body class="nss-page nss-homepage">
 
   <!-- ======================================================================
        1. COMPACT INSTITUTIONAL HEADER & NAVIGATION
        ====================================================================== -->
+  <div class="nss-announcement"><span class="nss-announcement-dot" aria-hidden="true"></span> National Service Scheme · TGPCOP Nagpur <a href="register.html">Volunteer with us <span aria-hidden="true">↗</span></a></div>
   <header class="nss-header" id="top">
     <div class="nss-header-wrap">
       <a href="index.html" class="nss-header-brand" aria-label="NSS TGPCOP Home">
@@ -31,20 +32,18 @@
       <!-- Desktop Nav -->
       <nav class="nss-header-nav" aria-label="Main Navigation">
         <a href="#top" class="nss-nav-item active">Home</a>
-        <a href="#about" class="nss-nav-item">About</a>
+        <a href="#about" class="nss-nav-item">About NSS</a>
         <a href="#activities" class="nss-nav-item">Activities</a>
-        <a href="#events" class="nss-nav-item">Events</a>
-        <a href="#leadership" class="nss-nav-item">Leadership</a>
         <a href="#gallery" class="nss-nav-item">Gallery</a>
-        <a href="#impact" class="nss-nav-item">Impact</a>
+        <a href="#leadership" class="nss-nav-item">Team</a>
         <a href="#contact" class="nss-nav-item">Contact</a>
       </nav>
 
       <!-- Action Buttons -->
       <div class="nss-header-actions">
-        <a href="register.html" class="nss-btn-join">Volunteer</a>
-        <a href="login.html" class="nss-btn-login">Login</a>
-        <button class="nss-menu-toggle" id="nssMenuToggle" aria-label="Toggle Navigation Menu">
+        <a href="register.html" class="nss-btn-join">Join NSS</a>
+        <a href="login.html" class="nss-btn-login" id="nssAccountLink">Volunteer Login</a>
+        <button class="nss-menu-toggle" id="nssMenuToggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="nssDrawer">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -60,20 +59,18 @@
       </div>
       <button class="nss-drawer-close" id="nssDrawerClose" aria-label="Close Navigation Menu">&times;</button>
     </div>
-    <nav class="nss-drawer-nav">
+    <nav class="nss-drawer-nav" aria-label="Mobile navigation">
       <a href="#top" class="nss-drawer-link">Home</a>
       <a href="#about" class="nss-drawer-link">About NSS</a>
-      <a href="#activities" class="nss-drawer-link">Key Activities</a>
-      <a href="#events" class="nss-drawer-link">Recent Events</a>
-      <a href="#leadership" class="nss-drawer-link">Leadership Desk</a>
-      <a href="#gallery" class="nss-drawer-link">Photo Gallery</a>
-      <a href="#impact" class="nss-drawer-link">Qualitative Impact</a>
-      <a href="register.html" class="nss-drawer-link highlight">Volunteer Registration ➔</a>
+      <a href="#activities" class="nss-drawer-link">Activities</a>
+      <a href="#gallery" class="nss-drawer-link">Gallery</a>
+      <a href="#leadership" class="nss-drawer-link">Team</a>
+      <a href="#contact" class="nss-drawer-link">Contact</a>
+      <a href="register.html" class="nss-drawer-link highlight">Join NSS <span aria-hidden="true">↗</span></a>
       <a href="status.html" class="nss-drawer-link">Check Application Status</a>
       <a href="my-id.html" class="nss-drawer-link">Digital ID Card</a>
       <a href="verify.html" class="nss-drawer-link">Scan / Verify Certificate</a>
-      <a href="login.html" class="nss-drawer-link">Coordinator Login</a>
-      <a href="#contact" class="nss-drawer-link">Contact Information</a>
+      <a href="login.html" class="nss-drawer-link" id="nssDrawerAccountLink">Volunteer Login</a>
     </nav>
   </div>
 
@@ -81,34 +78,25 @@
     <!-- ======================================================================
          2. HOMEPAGE HERO (CLEAR BACKGROUND ARTWORK & BALANCED CONTENT)
          ====================================================================== -->
-    <section class="nss-hero">
-      <div class="nss-hero-bg" aria-hidden="true">
-        <img src="assets/nss-hero-scroll-bg.png" alt="" class="nss-hero-bg-art" id="sceneImage">
-        <div class="nss-hero-overlay"></div>
-      </div>
-
-      <div class="nss-hero-content">
-        <div class="nss-badge-pill">
-          <span class="star">★</span> NATIONAL SERVICE SCHEME • TGPCOP NAGPUR <span class="star">★</span>
+    <section class="nss-hero nss-home-hero" aria-labelledby="homeHeroTitle">
+      <div class="nss-home-hero-glow" aria-hidden="true"></div>
+      <div class="nss-container nss-home-hero-grid">
+        <div class="nss-home-hero-copy nss-reveal">
+          <p class="nss-home-eyebrow"><span></span> NATIONAL SERVICE SCHEME <i>·</i> TGPCOP NAGPUR</p>
+          <h1 class="nss-home-title" id="homeHeroTitle">NOT ME,<br><em>BUT YOU.</em></h1>
+          <p class="nss-home-lede">A campus community built around service, compassion, and meaningful change.</p>
+          <div class="nss-home-actions">
+            <a href="register.html" class="nss-home-primary">Become a volunteer <span aria-hidden="true">↗</span></a>
+            <a href="#activities" class="nss-home-secondary">Explore our work <span aria-hidden="true">↓</span></a>
+          </div>
+          <p class="nss-home-note">Tulsiramji Gaikwad-Patil College of Pharmacy · Nagpur</p>
         </div>
-        <h1 class="nss-hero-title">“NOT ME, BUT YOU.”</h1>
-        <h2 class="nss-hero-subtitle">Serving Communities. Inspiring Change.</h2>
-        <p class="nss-hero-description">
-          Discover how NSS volunteers at Tulsiramji Gaikwad-Patil College of Pharmacy contribute to community service, health awareness and environmental responsibility.
-        </p>
-
-        <div class="nss-hero-actions">
-          <a href="#activities" class="nss-btn-primary">Explore Our Activities ↓</a>
-          <a href="register.html" class="nss-btn-yellow">Become a Volunteer</a>
-          <a href="verify.html" class="nss-btn-ghost">Verify ID / Certificate ➔</a>
-        </div>
+        <figure class="nss-home-photo nss-reveal" aria-label="NSS blood donation camp">
+          <img src="https://res.cloudinary.com/axgam8br/image/upload/f_auto,q_auto,w_1200/v1793047208/IMG_1159.jpg" alt="NSS volunteers supporting blood donation camp registration and donor screening" fetchpriority="high">
+          <figcaption><span class="nss-photo-tag"><i aria-hidden="true"></i> Community in action</span><span>Blood Donation Camp <b aria-hidden="true">↗</b></span></figcaption>
+        </figure>
       </div>
-
-      <!-- Mouse Scroll Indicator -->
-      <a href="#about" class="nss-scroll-indicator" aria-label="Scroll to explore">
-        <span class="mouse"></span>
-        <span class="text">Scroll to explore</span>
-      </a>
+      <a href="#about" class="nss-home-scroll" aria-label="Scroll to About NSS"><span></span> Scroll to explore</a>
     </section>
 
     <!-- ======================================================================
@@ -236,7 +224,7 @@
       <div class="nss-container">
         <div class="nss-section-header">
           <div class="nss-eyebrow">Events & Drives</div>
-          <h2 class="nss-section-title">Recent Events</h2>
+          <h2 class="nss-section-title">Campus in action</h2>
           <p class="nss-section-subtitle">
             Documenting our active campus drives, community outreach schedules, and student volunteer participation.
           </p>
@@ -246,12 +234,12 @@
           <article class="nss-event-card featured">
             <div class="nss-event-media">
               <img src="https://res.cloudinary.com/axgam8br/image/upload/f_auto,q_auto,w_800/v1793047208/IMG_1159.jpg" id="eventHealthCampImg" alt="Voluntary Blood Donation & Health Literacy Drive" loading="lazy">
-              <span class="nss-event-tag-pill">Field Documented</span>
+              <span class="nss-event-tag-pill">NSS field documentation</span>
             </div>
             <div class="nss-event-body">
               <div class="nss-event-meta">
                 <span class="nss-event-badge">Healthcare</span>
-                <span class="nss-event-date">Campus Drive</span>
+                <span class="nss-event-date">Blood donation camp</span>
               </div>
               <h3 class="nss-event-title">Voluntary Blood Donation & Health Literacy Drive</h3>
               <p class="nss-event-desc">
@@ -270,9 +258,9 @@
       <div class="nss-container">
         <div class="nss-section-header">
           <div class="nss-eyebrow">Leadership Desk</div>
-          <h2 class="nss-section-title">Message from the NSS President</h2>
+          <h2 class="nss-section-title">Led by a spirit of service</h2>
           <p class="nss-section-subtitle">
-            Guiding student civic participation, empathy, and professional integrity.
+            NSS leadership at TGPCOP supports student participation in community and campus initiatives.
           </p>
         </div>
 
@@ -282,13 +270,13 @@
               <img src="assets/president.jpg" alt="NSS President Portrait" class="nss-president-portrait-img" id="presidentPortraitImg" onerror="this.src='assets/nss-logo.png'">
             </div>
             <div class="nss-president-details">
-              <div class="nss-desk-tag">★ Student Council & NSS Leadership ★</div>
-              <blockquote class="nss-president-quote">
-                “Pharmacy education fulfills its highest calling when student knowledge directly uplifts community well-being. Through the National Service Scheme, our student volunteers step beyond academic classrooms to understand real community healthcare needs, build empathy, and cultivate leadership through dedicated, selfless service.”
-              </blockquote>
+              <div class="nss-desk-tag">NATIONAL SERVICE SCHEME · TGPCOP</div>
+              <p class="nss-president-quote">
+                The NSS spirit connects learning with service. Student volunteers bring care, teamwork, and a commitment to community wellbeing beyond the classroom.
+              </p>
               <div class="nss-president-info">
-                <div class="nss-president-name">President</div>
-                <div class="nss-president-title">Student Council & National Service Scheme Unit</div>
+                <div class="nss-president-name">NSS President</div>
+                <div class="nss-president-title">Student Leadership · TGPCOP</div>
                 <div class="nss-president-college">Tulsiramji Gaikwad-Patil College of Pharmacy, Nagpur</div>
               </div>
             </div>
@@ -310,11 +298,11 @@
           </p>
         </div>
 
-        <!-- Dynamic Grid (Populated automatically when Cloudinary URLs are added) -->
-        <div class="nss-gallery-grid" id="nssGalleryGrid" style="display:none;"></div>
+        <!-- Populated from the verified photo list in cloudinary-config.js. -->
+        <div class="nss-gallery-grid" id="nssGalleryGrid" aria-label="NSS event photographs"></div>
 
         <!-- Intentional Empty State (Displayed when real photos are pending) -->
-        <div class="nss-empty-notice" id="nssGalleryNotice">
+        <div class="nss-empty-notice" id="nssGalleryNotice" style="display:none;">
           <div class="nss-empty-icon">📷</div>
           <h3>Official Event Photos Coming Soon</h3>
           <p>
@@ -418,6 +406,7 @@
           <p class="nss-footer-brand-desc">
             Tulsiramji Gaikwad-Patil College of Pharmacy, Wardha Road, Mohgaon, Nagpur - 441108.
           </p>
+          <p class="nss-footer-contact-text"><b>Email:</b> <a href="mailto:contact@tgpcop.site">contact@tgpcop.site</a></p>
           <div class="nss-footer-motto-pill">★ NOT ME, BUT YOU ★</div>
           <p class="nss-footer-accreditation">
             Sponsored by Ministry of Youth Affairs & Sports, Govt. of India. Affiliated with RTMNU Nagpur.
@@ -486,60 +475,177 @@
   <script src="cloudinary-config.js?v=20261031-v5"></script>
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v10"></script>
+  <script src="nss.js?v=20261031-v11"></script>
   <script>
-    // Mobile navigation drawer toggle
+    // Responsive navigation, account link and scroll-aware header.
     const toggleBtn = document.getElementById('nssMenuToggle');
     const closeBtn = document.getElementById('nssDrawerClose');
     const drawer = document.getElementById('nssDrawer');
+    const header = document.querySelector('.nss-header');
+    const closeDrawer = () => {
+      if (!drawer || !toggleBtn) return;
+      drawer.classList.remove('open');
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      toggleBtn.setAttribute('aria-label', 'Open navigation menu');
+      document.body.classList.remove('nss-menu-open');
+    };
 
     if (toggleBtn && drawer) {
-      toggleBtn.addEventListener('click', () => drawer.classList.add('open'));
-    }
-    if (closeBtn && drawer) {
-      closeBtn.addEventListener('click', () => drawer.classList.remove('open'));
-    }
-    if (drawer) {
-      drawer.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => drawer.classList.remove('open'));
+      toggleBtn.addEventListener('click', () => {
+        const open = !drawer.classList.contains('open');
+        drawer.classList.toggle('open', open);
+        toggleBtn.setAttribute('aria-expanded', String(open));
+        toggleBtn.setAttribute('aria-label', open ? 'Close navigation menu' : 'Open navigation menu');
+        document.body.classList.toggle('nss-menu-open', open);
       });
     }
+    if (closeBtn && drawer) closeBtn.addEventListener('click', closeDrawer);
+    if (drawer) {
+      drawer.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', closeDrawer);
+      });
+      drawer.addEventListener('click', event => { if (event.target === drawer) closeDrawer(); });
+    }
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') closeDrawer(); });
 
-    // Lightbox viewer
-    function viewPhoto(src, caption) {
-      const capText = caption || 'NSS TGPCOP Blood Donation Camp';
-      let lb = document.getElementById('lb');
-      if (!lb) {
-        lb = document.createElement('div');
-        lb.id = 'lb';
-        document.body.appendChild(lb);
+    let headerTicking = false;
+    const updateHeader = () => {
+      if (!headerTicking) {
+        headerTicking = true;
+        requestAnimationFrame(() => {
+          header?.classList.toggle('is-scrolled', window.scrollY > 28);
+          headerTicking = false;
+        });
       }
-      lb.innerHTML = `
-        <div class="nss-lightbox-content" onclick="event.stopPropagation()">
-          <img src="${src}" alt="${capText}" class="nss-lightbox-img">
-          <div class="nss-lightbox-cap">${capText}</div>
-          <button class="nss-lightbox-close" onclick="closePhoto()" aria-label="Close viewer">&times;</button>
-        </div>
-      `;
-      lb.classList.add('on');
+    };
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    updateHeader();
+
+    const syncAccountLinks = () => {
+      const user = window.USER || null;
+      const links = [document.getElementById('nssAccountLink'), document.getElementById('nssDrawerAccountLink')];
+      links.forEach(link => {
+        if (!link) return;
+        link.href = user ? 'profile.html' : 'login.html';
+        link.textContent = user ? 'My Account' : 'Volunteer Login';
+      });
+    };
+    syncAccountLinks();
+    document.addEventListener('echo-auth', syncAccountLinks);
+
+    // Reveal sections only when supported; reduced-motion users see content immediately.
+    const revealTargets = document.querySelectorAll('.nss-section-header, .nss-feature-card, .nss-activity-card, .nss-event-card, .nss-president-card, .nss-impact-card, .nss-cta-wrap');
+    if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const revealObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          revealObserver.unobserve(entry.target);
+        }
+      }), { threshold: 0.12, rootMargin: '0px 0px -24px 0px' });
+      revealTargets.forEach(element => { element.classList.add('nss-reveal'); revealObserver.observe(element); });
+      document.querySelectorAll('.nss-home-hero .nss-reveal').forEach(element => revealObserver.observe(element));
+    } else {
+      revealTargets.forEach(element => element.classList.add('is-visible'));
+      document.querySelectorAll('.nss-reveal').forEach(element => element.classList.add('is-visible'));
     }
 
-    function closePhoto() {
-      const lb = document.getElementById('lb');
-      if (lb) {
-        lb.classList.remove('on');
-        lb.innerHTML = '';
-      }
+    // Active section underline for the desktop navigation.
+    if ('IntersectionObserver' in window) {
+      const navBySection = new Map([...document.querySelectorAll('.nss-nav-item[href^="#"]')].map(link => [link.hash.slice(1), link]));
+      const sectionObserver = new IntersectionObserver(entries => entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        document.querySelectorAll('.nss-nav-item').forEach(link => link.classList.remove('active'));
+        navBySection.get(entry.target.id)?.classList.add('active');
+      }), { rootMargin: '-25% 0px -62% 0px' });
+      navBySection.forEach((_, id) => { const section = document.getElementById(id); if (section) sectionObserver.observe(section); });
     }
 
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closePhoto();
-    });
-
-    document.addEventListener('click', (e) => {
-      const lb = document.getElementById('lb');
-      if (lb && lb.classList.contains('on') && e.target === lb) {
-        closePhoto();
+    // Accessible gallery from the configured real event photographs.
+    const galleryPhotos = (window.NSS_CLOUDINARY_CONFIG?.galleryPhotos || []).filter(photo => photo?.url && photo?.thumb);
+    const galleryGrid = document.getElementById('nssGalleryGrid');
+    const galleryNotice = document.getElementById('nssGalleryNotice');
+    let galleryIndex = 0;
+    let galleryDialog = null;
+    let previousFocus = null;
+    let touchStartX = null;
+    const paintGallery = () => {
+      if (!galleryGrid || !galleryNotice) return;
+      if (!galleryPhotos.length) { galleryNotice.style.display = 'block'; return; }
+      galleryNotice.style.display = 'none';
+      galleryPhotos.forEach((photo, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'nss-gallery-item';
+        button.setAttribute('aria-label', `Open photo ${index + 1}: ${photo.caption || photo.tag || 'NSS event photo'}`);
+        const image = document.createElement('img');
+        image.src = photo.thumb;
+        image.alt = photo.caption || 'NSS TGPCOP event photograph';
+        image.loading = 'lazy';
+        image.decoding = 'async';
+        image.addEventListener('error', () => {
+          button.remove();
+          if (!galleryGrid.children.length) {
+            galleryNotice.style.display = 'block';
+            galleryNotice.querySelector('h3').textContent = 'Photos temporarily unavailable';
+            galleryNotice.querySelector('p').textContent = 'The event gallery could not load right now. Please try again later.';
+          }
+        }, { once: true });
+        const caption = document.createElement('span');
+        caption.className = 'nss-gallery-caption';
+        caption.textContent = photo.caption || photo.tag || 'NSS TGPCOP';
+        button.append(image, caption);
+        button.addEventListener('click', () => openGalleryPhoto(index));
+        galleryGrid.appendChild(button);
+      });
+    };
+    const openGalleryPhoto = index => {
+      if (!galleryPhotos.length) return;
+      galleryIndex = (index + galleryPhotos.length) % galleryPhotos.length;
+      if (!galleryDialog) {
+        galleryDialog = document.createElement('div');
+        galleryDialog.className = 'nss-lightbox-modern';
+        galleryDialog.setAttribute('role', 'dialog');
+        galleryDialog.setAttribute('aria-modal', 'true');
+        galleryDialog.setAttribute('aria-label', 'NSS photo gallery');
+        galleryDialog.innerHTML = '<figure><button type="button" class="nss-lightbox-close-modern" aria-label="Close photo viewer">×</button><button type="button" class="nss-lightbox-prev" aria-label="Previous photo">‹</button><img alt=""><button type="button" class="nss-lightbox-next" aria-label="Next photo">›</button><figcaption></figcaption></figure>';
+        galleryDialog.addEventListener('click', event => { if (event.target === galleryDialog) closeGalleryPhoto(); });
+        galleryDialog.querySelector('.nss-lightbox-close-modern').addEventListener('click', closeGalleryPhoto);
+        galleryDialog.querySelector('.nss-lightbox-prev').addEventListener('click', () => openGalleryPhoto(galleryIndex - 1));
+        galleryDialog.querySelector('.nss-lightbox-next').addEventListener('click', () => openGalleryPhoto(galleryIndex + 1));
+        galleryDialog.addEventListener('touchstart', event => { touchStartX = event.changedTouches[0].clientX; }, { passive: true });
+        galleryDialog.addEventListener('touchend', event => {
+          if (touchStartX === null) return;
+          const delta = event.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(delta) > 45) openGalleryPhoto(galleryIndex + (delta < 0 ? 1 : -1));
+          touchStartX = null;
+        }, { passive: true });
+        document.body.appendChild(galleryDialog);
+      }
+      const photo = galleryPhotos[galleryIndex];
+      galleryDialog.querySelector('img').src = photo.url;
+      galleryDialog.querySelector('img').alt = photo.caption || 'NSS TGPCOP event photograph';
+      galleryDialog.querySelector('figcaption').textContent = `${photo.caption || photo.tag || 'NSS TGPCOP'} · ${galleryIndex + 1} / ${galleryPhotos.length}`;
+      if (!galleryDialog.classList.contains('is-open')) previousFocus = document.activeElement;
+      galleryDialog.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+      galleryDialog.querySelector('.nss-lightbox-close-modern').focus();
+    };
+    const closeGalleryPhoto = () => {
+      if (!galleryDialog) return;
+      galleryDialog.classList.remove('is-open');
+      document.body.style.overflow = '';
+      previousFocus?.focus?.();
+    };
+    paintGallery();
+    document.addEventListener('keydown', event => {
+      if (!galleryDialog?.classList.contains('is-open')) return;
+      if (event.key === 'Escape') closeGalleryPhoto();
+      if (event.key === 'ArrowLeft') openGalleryPhoto(galleryIndex - 1);
+      if (event.key === 'ArrowRight') openGalleryPhoto(galleryIndex + 1);
+      if (event.key === 'Tab') {
+        const controls = [...galleryDialog.querySelectorAll('button')];
+        if (event.shiftKey && document.activeElement === controls[0]) { event.preventDefault(); controls[controls.length - 1].focus(); }
+        else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) { event.preventDefault(); controls[0].focus(); }
       }
     });
   </script>

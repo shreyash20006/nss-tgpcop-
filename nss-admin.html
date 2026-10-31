@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261031-v7">
+  <link rel="stylesheet" href="nss.css?v=20261031-v8">
 
   <!-- Early Global NSS Definition -->
   <script>
@@ -30,7 +30,7 @@
   <script src="cloudinary-config.js?v=20261031-v5"></script>
   <script src="env.js?v=20261031-v7"></script>
   <script src="echo.js?v=20261031-v5"></script>
-  <script src="nss.js?v=20261031-v10"></script>
+  <script src="nss.js?v=20261031-v11"></script>
 
   <style>
     :root {
@@ -646,6 +646,40 @@
       .admin-content-pane {
         padding: 18px;
       }
+    }
+
+    /* Calm, high-contrast admin workspace refresh. */
+    body.nss-admin-body { background:#F5F7FC; }
+    .admin-sidebar { width:258px; box-shadow:8px 0 34px rgba(3,15,42,.14); }
+    .sidebar-header { padding:20px 18px; }
+    .sidebar-nav { gap:5px; padding:16px 12px; }
+    .nav-item { min-height:42px; border-radius:10px; }
+    .nav-item.active { box-shadow:inset 3px 0 #FFD400,0 8px 18px rgba(6,71,200,.2); }
+    .admin-main { background:#F5F7FC; }
+    .admin-topbar { position:sticky; top:0; z-index:900; background:rgba(255,255,255,.94); backdrop-filter:blur(14px); border-bottom:1px solid #E4EAF3; box-shadow:0 8px 24px rgba(7,27,73,.04); }
+    .admin-content-pane { padding:clamp(18px,3vw,34px); }
+    .metric-card,.chart-box { border-radius:17px; border-color:#E4EAF3; box-shadow:0 10px 32px rgba(7,27,73,.055); }
+    .metric-card { padding:20px; transition:transform .22s ease,box-shadow .22s ease; }
+    .metric-card:hover { transform:translateY(-4px); box-shadow:0 18px 38px rgba(7,27,73,.1); }
+    .chart-box { padding:24px; }
+    .chart-box h3 { font-size:15px !important; letter-spacing:-.02em; }
+    table.nss-data-table { border-collapse:separate; border-spacing:0; overflow:hidden; border:1px solid #E4EAF3; border-radius:14px; }
+    table.nss-data-table th { background:#F1F5FB; color:#334155; font-size:10px; letter-spacing:.08em; text-transform:uppercase; }
+    table.nss-data-table td { border-bottom:1px solid #EDF1F6; }
+    .admin-sidebar button:focus-visible,.admin-sidebar a:focus-visible,.admin-main button:focus-visible { outline:3px solid #FFD400; outline-offset:3px; }
+    #tab-settings .chart-box { max-width:760px !important; }
+    #siteMaintenanceEnabled { accent-color:#DC2626; }
+    #saveMaintenanceSetting:disabled { opacity:.65; cursor:wait; }
+    @media (max-width:760px) {
+      .admin-topbar { min-height:62px; }
+      .admin-content-pane { padding:14px; }
+      .chart-box { padding:17px; }
+      .metrics-grid { grid-template-columns:repeat(auto-fit,minmax(155px,1fr)); gap:10px; }
+      .metric-card { min-height:74px; padding:13px; }
+      #tab-settings table { display:block; overflow-x:auto; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .metric-card,.admin-sidebar,.admin-content-pane { transition:none !important; animation:none !important; }
     }
   </style>
 </head>
@@ -1564,6 +1598,20 @@
            MODULE 16: PORTAL SETTINGS
            ==================================================================== -->
       <section id="tab-settings" class="admin-content-pane">
+        <div class="chart-box" style="max-width:680px; margin-bottom:22px;">
+          <h3>Student Website Maintenance</h3>
+          <p style="color:#64748B; font-size:13px; line-height:1.6;">Pause student-facing pages while you work on the portal. Admin and login pages remain available. Changes appear for visitors when they open or refresh a page.</p>
+          <label for="siteMaintenanceEnabled" style="display:flex; align-items:center; gap:12px; padding:14px; border:1px solid #E2E8F0; border-radius:12px; font-weight:700; color:var(--nss-navy);">
+            <input id="siteMaintenanceEnabled" type="checkbox" style="width:20px; height:20px; accent-color:#DC2626;">
+            Enable maintenance mode
+          </label>
+          <label for="siteMaintenanceMessage" style="display:block; margin-top:16px; color:#334155; font-weight:600; font-size:13px;">Message shown to students</label>
+          <textarea id="siteMaintenanceMessage" maxlength="500" rows="3" style="width:100%; box-sizing:border-box; margin-top:7px; padding:12px; border:1px solid #CBD5E1; border-radius:10px; font:inherit; resize:vertical;" placeholder="The NSS portal is temporarily under maintenance. Please check back soon."></textarea>
+          <div style="display:flex; align-items:center; gap:14px; margin-top:14px; flex-wrap:wrap;">
+            <button id="saveMaintenanceSetting" type="button" class="btn-nss btn-nss-primary">Save maintenance setting</button>
+            <span id="maintenanceSettingStatus" role="status" aria-live="polite" style="font-size:13px; color:#64748B;"></span>
+          </div>
+        </div>
         <div class="chart-box" style="max-width:680px;">
           <h3>Portal System Information & Health</h3>
           <table style="width:100%; border-collapse:collapse; font-size:13px; line-height:2;">
@@ -1864,6 +1912,42 @@
 
       // Load initial dashboard statistics
       loadOverviewTab();
+      loadMaintenanceSetting();
+    }
+
+    async function loadMaintenanceSetting() {
+      const status = document.getElementById('maintenanceSettingStatus');
+      try {
+        const setting = await NSS.Maintenance.getSetting();
+        document.getElementById('siteMaintenanceEnabled').checked = Boolean(setting.maintenance_enabled);
+        document.getElementById('siteMaintenanceMessage').value = setting.maintenance_message || '';
+        status.textContent = setting.maintenance_enabled ? 'Maintenance mode is ON.' : 'Maintenance mode is OFF.';
+        status.style.color = setting.maintenance_enabled ? '#B91C1C' : '#166534';
+      } catch (error) {
+        status.textContent = error.message || 'Could not load maintenance settings. Apply the site-maintenance SQL first.';
+        status.style.color = '#B91C1C';
+      }
+    }
+
+    async function saveMaintenanceSetting() {
+      const button = document.getElementById('saveMaintenanceSetting');
+      const status = document.getElementById('maintenanceSettingStatus');
+      button.disabled = true;
+      status.textContent = 'Saving…';
+      status.style.color = '#64748B';
+      try {
+        const setting = await NSS.Maintenance.setSetting(
+          document.getElementById('siteMaintenanceEnabled').checked,
+          document.getElementById('siteMaintenanceMessage').value
+        );
+        status.textContent = setting.maintenance_enabled ? 'Maintenance mode is ON. Student pages show the notice on next load.' : 'Maintenance mode is OFF. Student pages are available on next load.';
+        status.style.color = setting.maintenance_enabled ? '#B91C1C' : '#166534';
+      } catch (error) {
+        status.textContent = error.message || 'Could not save maintenance settings.';
+        status.style.color = '#B91C1C';
+      } finally {
+        button.disabled = false;
+      }
     }
 
     // 2. Tab Switcher
@@ -3170,6 +3254,7 @@
     // Auto-init on page load
     document.addEventListener('DOMContentLoaded', initAdminAuth);
     document.addEventListener('echo-auth', initAdminAuth);
+    document.getElementById('saveMaintenanceSetting').addEventListener('click', saveMaintenanceSetting);
   
     // Brevo Template 14 Live Tester
     async function sendTestApprovalNotification() {
