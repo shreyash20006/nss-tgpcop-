@@ -14,9 +14,10 @@ const bar=D.createElement('div');bar.className='sfx-bar';D.body.appendChild(bar)
 let lamp=null;if(fine&&!admin&&!verify){lamp=D.createElement('div');lamp.className='sfx-lamp';D.body.appendChild(lamp);addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY},{passive:true})}
 /* ambient canvas */
 let cv=null,cx,W,H,P=[];
-if(!admin&&!verify){cv=D.createElement('canvas');cv.className='sfx-fx';D.body.appendChild(cv);cx=cv.getContext('2d');
-const fit=()=>{const d=Math.min(devicePixelRatio||1,1.5);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};fit();addEventListener('resize',fit);
-P=Array.from({length:home?(small?28:60):(small?14:34)},(_,i)=>({x:Math.random(),y:Math.random(),z:.3+Math.random()*1.2,r:.8+Math.random()*2,ph:Math.random()*6.28,leaf:i%9===0,ox:0,oy:0}))}
+/* The standalone cinematic homepage already owns a full-screen canvas. Avoid painting a second one over it. */
+if(!admin&&!verify&&!D.getElementById('fx')){cv=D.createElement('canvas');cv.className='sfx-fx';D.body.appendChild(cv);cx=cv.getContext('2d');
+const fit=()=>{const d=Math.min(devicePixelRatio||1,small?1:1.25);W=innerWidth;H=innerHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0)};fit();addEventListener('resize',fit);
+P=Array.from({length:home?(small?12:42):(small?8:24)},(_,i)=>({x:Math.random(),y:Math.random(),z:.3+Math.random()*1.2,r:.8+Math.random()*2,ph:Math.random()*6.28,leaf:i%9===0,ox:0,oy:0}))}
 const draw=(t,dt)=>{if(!cv)return;cx.clearRect(0,0,W,H);
 for(const p of P){const px=p.x*W+Math.sin(t*.6+p.ph)*18*p.z,py=((p.y*H-t*12*p.z-scrollY*.3*p.z)%H+H)%H;
 const dx=px-mx,dy=py-my,d=Math.hypot(dx,dy)||1;let tx=0,ty=0;if(fine&&d<170){const f=Math.pow(1-d/170,1.5)*60;tx=dx/d*f;ty=dy/d*f}
@@ -61,14 +62,21 @@ addEventListener('wheel',e=>{if(e.ctrlKey||e.defaultPrevented||getComputedStyle(
 if(!active){cur=tgt=scrollY}let d=e.deltaY;if(e.deltaMode===1)d*=32;else if(e.deltaMode===2)d*=innerHeight;tgt=Math.max(0,Math.min(max(),tgt+d));active=true},{passive:false});
 addEventListener('scroll',()=>{if(!active)cur=tgt=scrollY},{passive:true})}
 /* loop */
-let last=performance.now();
-const frame=now=>{const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
+let last=performance.now(),framePending=false;
+const needsFrame=()=>!!(cv||lamp||smooth||hero);
+const updateBar=()=>{const y=scrollY;bar.style.transform='scaleX('+(y/Math.max(1,max()))+')'};
+const scheduleFrame=()=>{if(!framePending&&!document.hidden&&needsFrame()){framePending=true;requestAnimationFrame(frame)}};
+const frame=now=>{framePending=false;if(document.hidden)return;if(small&&now-last<32){scheduleFrame();return}const dt=Math.min(.05,(now-last)/1000);last=now;T+=dt;
 if(active){cur+=(tgt-cur)*(1-Math.exp(-7.5*dt));if(Math.abs(tgt-cur)<.5){cur=tgt;active=false}scrollTo(0,cur)}
-const y=scrollY;bar.style.transform='scaleX('+(y/Math.max(1,max()))+')';
+const y=scrollY;updateBar();
 if(hero&&y<innerHeight*1.4){const hp=Math.min(1,y/Math.max(1,hero.offsetHeight));hc.style.translate='0 '+(y*.3)+'px';if(hbg)hbg.style.translate='0 '+(y*.12)+'px';if(title)title.style.letterSpacing=(.02+hp*.14)+'em'}
 if(lamp){lx+=(mx-lx)*(1-Math.exp(-10*dt));ly+=(my-ly)*(1-Math.exp(-10*dt));lamp.style.transform='translate3d('+lx+'px,'+ly+'px,0)'}
-draw(T,dt);requestAnimationFrame(frame)};
-requestAnimationFrame(frame);
+draw(T,dt);scheduleFrame()};
+updateBar();
+addEventListener('scroll',()=>{if(!active)cur=tgt=scrollY;updateBar();scheduleFrame()},{passive:true});
+addEventListener('resize',()=>{updateBar();scheduleFrame()},{passive:true});
+D.addEventListener('visibilitychange',()=>{if(!D.hidden){last=performance.now();scheduleFrame()}});
+scheduleFrame();
 };
 if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',go);else go();
 })();
