@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="echo.css">
-  <link rel="stylesheet" href="nss.css?v=20261031-v8">
+  <link rel="stylesheet" href="nss.css?v=20261031-v9">
 </head>
 <body class="nss-page nss-homepage">
 
@@ -78,27 +78,26 @@
     <!-- ======================================================================
          2. HOMEPAGE HERO (CLEAR BACKGROUND ARTWORK & BALANCED CONTENT)
          ====================================================================== -->
-    <section class="nss-hero nss-home-hero" aria-labelledby="homeHeroTitle">
-      <div class="nss-home-hero-glow" aria-hidden="true"></div>
-      <div class="nss-container nss-home-hero-grid">
-        <div class="nss-home-hero-copy nss-reveal">
-          <p class="nss-home-eyebrow"><span></span> NATIONAL SERVICE SCHEME <i>·</i> TGPCOP NAGPUR</p>
-          <h1 class="nss-home-title" id="homeHeroTitle">NOT ME,<br><em>BUT YOU.</em></h1>
-          <p class="nss-home-lede">A campus community built around service, compassion, and meaningful change.</p>
-          <div class="nss-home-actions">
-            <a href="register.html" class="nss-home-primary">Become a volunteer <span aria-hidden="true">↗</span></a>
-            <a href="#activities" class="nss-home-secondary">Explore our work <span aria-hidden="true">↓</span></a>
-          </div>
-          <p class="nss-home-note">Tulsiramji Gaikwad-Patil College of Pharmacy · Nagpur</p>
+    <section class="nss-cinematic" id="nssStory" aria-label="NSS TGPCOP: a story of service" data-scroll-story>
+      <div class="nss-cinematic-stage">
+        <div class="nss-cinematic-art" aria-hidden="true">
+          <img src="assets/nss-hero-scroll-bg.png?v=20261031-v1" alt="" fetchpriority="high" decoding="async">
+          <div class="nss-cinematic-photo"></div><div class="nss-cinematic-wash"></div><div class="nss-cinematic-bottom"></div>
+          <svg class="nss-cinematic-ribbon" viewBox="0 0 1440 260" preserveAspectRatio="none" aria-hidden="true"><path class="nss-ribbon-gold" d="M0 102 C180 12 310 30 485 118 S780 224 960 132 1240 20 1440 86"/><path class="nss-ribbon-white" d="M0 142 C190 48 324 62 490 142 S790 252 970 166 1255 55 1440 118 L1440 260 L0 260Z"/></svg>
+          <img class="nss-cinematic-emblem" src="assets/nss-logo.png" alt="" aria-hidden="true" decoding="async">
+          <div class="nss-cinematic-particles" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
         </div>
-        <figure class="nss-home-photo nss-reveal" aria-label="NSS blood donation camp">
-          <img src="https://res.cloudinary.com/axgam8br/image/upload/f_auto,q_auto,w_1200/v1793047208/IMG_1159.jpg" alt="NSS volunteers supporting blood donation camp registration and donor screening" fetchpriority="high">
-          <figcaption><span class="nss-photo-tag"><i aria-hidden="true"></i> Community in action</span><span>Blood Donation Camp <b aria-hidden="true">↗</b></span></figcaption>
-        </figure>
+        <div class="nss-cinematic-copy" aria-live="polite">
+          <article class="nss-story-beat is-active" data-story-beat="0"><p class="nss-home-eyebrow"><span></span> NATIONAL SERVICE SCHEME <i>·</i> TGPCOP NAGPUR</p><h1 id="homeHeroTitle">NOT ME,<br><em>BUT YOU.</em></h1><p>A campus community built around service, compassion, and meaningful change.</p><small>Tulsiramji Gaikwad-Patil College of Pharmacy · Nagpur</small></article>
+          <article class="nss-story-beat" data-story-beat="1"><p class="nss-story-kicker">A COMMUNITY IN MOTION</p><h2>Together,<br><em>we serve.</em></h2><p>Students and neighbours working side by side for healthier, kinder communities.</p></article>
+          <article class="nss-story-beat" data-story-beat="2"><p class="nss-story-kicker">EVERY ACTION COUNTS</p><h2>Small actions.<br><em>Lasting impact.</em></h2><p>From health awareness to caring for our environment, service turns intention into change.</p></article>
+          <article class="nss-story-beat" data-story-beat="3"><p class="nss-story-kicker">YOUR NEXT CHAPTER</p><h2>Be the<br><em>change.</em></h2><p>Bring your time, your ideas, and your care to the NSS community.</p><a href="register.html" class="nss-home-primary">Become an NSS volunteer <span aria-hidden="true">↗</span></a></article>
+          <a class="nss-story-explore" href="#about">Explore NSS <span aria-hidden="true">↓</span></a>
+        </div>
+        <div class="nss-story-progress" aria-hidden="true"><span></span><small>01 <b>—</b> 04</small></div>
       </div>
-      <a href="#about" class="nss-home-scroll" aria-label="Scroll to About NSS"><span></span> Scroll to explore</a>
     </section>
-
+    <!-- Previous hero content is replaced by the scroll-linked story stage. -->
     <!-- ======================================================================
          3. ABOUT NSS AT TGPCOP
          ====================================================================== -->
@@ -648,6 +647,65 @@
         else if (!event.shiftKey && document.activeElement === controls[controls.length - 1]) { event.preventDefault(); controls[0].focus(); }
       }
     });
+
+    // Scroll progress drives every visual layer so the story reverses naturally.
+    (() => {
+      const section = document.querySelector('[data-scroll-story]');
+      const stage = section?.querySelector('.nss-cinematic-stage');
+      const beats = [...(section?.querySelectorAll('[data-story-beat]') || [])];
+      if (!section || !stage || beats.length !== 4) return;
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      let frame = 0;
+      let activeBeat = -1;
+      const clamp = value => Math.max(0, Math.min(1, value));
+      const smooth = (a, b, value) => { const t = clamp((value - a) / (b - a)); return t * t * (3 - 2 * t); };
+      const paint = () => {
+        frame = 0;
+        if (reduceMotion.matches) return;
+        const rect = section.getBoundingClientRect();
+        const distance = Math.max(1, section.offsetHeight - innerHeight);
+        const progress = clamp(-rect.top / distance);
+        const light = smooth(.2, .46, progress) * (1 - smooth(.68, .91, progress));
+        const rise = smooth(.68, 1, progress) * 66;
+        const photo = smooth(.08, .3, progress) * (1 - smooth(.58, .82, progress));
+        const beatIndex = Math.min(3, Math.floor(progress * 4));
+        stage.style.setProperty('--story-p', progress.toFixed(4));
+        stage.style.setProperty('--story-dark', (1 - light * .88).toFixed(4));
+        stage.style.setProperty('--story-photo', photo.toFixed(4));
+        stage.style.setProperty('--story-emblem', (1 - smooth(.46, .75, progress) * .62).toFixed(4));
+        stage.style.setProperty('--story-particles', (.3 + (1 - Math.abs(progress - .5) * 2) * .48).toFixed(4));
+        stage.style.setProperty('--story-rise', `${rise.toFixed(2)}%`);
+        const ink = light > .52 ? '#071b49' : '#ffffff';
+        stage.style.setProperty('--story-ink', ink);
+        stage.style.setProperty('--story-accent', light > .52 ? '#0647c8' : '#ffd433');
+        const goldWave = stage.querySelector('.nss-ribbon-gold');
+        const whiteWave = stage.querySelector('.nss-ribbon-white');
+        if (goldWave) goldWave.setAttribute('d', `M0 ${102-progress*16} C180 ${12+progress*18} 310 ${30+progress*34} 485 ${118-progress*18} S780 ${224-progress*30} 960 ${132+progress*18} 1240 ${20+progress*22} 1440 ${86-progress*12}`);
+        if (whiteWave) whiteWave.setAttribute('d', `M0 ${142-progress*14} C190 ${48+progress*20} 324 ${62+progress*32} 490 ${142-progress*14} S790 ${252-progress*26} 970 ${166+progress*18} 1255 ${55+progress*18} 1440 ${118-progress*10} L1440 260 L0 260Z`);
+        if (beatIndex !== activeBeat) {
+          activeBeat = beatIndex;
+          beats.forEach((beat, index) => {
+            const isActive = index === activeBeat;
+            beat.classList.toggle('is-active', isActive);
+            beat.setAttribute('aria-hidden', String(!isActive));
+          });
+          const counter = stage.querySelector('.nss-story-progress small');
+          if (counter) counter.innerHTML = `0${beatIndex + 1} <b>—</b> 04`;
+        }
+      };
+      const requestPaint = () => { if (!frame) frame = requestAnimationFrame(paint); };
+      const motionChange = () => {
+        section.classList.toggle('is-static', reduceMotion.matches);
+        if (reduceMotion.matches) {
+          beats.forEach((beat, index) => { beat.classList.add('is-active'); beat.setAttribute('aria-hidden', 'false'); });
+        } else requestPaint();
+      };
+      addEventListener('scroll', requestPaint, { passive: true });
+      addEventListener('resize', requestPaint, { passive: true });
+      reduceMotion.addEventListener?.('change', motionChange);
+      motionChange();
+      requestPaint();
+    })();
   </script>
 </body>
 </html>
