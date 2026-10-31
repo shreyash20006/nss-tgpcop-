@@ -10,6 +10,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
   'use strict';
 
   var NSS = window.NSS = window.NSS || {};
+  var nssAnonClient;
 
   // Status Badge Helper
   NSS.renderStatusBadge = function (status) {
@@ -218,22 +219,68 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       }
     },
 
+    normalizeRollNumber(rollNumber) {
+      if (typeof rollNumber !== 'string') {
+        throw new Error('Enter a valid college roll number.');
+      }
+      const normalized = rollNumber.trim().toUpperCase();
+      if (!normalized || normalized.length > 50 || !/^[A-Z0-9][A-Z0-9 /_-]*$/.test(normalized)) {
+        throw new Error('Enter a valid college roll number.');
+      }
+      return normalized;
+    },
+
     async checkExistingByRoll(rollNumber) {
-      const sb = (typeof window !== 'undefined' && window.NSS && typeof window.NSS.getSupabase === 'function')
-        ? await window.NSS.getSupabase()
-        : (typeof NSS !== 'undefined' && typeof NSS.getSupabase === 'function' ? await NSS.getSupabase() : null);
-      if (!sb || !rollNumber) return null;
+      const normalized = this.normalizeRollNumber(rollNumber);
+      const sb = await NSS.getSupabase();
+      if (!sb) {
+        throw new Error('Roll number verification is unavailable. Please try again.');
+      }
+
       try {
-        const { data, error } = await sb
+        // RLS limits authenticated applicants to their own application. Check it first,
+        // then use the existing anon SELECT policy on nss_students for registry matches.
+        const { data: application, error: applicationError } = await sb
           .from('nss_applications')
           .select('id, full_name, status, roll_number')
-          .eq('roll_number', rollNumber.trim().toUpperCase())
+          .eq('roll_number', normalized)
           .maybeSingle();
-        if (error) return null;
-        return data;
-      } catch (e) {
+        if (applicationError) throw applicationError;
+        if (application) return application;
+
+        const env = window.__ENV__ || {};
+        if (!nssAnonClient) {
+          if (typeof window.supabase?.createClient !== 'function' || !env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+            throw new Error('Supabase anonymous client is unavailable.');
+          }
+          nssAnonClient = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY, {
+            auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+          });
+        }
+
+        const { data: student, error: studentError } = await nssAnonClient
+          .from('nss_students')
+          .select('roll_number, application_status')
+          .eq('roll_number', normalized)
+          .maybeSingle();
+        if (studentError) throw studentError;
+        if (student) {
+          return {
+            id: null,
+            full_name: null,
+            status: student.application_status || 'registered',
+            roll_number: student.roll_number
+          };
+        }
         return null;
+      } catch (error) {
+        console.error('Roll number verification failed:', error);
+        throw new Error('Unable to verify this roll number right now. Check your connection and try again.');
       }
+    },
+
+    async checkRollExists(rollNumber) {
+      return Boolean(await this.checkExistingByRoll(rollNumber));
     },
 
     async submitApplication(appData) {
@@ -244,7 +291,7 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
       const user = await NSS.Auth.getCurrentUser();
       if (!user) throw new Error('Authentication required before submitting application.');
 
-      const cleanRoll = String(appData.roll_number || '').trim().toUpperCase();
+      const cleanRoll = this.normalizeRollNumber(String(appData.roll_number || ''));
       const existing = await this.checkExistingByRoll(cleanRoll);
       if (existing) {
         throw new Error(`An application with Roll Number ${cleanRoll} is already registered (${existing.status.toUpperCase()}).`);
@@ -275,7 +322,12 @@ var NSS = (typeof window !== 'undefined' ? (window.NSS = window.NSS || {}) : {})
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === '23505') {
+          throw new Error(`An application with Roll Number ${cleanRoll} is already registered.`);
+        }
+        throw error;
+      }
 
       // Also upsert into centralized nss_students registry
       try {
